@@ -1,0 +1,64 @@
+//
+//  HYZuYue_TipsView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYZuYue_TipsView.h"
+#import "HYAttributedStringLabel.h"
+#import "HYZuYue_InforBaseView.h"
+@interface HYZuYue_TipsView ()
+@property (nonatomic, strong) HYBaseView * addInforView;
+@property (nonatomic, strong) HYAttributedStringLabel * tipsView;
+@property (nonatomic, strong) HYZuYue_InforBaseView * baseView;
+@end
+@implementation HYZuYue_TipsView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _baseView = [[HYZuYue_InforBaseView alloc] init];
+        _baseView.titleLable.text = @"温馨提示";
+        [self addSubview:_baseView];
+        [_baseView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self);
+        }];
+        [_baseView addSubview:self.addInforView];
+        [_addInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_baseView.titleLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_baseView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_baseView.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(_baseView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        [_baseView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+        
+        [_tipsView setAttributedStringWithContentArray:@[
+                                                         @{@"color" : HYCOLOR.color_c4,
+                                                           @"content" : @"   1.房间到交付条件后，2日内签署合同，若因个人原因无法按时签约，定金不予退还，以电话通知为准 \n  2.房间到交付条件后，2日内签署合同，若因个人原因无法按时签约，定金不予退还，以电话通知为准\n  3.房间到交付条件后，2日内签署合同，若因个人原因无法按时签约，定金不予退还，以电话通知为准",
+                                                           @"size" : SYSTEM_REGULARFONT(13),
+                                                           @"lineSpacing": @5},]];
+        
+    }
+    return self;
+}
+
+- (HYBaseView*)addInforView
+{
+    if (!_addInforView) {
+        _addInforView = [[HYBaseView alloc] init];
+        _tipsView = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(14)
+                                                      text:@""
+                                                 textColor:HYCOLOR.color_c4];
+        _tipsView.numberOfLines = 0;
+        [_addInforView addSubview:_tipsView];
+        [_tipsView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(_addInforView);
+        }];
+        
+    }
+    return _addInforView;
+}
+@end

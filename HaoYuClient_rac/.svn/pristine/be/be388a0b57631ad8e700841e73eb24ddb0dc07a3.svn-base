@@ -1,0 +1,171 @@
+//
+//  LWRegisterViewController.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/15.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWRegisterViewController: LWBaseViewController {
+
+    var phoneTF:LWDefaultTextField?
+    var codeTF:LWDefaultTextField?
+    var sendeCodeBtn:LWDefaultButton?
+    var timerNumber:NSInteger = 3
+    var codeTimer:Timer?
+
+    /// 1.忘记密码 2.注册
+    public var fromType:NSInteger = 0
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        self.title = "注册"
+        
+        confiUI()
+        
+    }
+    
+    //    提交信息
+    @objc func submitInfor() {
+        if phoneTF?.textField?.text == "" {
+            LWAlertView.show(text: "手机号不能为空")
+            return
+        }
+        if codeTF?.textField?.text == "" {
+            LWAlertView.show(text: "验证码不能为空")
+            return
+        }
+        
+        //        网络请求
+        
+        if self.fromType == 1 {
+            let setNewPW = LWSetNewPWViewController()
+            self.navigationController?.pushViewController(setNewPW, animated: true)
+        }else if self.fromType == 2 {
+            let setNewPW = LWRegisterSetPWViewController()
+            self.navigationController?.pushViewController(setNewPW, animated: true)
+        }
+    }
+    
+    @objc func clickCodeBtn() {
+        if phoneTF?.textField?.text == "" {
+            LWAlertView.show(text: "手机号不能为空")
+            return
+        }
+        codeTimer = Timer.init(timeInterval: 1, target: self, selector: #selector(cutDown), userInfo: nil, repeats: true)
+        RunLoop.current.add(codeTimer!, forMode: RunLoop.Mode.default)
+        codeTimer?.fire()
+    }
+    
+    @objc func cutDown(){
+        self.timerNumber -= 1
+        self.sendeCodeBtn?.setTitle("        "+String(self.timerNumber)+"s"+"         ", for: .normal)
+        self.sendeCodeBtn?.isEnabled = false
+        LWPrint(message: self.timerNumber)
+        if self.timerNumber <= 0 {
+            self.codeTimer?.invalidate()
+            self.sendeCodeBtn?.setTitle("  获取验证码  ", for: .normal)
+            self.sendeCodeBtn?.isEnabled = true
+            self.timerNumber = 3
+        }
+    }
+     
+    // 配置界面
+    func confiUI() {
+        let headerImageView = UIImageView.init()
+        view.addSubview(headerImageView)
+        headerImageView.backgroundColor = .red
+        let phoneVeiw = phoneUI()
+        view.addSubview(phoneVeiw)
+        let codeView = codeUI()
+        view.addSubview(codeView)
+        
+        let next_submit = LWDefaultButton.defaultButton(title: "下一步", textfont: LWSytem_Regular(15), textColor: .black, target: self, sel: #selector(submitInfor))
+        view.addSubview(next_submit)
+        next_submit.backgroundColor = .red
+        next_submit.setBoundCorners(radius: ADJUSET(myfloat: 20), boundWidth: 0)
+        
+        headerImageView.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 20))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 20))
+            make.top.equalTo(view.snp.top).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 200))
+        }
+        phoneVeiw.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 30))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 30))
+            make.top.equalTo(headerImageView.snp.bottom).offset(ADJUSET(myfloat: 30))
+        }
+        codeView.snp.makeConstraints { (make) in
+            make.left.right.equalTo(phoneVeiw)
+            make.top.equalTo(phoneVeiw.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+        next_submit.snp.makeConstraints { (make) in
+            make.left.right.equalTo(phoneVeiw)
+            make.top.equalTo(codeView.snp.bottom).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+    }
+    
+    //    验证码
+    func codeUI() -> LWBaseView{
+        let pwView = LWBaseView()
+        codeTF = LWDefaultTextField.defaultTextField(placeholder: "请输入验证码", textFont: LWSytem_Regular(15), textColor: .black)
+        codeTF?.textField?.keyboardType = .phonePad
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        pwView.addSubview(lefticon)
+        pwView.addSubview(codeTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(pwView)
+            make.centerY.equalTo(pwView.snp.centerY)
+        }
+        codeTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(pwView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        pwView.addBottomLine()
+        return pwView
+    }
+    
+    //    手机号
+    func phoneUI() -> LWBaseView {
+        let phoneView = LWBaseView()
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        phoneTF = LWDefaultTextField.defaultTextField(placeholder: "请输入手机号", textFont: LWSytem_Regular(15), textColor: .black)
+        phoneTF?.maxLenght = 5
+        phoneTF?.textField?.keyboardType = .numberPad
+        phoneView.addSubview(lefticon)
+        phoneView.addSubview(phoneTF!)
+        
+        sendeCodeBtn = LWDefaultButton.defaultButton(title: "  获取验证码  ", textfont: LWSystem(ADJUSET(myfloat: 12)), textColor: .black, target: self, sel: #selector(clickCodeBtn))
+        sendeCodeBtn?.setBoundCorners(radius: 6, boundWidth: 1, color: .gray)
+        phoneView.addSubview(sendeCodeBtn!)
+
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(phoneView)
+            make.centerY.equalTo(phoneView)
+        }
+        sendeCodeBtn?.snp.makeConstraints({ (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 80), height: ADJUSET(myfloat: 30)))
+            make.right.equalTo(phoneView.snp.right).offset(-ADJUSET(myfloat: 5))
+            make.centerY.equalTo(phoneView)
+        })
+        phoneTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.equalTo(phoneView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+            make.right.equalTo(sendeCodeBtn!.snp.left).offset(-ADJUSET(myfloat: 5))
+        }
+        phoneView.addBottomLine()
+        return phoneView
+    }
+
+}

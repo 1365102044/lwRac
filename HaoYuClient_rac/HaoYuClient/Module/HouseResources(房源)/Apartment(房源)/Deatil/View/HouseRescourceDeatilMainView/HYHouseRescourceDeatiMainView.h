@@ -1,0 +1,25 @@
+//
+//  HYHouseRescourceDeatiMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/11.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYHouseRescourcesModel.h"
+#import "HYPictureCarouselView.h"
+#import "HYContactUsView.h"
+/**
+ 点击户型  为0时 点击的更多
+ */
+typedef void(^clickHuXingBlock)(NSInteger row);
+@interface HYHouseRescourceDeatiMainView : HYBaseView
+//筹建中的图标(即将开业)
+@property (nonatomic, strong) UIImageView * statusImageView;
+@property (nonatomic, strong) HYContactUsView * contactUsView;
+@property (nonatomic, strong) HYPictureCarouselView * ImageScrollView;
+@property (nonatomic, copy) clickHuXingBlock  clickHuxingBlock;
+@property (nonatomic, strong) HYHouseRescourcesModel * dataModel;
+
+@end

@@ -1,0 +1,73 @@
+//
+//  HYFindHouseMenDianInforView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYFindHouseMenDianInforView.h"
+
+@interface HYFindHouseMenDianInforView ()
+@property (nonatomic, strong) HYDefaultLabel * nameL;
+@property (nonatomic, strong) HYDefaultLabel * desL;
+@property (nonatomic, strong) HYDefaultLabel * priceL;
+@property (nonatomic, strong) UIImageView * houseImageView;
+
+@end
+
+@implementation HYFindHouseMenDianInforView
+
+- (void)setProjectModel:(HYHouseRescourcesModel *)projectModel
+{
+    _projectModel = projectModel;
+    _nameL.text = projectModel.hiItemName;
+    _desL.text = projectModel.hiDetailedAddress;
+    if(![projectModel.minRent isEqualToString:projectModel.maxRent]){
+        _priceL.text = [NSString stringWithFormat:@"¥%@-%@起租",projectModel.minRent,projectModel.maxRent];
+    }else{
+         _priceL.text = [NSString stringWithFormat:@"¥%@起租",projectModel.minRent];
+    }
+    HYpicObjModel*pic_M = projectModel.picArrModel.firstObject;
+    [_houseImageView sd_setImageWithURL:[NSURL URLWithString:HYIMAGEURLSTRING(HYProjectImageURLStringMid, pic_M.big)] placeholderImage:IMAGENAME(@"占位图-750_320")];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setConfiUI];
+    }
+    return self;
+}
+
+- (void)setConfiUI
+{
+    _nameL = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(17) text:@"" textColor:[UIColor blackColor]];
+    _desL = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12) text:@"" textColor:HYCOLOR.color_c2];
+    _priceL = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(15) text:@"" textColor:HYCOLOR.color_c3];
+    _houseImageView = [[UIImageView alloc] init];
+    [self addSubview:_nameL];
+    [self addSubview:_desL];
+    [self addSubview:_priceL];
+    [self addSubview:_houseImageView];
+    
+    [_nameL mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(self).mas_offset(MARGIN*1.5);
+    }];
+    [_priceL mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.centerY.mas_equalTo(_nameL.mas_centerY);
+    }];
+    [_desL mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(_nameL.mas_left);
+        make.top.mas_equalTo(_nameL.mas_bottom).mas_offset(MARGIN*2);
+    }];
+    [_houseImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.mas_equalTo(self);
+        make.top.mas_equalTo(_desL.mas_bottom).mas_offset(MARGIN);
+        make.height.mas_offset(MARGIN*16);
+    }];
+}
+
+@end

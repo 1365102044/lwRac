@@ -1,0 +1,159 @@
+//
+//  HYHuXingDeatilMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHuXingDeatilMainView.h"
+#import "HYHuXingTopInforView.h"
+#import "HYHuXingFangJianInforView.h"
+#import "HYHuXingPicView.h"
+#import "HYHuXingJianJieView.h"
+#import "HYHuXingBaoZhangView.h"
+#import "HYJiChuSheShiView.h"
+
+@interface  HYHuXingDeatilMainView ()
+@property (nonatomic, strong) HYBaseView * imageBgView;
+@property (nonatomic, strong) HYHuXingTopInforView * topInforView;
+@property (nonatomic, strong) HYHuXingFangJianInforView * FangJianInforView;
+@property (nonatomic, strong) HYHuXingPicView * HuXingPicView;
+@property (nonatomic, strong) HYJiChuSheShiView * jichusheshiView;
+@property (nonatomic, strong) HYHuXingJianJieView * HuXingJianJieView;
+@property (nonatomic, strong) HYHuXingBaoZhangView * BaoZhangView;
+@end
+@implementation HYHuXingDeatilMainView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        [self setSubUI];
+    }
+    return self;
+}
+
+- (void)setSubUI
+{
+    _topInforView = [[HYHuXingTopInforView alloc] init];
+    _FangJianInforView = [[HYHuXingFangJianInforView alloc] init];
+    _HuXingPicView = [[HYHuXingPicView alloc] init];
+    _jichusheshiView = [[HYJiChuSheShiView alloc] init];
+    _HuXingJianJieView = [[HYHuXingJianJieView alloc] init];
+    _BaoZhangView = [[HYHuXingBaoZhangView alloc] init];
+    
+    [self addSubview:self.imageBgView];
+    [self addSubview:_topInforView];
+    [self addSubview:_FangJianInforView];
+    [self addSubview:_HuXingPicView];
+    [self addSubview:_jichusheshiView];
+    [self addSubview:_HuXingJianJieView];
+    [self addSubview:_BaoZhangView];
+    [_imageBgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self);
+        make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+        make.height.mas_offset(MARGIN*20);
+    }];
+    [_topInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_imageBgView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_FangJianInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_topInforView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_HuXingPicView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_FangJianInforView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_jichusheshiView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_HuXingPicView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_HuXingJianJieView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_jichusheshiView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_BaoZhangView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_HuXingJianJieView.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+    [_topInforView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [_FangJianInforView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [_jichusheshiView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [_HuXingPicView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [_BaoZhangView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [_HuXingJianJieView setBoundWidth:0.5 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    
+    _jichusheshiView.titleLable.text = @"房间配套";
+    
+    [self setTestData];
+}
+
+- (void)setTestData
+{
+    _topInforView.titileLable.text = @"北京牡丹园店";
+    _topInforView.baozhangLable.text = @"一室一厅";
+    _topInforView.yongjinLable.text = @" 户型灵活，卧室宽敞，可住2个 ";
+    _topInforView.priceLable.text = @"¥ 1600-3000";
+    
+    NSArray * dataArr = @[@{@"title":@"账单",@"image":@"mine_bill_n"},
+                          @{@"title":@"合同",@"image":@"mine_hetong_n"},
+                          @{@"title":@"保修",@"image":@"mine_baoxiu_n"},];
+    _FangJianInforView.jiugonggeView.dataArr = dataArr;
+    
+    _HuXingPicView.pic.image = IMAGENAME(@"11");
+    _HuXingPicView.shitingLable.text = @" 一室一厅 ";
+    _HuXingPicView.fangxiangLable.text = @"朝向：南偏西";
+    
+    NSArray * dataArr2 = @[@{@"title":@"账单",@"image":@"mine_bill_n"},
+                          @{@"title":@"合同",@"image":@"mine_hetong_n"},
+                          @{@"title":@"保修",@"image":@"mine_baoxiu_n"},
+                          @{@"title":@"保洁",@"image":@"mine_baojie_n"},
+                          @{@"title":@"水表",@"image":@"mine_shuibiao_n"},
+                          @{@"title":@"电表",@"image":@"mine_dianbiao_n"},
+                          @{@"title":@"智能门锁",@"image":@"mine_mensuo_n"},
+                          @{@"title":@"缴费",@"image":@"mine_pay_n"},
+                          @{@"title":@"我的预约",@"image":@"mine_yuyue_n"},
+                          @{@"title":@"我的预定",@"image":@"mine_yuding_n"},
+                          @{@"title":@"我的优惠券",@"image":@"mine_youhuiquan_n"},
+                          @{@"title":@"我的活动",@"image":@"mine_huodong_n"},
+                          @{@"title":@"我的收藏",@"image":@"mine_collection_n"},
+                          @{@"title":@"我的积分",@"image":@"mine_jifen_n"},];
+    _jichusheshiView.jiugonggeView.dataArr = dataArr2;
+    
+    
+    [_HuXingJianJieView.contentLable setAttributedStringWithContentArray:@[@{@"color" : HYCOLOR.color_c4,
+                                                                   @"content" :  @"王夫人对黛玉可没有那么多的宠爱，所以她必然会为宝玉打算。而黛玉入门，就算不让她去管家，病怏怏的几乎很难为贾家开枝散叶。就这一点来看，只要贾母准备指婚，第一个不答应的必然是王夫人。而如果嫁了进来，不讨婆婆喜欢，受苦的还是黛玉。",
+                                                                   @"size" : SYSTEM_REGULARFONT(13),
+                                                                   @"lineSpacing": @5},]];
+    _BaoZhangView.baozhangLable.text = @"100%真实房源";
+    _BaoZhangView.yongjinLable.text = @"100%免佣金";
+}
+
+- (HYBaseView*)imageBgView
+{
+    if (!_imageBgView) {
+        _imageBgView = [[HYBaseView   alloc] init];
+        NSArray *ads = @[@"http://www.lanjing-lijia.com/ljshops/images/upload/2017-01/Image/1484014020.jpg",
+                         @"http://r-cc.bstatic.com/images/hotel/max1280x900/606/60667759.jpg",
+                         @"http://tu.07358.com/o_1beut7luqik8t631m5o1lct1sokj.jpg"];
+        _ImageScrollView = [HYPictureCarouselView cycleScrollViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, ADJUST_PERCENT_FLOAT(120)) shouldInfiniteLoop:YES imageNamesGroup:ads];
+        [_imageBgView addSubview:_ImageScrollView];
+        _ImageScrollView.showPageControl = NO;
+        [_ImageScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(_imageBgView);
+        }];
+    }
+    return _imageBgView;
+}
+@end

@@ -1,0 +1,161 @@
+//
+//  HYAddTongZhuRenView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYAddTongZhuRenView.h"
+#import "HYLeftRightArrowView.h"
+@interface HYAddTongZhuRenView ()
+@property (nonatomic, strong) NSMutableDictionary * param;
+@property (nonatomic, copy) HYEventCallBackBlock  callBackBlock;
+
+@end
+
+@implementation HYAddTongZhuRenView
++ (instancetype)showAddHeZhuRenView:(HYEventCallBackBlock)callBackBlock
+{
+    HYAddTongZhuRenView *instance = [[HYAddTongZhuRenView alloc] init];
+    instance.callBackBlock = callBackBlock;
+    return instance;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.param = [NSMutableDictionary dictionary];
+        [self setUI];
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(didClickKeyboard:) name:UIKeyboardWillShowNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(didKboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
+  
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                          text:@"添加同住人"
+                                                     textColor:HYCOLOR.color_c4];
+    HYLeftRightArrowView *name = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"姓名："
+                                                                                              rightStr:@""
+                                                                                         showArrowIcon:NO
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                             [self creatParam:sender key:@"left"];
+                                                                                         }];
+    HYLeftRightArrowView *phone = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"手机号："
+                                                                                              rightStr:@""
+                                                                                         showArrowIcon:NO
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                             [self creatParam:sender key:@"right"];
+                                                                                         }];
+    HYLeftRightArrowView *zhengjianleixing = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"证件类型："
+                                                                                              rightStr:@""
+                                                                                         showArrowIcon:YES
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                             
+                                                                                         }];
+    HYLeftRightArrowView *zhengjianhao = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"证件号码："
+                                                                                              rightStr:@""
+                                                                                         showArrowIcon:NO
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                             [self creatParam:sender key:@"zhengjian"];
+                                                                                         }];
+    HYFillLongButton *commit = [HYFillLongButton buttonCorWithTitleStringKey:@"确定"
+                                                                      target:self
+                                                                    selector:@selector(clickBtn)];
+    [self.bgView addSubview:titleLable];
+    [self.bgView addSubview:phone];
+    [self.bgView addSubview:name];
+    [self.bgView addSubview:zhengjianleixing];
+    [self.bgView addSubview:zhengjianhao];
+    [self.bgView addSubview:commit];
+    
+    [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.bgView.mas_top).mas_offset(MARGIN*2);
+        make.centerX.mas_equalTo(self.bgView.mas_centerX);
+    }];
+    [name mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.bgView.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.bgView.mas_right).mas_offset(-MARGIN);
+        make.height.mas_offset(MARGIN*4);
+        make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN*2);
+    }];
+    [phone mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.mas_equalTo(name);
+        make.height.mas_offset(MARGIN*4);
+        make.top.mas_equalTo(name.mas_bottom);
+    }];
+    [zhengjianleixing mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.mas_equalTo(name);
+        make.height.mas_offset(MARGIN*4);
+        make.top.mas_equalTo(phone.mas_bottom);
+    }];
+    [zhengjianhao mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.mas_equalTo(name);
+        make.height.mas_offset(MARGIN*4);
+        make.top.mas_equalTo(zhengjianleixing.mas_bottom);
+    }];
+    [commit mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_offset(MARGIN*12);
+        make.height.mas_offset(MARGIN*3);
+        make.centerX.mas_equalTo(self.bgView.mas_centerX);
+        make.top.mas_equalTo(zhengjianhao.mas_bottom).mas_offset(MARGIN*2);
+        make.bottom.mas_equalTo(self.bgView.mas_bottom).mas_offset(-MARGIN*2);
+    }];
+    [self.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_offset(SCREEN_WIDTH*0.8);
+        make.centerX.mas_equalTo(self.window.mas_centerX);
+        make.centerY.mas_equalTo(self.window.mas_centerY);
+    }];
+}
+
+- (void)clickBtn
+{
+    LWLog(@"------");
+    
+    [self dismiss];
+    if (self.callBackBlock) {
+        self.callBackBlock(self.param);
+    }
+}
+/**
+ 创建参数
+ */
+- (void)creatParam:(HYLeftRightArrowView *)sender key:(NSString *)key
+{
+    NSString *value = sender.rightTextField.text;
+    if (value && ![value isEqualToString:@""]) {
+        [self.param setObject:value forKey:key];
+    }
+}
+
+-(void)didClickKeyboard:(NSNotification *)sender{
+    
+    CGFloat durition = [sender.userInfo[@"UIKeyboardAnimationDurationUserInfoKey"] doubleValue];
+    
+    CGRect keyboardRect = [sender.userInfo[@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
+    
+    CGFloat keyboardHeight = keyboardRect.size.height;
+    
+    [UIView animateWithDuration:durition animations:^{
+        
+        self.bgView.transform = CGAffineTransformMakeTranslation(0, -MARGIN*8);
+    }];
+}
+
+-(void)didKboardDisappear:(NSNotification *)sender{
+    
+    CGFloat duration = [sender.userInfo[@"UIKeyboardAnimationDurationUserInfoKey"] doubleValue];
+    
+    [UIView animateWithDuration:duration animations:^{
+        
+        self.bgView.transform = CGAffineTransformIdentity;
+        
+    }];
+}
+
+@end

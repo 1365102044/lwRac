@@ -1,0 +1,54 @@
+//
+//  HYContractPDFViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/7.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYContractPDFViewController.h"
+#import "LWHud.h"
+@interface HYContractPDFViewController ()<UIWebViewDelegate>
+
+@end
+
+@implementation HYContractPDFViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"合同预览";
+    UIWebView *webview = [[UIWebView alloc] initWithFrame:self.view.bounds];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[_pdf_url isNullToString]]];
+    [webview loadRequest:request];
+    [self.view addSubview:webview];
+    //使文档的显示范围适合UIWebView的bounds
+    [webview setScalesPageToFit:YES];
+    webview.delegate  = self;
+    [LWHud show];
+}
+
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    [LWHud dismiss];
+}
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+{
+    [LWHud dismiss];
+}
+
+@end

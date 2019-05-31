@@ -1,0 +1,23 @@
+//
+//  HYBaseAddBaoXiuMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYAddPhotoView.h"
+@protocol baoxiuDelegate <NSObject>
+//- (void)commitInfor:(NSDictionary *)para;
+/**
+ 上次图片
+ */
+- (void)uploadImages:(NSArray *)imags para:(NSDictionary *)para;
+@end
+@interface HYAddBaoXiuMainView : HYBaseView
+@property (nonatomic, weak) id<baoxiuDelegate>  delegate;
+@property (nonatomic, strong) HYAddPhotoView * addPhotoView;
++ (instancetype)creatAddBaoXiuMainView:(NSString *)titleStr ;
+@property (nonatomic, strong) NSArray * QuYuInfor;
+@end

@@ -1,0 +1,21 @@
+//
+//  HYLoginModuleService.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/21.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYLoginModuleService.h"
+
+@implementation HYLoginModuleService
++(instancetype)share
+{
+    static HYLoginModuleService *instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYLoginModuleService alloc] init];
+    });
+    return instance;
+}
+@end

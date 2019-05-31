@@ -1,0 +1,117 @@
+//
+//  LWImagePicker.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/8/10.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "LWImagePicker.h"
+
+@interface LWImagePicker ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UIActionSheetDelegate>
+@property (nonatomic, strong) UIImagePickerController * picker;
+@property (nonatomic, strong) UIViewController * sourceVC;
+@property (nonatomic, copy) HYEventCallBackBlock  callBlock;
+
+@end
+
+@implementation LWImagePicker
++ (instancetype)share
+{
+    static LWImagePicker *instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[LWImagePicker alloc ]init];
+    });
+    return instance;
+}
+
+/**
+ sourceVc                   来源控制器
+ allowsEditing               是否编辑
+ callBlock                   返回图片
+ */
+- (void)imagePickerWithSourceVc:(UIViewController *)sourceVc allowsEditing:(BOOL)allowsEditing callBlock:(HYEventCallBackBlock)callBlock
+{
+    self.picker  = [[UIImagePickerController alloc] init];
+    self.picker.navigationBar.tintColor  = [UIColor redColor];
+    self.picker.allowsEditing = allowsEditing;
+    self.picker.delegate = self;
+    self.sourceVC = sourceVc;
+    [self showAlerView];
+    self.callBlock  = callBlock;
+}
+
+#pragma mark --------- 代理  ---------
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
+    UIImage *image;
+    NSArray *array = @[@"UIImagePickerControllerMediaType",
+                       @"UIImagePickerControllerOriginalImage",
+                       @"UIImagePickerControllerEditedImage",
+                       @"UIImagePickerControllerCropRect",
+                       @"UIImagePickerControllerMediaURL",
+                       @"UIImagePickerControllerReferenceURL",
+                       @"UIImagePickerControllerMediaMetadata",
+                       @"UIImagePickerControllerLivePhoto"];
+    
+    if (self.picker.allowsEditing) {
+        image = [info objectForKey:array[2]];
+    }else {
+        image = [info objectForKey:array[1]];
+    }
+    if (self.callBlock) {
+        self.callBlock(image);
+    }
+    [self.sourceVC dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [self.sourceVC dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)showAlerView
+{
+    UIAlertController *temp = [UIAlertController alertControllerWithTitle:@"" message:@"提示" preferredStyle:(UIAlertControllerStyleActionSheet)];
+    UIAlertAction *sure = [UIAlertAction actionWithTitle:@"拍照" style:(UIAlertActionStyleDefault) handler:^(UIAlertAction * _Nonnull action) {
+        [self clickedButtonAtIndex:1];
+    }];
+    UIAlertAction *sure0 = [UIAlertAction actionWithTitle:@"从相册选择" style:(UIAlertActionStyleDefault) handler:^(UIAlertAction * _Nonnull action) {
+        [self clickedButtonAtIndex:2];
+    }];
+    UIAlertAction *cancle = [UIAlertAction actionWithTitle:@"取消" style:(UIAlertActionStyleCancel) handler:^(UIAlertAction * _Nonnull action) {
+    }];
+    [temp addAction:sure];
+    [temp addAction:sure0];
+    [temp addAction:cancle];
+    [self.sourceVC presentViewController:temp animated:YES completion:nil];
+}
+
+- (void)clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if (buttonIndex == 1) {
+        
+        _picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunicode-whitespace"
+        
+        [self.sourceVC presentViewController:_picker animated:YES completion:nil];
+        
+#pragma clang diagnostic pop
+        
+    }else if (buttonIndex == 2) {
+        
+        _picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunicode-whitespace"
+        
+        [self.sourceVC presentViewController:_picker animated:YES completion:nil];
+        
+#pragma clang diagnostic pop
+        
+    }
+    
+}
+@end

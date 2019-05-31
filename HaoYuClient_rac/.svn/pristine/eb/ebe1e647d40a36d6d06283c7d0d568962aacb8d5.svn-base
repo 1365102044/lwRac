@@ -1,0 +1,37 @@
+//
+//  HYMapView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import <BaiduMapAPI_Map/BMKMapComponent.h>
+#import "HYHouseRescourcesModel.h"
+typedef NS_ENUM(NSInteger, LWMapType) {
+    LWlocationType,//经纬度定位显示大头针
+    LWJuHeType,//聚合
+};
+@interface HYMapView : HYBaseView <BMKMapViewDelegate>
+
+@property (nonatomic, strong) BMKMapView * myMapView;
+/**
+ 根据经纬度显示大头针位置
+ */
+- (void)addPointViewWithlat:(double)lat lng:(double)lng;
+/**
+ 点击地图空白出的回掉
+ */
+@property (nonatomic, copy) HYEventCallBackBlock  clickMapBlankBlock;
+//点击 门店回调
+@property (nonatomic, copy) HYEventCallBackBlock  clickHouseItemBlock;
+
+/**
+ 设置地图找房的数据 以及 地图中心坐标
+ */
+- (void)setHouseDatas:(NSArray *)houseDatas CenterCoordinate:(CLLocationCoordinate2D)CenterCoordinate;
+
++ (instancetype)creatMyMapView:(CGRect)frame mapType:(LWMapType)type;
+
+@end

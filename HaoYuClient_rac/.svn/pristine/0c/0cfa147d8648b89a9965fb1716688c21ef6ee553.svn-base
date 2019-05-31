@@ -1,0 +1,67 @@
+//
+//  HYBaseTextView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTextView.h"
+@interface HYBaseTextView ()<UITextViewDelegate>
+
+@end
+
+@implementation HYBaseTextView
+
+- (void)setUI
+{
+    _TextView = [[UITextView alloc] init];
+    _TextView.delegate = self;
+    _placeHolderLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12) text:@"" textColor:HYCOLOR.color_c6];
+    [self addSubview:_TextView];
+    [self addSubview:_placeHolderLable];
+    
+    [_TextView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+    [_placeHolderLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_TextView.mas_top).mas_offset(8);
+        make.left.mas_equalTo(_TextView.mas_left).mas_offset(8);
+    }];
+    [self setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c3];
+    [_placeHolderLable bk_whenTapped:^{
+        [_TextView becomeFirstResponder];
+    }];
+}
+
+- (void)textViewDidChange:(UITextView *)textView
+{
+    if ([textView.text isEqualToString:@""] || textView.text == nil) {
+        _placeHolderLable.hidden = NO;
+    }else{
+        _placeHolderLable.hidden = YES;
+    }
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    NSString *totalString;
+    if (text.length <= 0) {
+        @try {
+            totalString = [textView.text substringToIndex:textView.text.length-1];
+        } @catch (NSException *exception) {
+            
+        } @finally {
+            
+        }
+    }
+    else {
+        totalString = [NSString stringWithFormat:@"%@%@",textView.text,text];
+    }
+    if (totalString.length == self.maxCount + 1) {
+        return NO;
+    }
+    return YES;
+}
+
+@end

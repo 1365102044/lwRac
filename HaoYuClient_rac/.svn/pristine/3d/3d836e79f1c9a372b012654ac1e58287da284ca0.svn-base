@@ -1,0 +1,71 @@
+//
+//  HYQianYueFillInforMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYueFillInforMainView.h"
+@interface HYQianYueFillInforMainView ()<UIScrollViewDelegate>
+@property (nonatomic, strong) UIScrollView * mainScrollView;
+@end
+
+@implementation HYQianYueFillInforMainView
+- (void)scrollToIndex:(NSInteger)index
+{
+    [self.mainScrollView setContentOffset:CGPointMake(SCREEN_WIDTH*index, 0) animated:YES];
+}
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    CGFloat offset_x = scrollView.contentOffset.x;
+    _scrollViewIndex = offset_x/SCREEN_WIDTH;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _scrollViewIndex = 0;
+        self.firstView.backgroundColor = HYCOLOR.color_c1;
+        self.secondView.backgroundColor = HYCOLOR.color_c1;
+        [self setSubViews];
+    }
+    return self;
+}
+
+- (void)setSubViews
+{
+    [self addSubview:self.mainScrollView];
+    [self.mainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+}
+- (UIScrollView*)mainScrollView
+{
+    if (!_mainScrollView) {
+        _mainScrollView = [[UIScrollView alloc] init];
+        [_mainScrollView addSubview:self.firstView];
+        [_mainScrollView addSubview:self.secondView];
+
+        _mainScrollView.pagingEnabled = YES;
+        _mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, 1);
+        _mainScrollView.delegate  = self;
+        _mainScrollView.scrollEnabled = NO;
+    }
+    return _mainScrollView;
+}
+- (HYQianYueFillInforFirstView*)firstView
+{
+    if (!_firstView) {
+        _firstView = [[HYQianYueFillInforFirstView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, self.bounds.size.height)];
+    }
+    return _firstView;
+}
+- (HYQianYueFillInforSecondView*)secondView
+{
+    if (!_secondView) {
+        _secondView = [[HYQianYueFillInforSecondView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, SCREEN_WIDTH, self.bounds.size.height+MARGIN)];
+    }
+    return _secondView;
+}
+@end

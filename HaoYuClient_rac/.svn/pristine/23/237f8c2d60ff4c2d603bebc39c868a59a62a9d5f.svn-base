@@ -1,0 +1,123 @@
+//
+//  HYServiceManager.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYServiceManager.h"
+#import "LWHud.h"
+@interface HYServiceManager ()
+{
+    NSURLSessionTask *requestTask;
+}
+@end
+@implementation HYServiceManager
+
++(instancetype)share{
+    static HYServiceManager *instance     = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance                          = [[HYServiceManager alloc] init];
+    });
+    return instance;
+}
+
+/**
+ 有加载动画的请求
+ */
+- (void)postRequestAnWithurl:(NSString *)url
+                   paramters:(NSDictionary *)paramters
+                successBlock:(HYNetRequestSuccessBlock)successBlock
+                failureBlock:(HYNetRequestFailureBlock)failBlock
+{
+    [LWHud show];
+    /**
+     *  请求并获取task
+     */
+    __weak HYServiceManager *weakSelf      = self;
+    requestTask                            = [[HYProjectNetRequestManager sharedNetRequestManager] connectNetWithUrl:url
+                                                                                                  requestNetworkType:HYProjectNetRequestPost
+                                                                                                          parameters:paramters
+                                                                                                     timeoutInterval:SEVRIES_TIMEOUT
+                                                                                                        successBlock:^(id objc, id requestInfo) {
+                                                                                                            [LWHud dismiss];
+                                                                                                            [weakSelf handleRequestSuccess:objc
+                                                                                                                              requestModel:requestInfo
+                                                                                                                                  sucBlock:successBlock
+                                                                                                                                 failBlock:failBlock];
+                                                                                                        }
+                                                                                                        failureBlock:^(id error, id requestInfo) {
+                                                                                                            [LWHud dismiss];
+                                                                                                            [weakSelf handleRequestFailed:error
+                                                                                                                             requestModel:requestInfo
+                                                                                                                                failBlock:failBlock];}];
+}
+
+/**
+ 没有加载动画的请求
+ */
+- (void)postRequestWithurl:(NSString *)url
+                 paramters:(NSDictionary *)paramters
+              successBlock:(HYNetRequestSuccessBlock)successBlock
+              failureBlock:(HYNetRequestFailureBlock)failBlock
+{
+    /**
+     *  请求并获取task
+     */
+    __weak HYServiceManager *weakSelf      = self;
+    requestTask                            = [[HYProjectNetRequestManager sharedNetRequestManager] connectNetWithUrl:url
+                                                                                                  requestNetworkType:HYProjectNetRequestPost
+                                                                                                          parameters:paramters
+                                                                                                     timeoutInterval:SEVRIES_TIMEOUT
+                                                                                                        successBlock:^(id objc, id requestInfo) {
+                                                                                                            [weakSelf handleRequestSuccess:objc
+                                                                                                                              requestModel:requestInfo
+                                                                                                                                  sucBlock:successBlock
+                                                                                                                                 failBlock:failBlock];
+                                                                                                        }
+                                                                                                        failureBlock:^(id error, id requestInfo) {
+                                                                                                            [weakSelf handleRequestFailed:error
+                                                                                                                             requestModel:requestInfo
+                                                                                                                                failBlock:failBlock];}];
+}
+
+/**
+ 上传图片
+ */
+- (void)uploadImageWithurl:(NSString *)url
+                  ImageArr:(NSArray *)imageArr
+                  fileName:(NSArray *)fileName
+                parameters:(NSDictionary *)parameters
+                   Success:(HYNetRequestSuccessBlock)successBlock
+                      fail:(HYNetRequestFailureBlock)failBlock
+{
+    [[HYProjectNetRequestManager sharedNetRequestManager] uploadImageWithUrl:url
+                                                                   parameter:parameters
+                                                                      images:imageArr
+                                                                    fileName:fileName
+                                                             timeoutInterval:30
+                                                                successBlock:successBlock
+                                                                failureBlock:failBlock];
+}
+
+/**
+ 上传图片  -- 单张
+ */
+- (void)uploadSingleImageWithurl:(NSString *)url
+                           Image:(UIImage *)image
+                        fileName:(NSString *)fileName
+                      parameters:(NSDictionary *)parameters
+                         Success:(HYNetRequestSuccessBlock)successBlock
+                            fail:(HYNetRequestFailureBlock)failBlock
+{
+    [[HYProjectNetRequestManager sharedNetRequestManager] uploadSingleImageWithUrl:url
+                                                                         parameter:parameters
+                                                                             image:image fileName:fileName
+                                                                   timeoutInterval:15
+                                                                      successBlock:successBlock
+                                                                      failureBlock:failBlock];
+}
+
+@end

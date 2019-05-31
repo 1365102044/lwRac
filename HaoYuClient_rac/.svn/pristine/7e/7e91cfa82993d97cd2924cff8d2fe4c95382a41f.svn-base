@@ -1,0 +1,286 @@
+//
+//  HYHomeViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/21.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHomeViewController.h"
+#import "HYHomeTableViewCell.h"
+#import "HYHomeTableHeaderView.h"
+#import "HYBaseBarButtonItem.h"
+#import "HYMessageViewController.h"
+#import "HYCityListViewController.h"
+#import "HYBaseNavigationController.h"
+#import "HYHuXingListViewController.h"
+#import "HYHouseRescourcesViewController.h"
+#import "HYHouseRescourceDeatilViewController.h"
+#import "HYHuXingDeatilViewController.h"
+#import "HYOnLineYuYueViewController.h"
+#import "HYOnLineYuDingViewController.h"
+#import "HYQianYueViewController.h"
+#import "HYRequstGlobalDataTool.h"
+#import "HYLocationTool.h"
+#import "HYMapFindHouseViewController.h"
+#import "HYHomePageModel.h"
+#import "HYHouseProjectInforTool.h"
+#import "HYMapView.h"
+#import <BaiduMapAPI_Base/BMKBaseComponent.h>//引入base相关所有的头文件
+#import <BaiduMapAPI_Map/BMKMapComponent.h>//引入地图功能所有的头文件
+#import <BaiduMapAPI_Location/BMKLocationComponent.h>
+
+#define HYHOMETABLECELLINDENTIFIER @"HYHOMETABLECELLINDENTIFIER"
+@interface HYHomeViewController ()<BMKLocationServiceDelegate>
+@property (nonatomic, strong) HYHomeTableHeaderView * headerView;
+@property (nonatomic, strong) HYDefaultButton *cityBtn;
+@property (nonatomic, strong) HYLocationTool * locationTool;
+
+@property (nonatomic, strong)BMKLocationService *locService;
+@property (nonatomic, strong) BMKMapManager * mapManager;
+//用户定位的城市
+@property (nonatomic, strong) NSString * user_location_city;
+
+@property (nonatomic, strong) NSArray * BnDataArray;//banner
+@property (nonatomic, strong) NSArray * HxDataArray;//户型数据
+@property (nonatomic, strong) NSArray * PjDataArray;//项目
+@property (nonatomic, strong) HYMapView * myMapView;
+@end
+
+@implementation HYHomeViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+- (void)requestListInfor
+{
+    [[HYRequstGlobalDataTool new] requestHomePageInforCallBackBlock:^(id sender) {
+        LWLog(@"\n\n+++++++++++首页数据:%@",sender);
+        NSDictionary *data_dic = (NSDictionary *)sender;
+        self.BnDataArray = data_dic[@"BN"];
+        self.PjDataArray = data_dic[@"PJ"];
+        self.HxDataArray = data_dic[@"HX"];
+        self.headerView.bannderModelArray = self.BnDataArray;
+        [self.MainTableView reloadData];
+        [self.MainTableView.mj_header endRefreshing];
+    } failureBlock:^(id sender) {
+        [self.MainTableView.mj_header endRefreshing];
+    }];
+    
+}
+
+#pragma mark - Third.点击事件
+
+- (void)clickHeaderViewFuncBtnWithKey:(NSString *)key
+{
+    if ([key isEqualToString:@"地图找房"]) {
+        HYMapFindHouseViewController *mapFindHouseVC = [[HYMapFindHouseViewController alloc] init];
+        mapFindHouseVC.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:mapFindHouseVC animated:YES];
+    }else if ([key isEqualToString:@"预约看房"]){
+        HYOnLineYuYueViewController *yuyueVC = [[HYOnLineYuYueViewController alloc] init];
+        yuyueVC.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:yuyueVC animated:YES];
+    }else if ([key isEqualToString:@"预定房源"]){
+        HYOnLineYuDingViewController *yudingvc = [HYOnLineYuDingViewController creatOnLineYuDingViewControllerExtend:nil];
+        yudingvc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:yudingvc animated:YES];
+    }else if ([key isEqualToString:@"在线签约"]){
+        HYQianYueViewController *qianyue = [HYQianYueViewController creatOnLineQianYueViewControllerExtend:nil];
+        qianyue.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:qianyue animated:YES];
+    }else if ([key isEqualToString:@"搜索"]){
+        
+    }
+}
+
+#pragma mark - Fourth.代理方法
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if ((self.HxDataArray.count > 0 && self.PjDataArray.count > 0)) {
+        return 2;
+    }else if ((self.HxDataArray.count == 0 && self.PjDataArray.count == 0)){
+        return 0;
+    }
+    return  1;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYHomeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:HYHOMETABLECELLINDENTIFIER];
+    if (!cell) {
+        cell = [[HYHomeTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:HYHOMETABLECELLINDENTIFIER];
+    }
+    cell.indexPath = indexPath;
+    if (indexPath.section == 0) {
+        cell.cellView.dataModelArrary = self.PjDataArray;
+    }else if (indexPath.section == 1){
+        cell.cellView.dataModelArrary = self.HxDataArray;
+    }
+    //点击collectviewCell
+    cell.cellView.clickCollectCellBlock = ^(id sender) {
+        NSIndexPath *indexpath = sender;
+        if(indexpath.row == 100000){
+            switch (indexPath.section) {
+                case 0:
+                    {
+                        HYHouseRescourcesViewController *houseRescources = [[HYHouseRescourcesViewController alloc] init];
+                        houseRescources.hidesBottomBarWhenPushed = YES;
+                        [self.navigationController pushViewController:houseRescources animated:YES];
+                    }
+                    break;
+                    case 1:
+                    {
+                        HYHuXingListViewController *huxingVC = [[HYHuXingListViewController alloc] init];
+                        huxingVC.hidesBottomBarWhenPushed = YES;
+                        [self.navigationController pushViewController:huxingVC animated:YES];
+                    }
+                default:
+                    break;
+            }
+        }else{
+            if (indexPath.section == 0) {
+                HYHouseRescourceDeatilViewController *deatilVC = [[HYHouseRescourceDeatilViewController alloc] init];
+                deatilVC.hidesBottomBarWhenPushed = YES;
+                HYHomePageModel *projectModel = self.PjDataArray[indexPath.row];
+                deatilVC.houseItemId = projectModel.itemId;
+                [self.navigationController pushViewController:deatilVC animated:YES];
+            }else if (indexPath.section == 1){
+                HYHuXingDeatilViewController *huxingDeatilVC = [[HYHuXingDeatilViewController alloc] init];
+                HYHomeHuXingModel *huxingModel = self.HxDataArray[indexPath.row];
+                huxingDeatilVC.HuXingId = huxingModel.roomTypeId;
+                huxingDeatilVC.hidesBottomBarWhenPushed = YES;
+                [self.navigationController pushViewController:huxingDeatilVC animated:YES];
+            }
+        }
+    };
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section != 0 ) {
+        return MARGIN;
+    }else{
+        return 0.0001;
+    }
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.navigationItem.title = @"好寓Hooray";
+    self.view.backgroundColor = HYCOLOR.color_c1;
+    
+    [self setUI];
+    [self requestListInfor];
+}
+
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.emptyDataSetSource = nil;
+    self.MainTableView.emptyDataSetDelegate = nil;
+    self.MainTableView.rowHeight = MARGIN*30;
+    self.MainTableView.tableHeaderView = self.headerView;
+    self.MainTableView.tableHeaderView.height = MARGIN*30;
+    self.MainTableView.backgroundColor = HYCOLOR.color_c1;
+    [self.MainTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.mas_equalTo(self.view);
+    }];
+    HYDefaultButton *messageBtn = [HYDefaultButton buttonImageWithImageNamed:@"message_icon"
+                                                                        type:HYProjectButtonSetImage
+                                                                      target:self
+                                                                    selector:@selector(clickNavItems:)];
+    messageBtn.tag = 1;
+    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:messageBtn];
+    self.navigationItem.rightBarButtonItem = rightItem;
+    HYDefaultButton *cityBtn = [HYDefaultButton buttonImageWithImageNamed:@""
+                                                                     type:HYProjectButtonSetBackgroundImage
+                                                                   target:self
+                                                                 selector:@selector(clickNavItems:)];
+    cityBtn.tag = 2;
+    NSString *cityname = [HYPublic_LocalData share].last_location_City_M.name;
+    [cityBtn setTitle:cityname forState:UIControlStateNormal];
+    cityBtn.mj_w = MARGIN*6;
+    self.cityBtn = cityBtn;
+    [cityBtn setTitleColor:HYCOLOR.color_c4 forState:UIControlStateNormal];
+    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:cityBtn];
+    self.navigationItem.leftBarButtonItem = leftItem;
+}
+
+- (void)clickNavItems:(UIButton *)sender
+{
+    if (sender.tag == 1) {
+        HYMessageViewController *tem = [HYMessageViewController new];
+        tem.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:tem animated:YES];
+    }else{
+        HYCityListViewController *cityListVC = [HYCityListViewController creatCityListViewController:self.cityBtn.titleLabel.text
+                                                                                           CallBlock:^(id sender) {
+                                                                                               [self.cityBtn setTitle:sender forState:UIControlStateNormal];
+                                                                                               [self requestListInfor];                                }];
+        cityListVC.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:cityListVC animated:YES];
+    }
+}
+
+#pragma mark - Seventh.懒加载
+- (HYHomeTableHeaderView*)headerView
+{
+    if (!_headerView) {
+        _headerView = [[HYHomeTableHeaderView alloc] init];
+        _headerView.viewController = self;
+        WEAKSELF(self);
+        _headerView.clickFuncBtnBlcok = ^(id sender) {
+            [weakself clickHeaderViewFuncBtnWithKey:sender];
+        };
+    }
+    return _headerView;
+}
+
+
+- (NSArray*)BnDataArray
+{
+    if (!_BnDataArray) {
+        _BnDataArray = [[NSArray alloc] init];
+    }
+    return _BnDataArray;
+}
+- (NSArray*)PjDataArray
+{
+    if (!_PjDataArray) {
+        _PjDataArray = [[NSArray alloc] init];
+    }
+    return _PjDataArray;
+}
+- (NSArray*)HxDataArray
+{
+    if (!_HxDataArray) {
+        _HxDataArray = [[NSArray alloc] init];
+    }
+    return _HxDataArray;
+}
+
+#pragma mark - Eigth.Other
+
+-(void)dealloc
+{
+    _locService = nil;
+}
+
+@end

@@ -1,0 +1,141 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+#import "HYAnnotationView.h"
+#import "HYPaoView.h"
+#import "HYPointAnnotation.h"
+#import "HYPointModel.h"
+#import "CoustomSlider.h"
+#import "UIControl+LWdelay.h"
+#import "HYCircleView.h"
+#import "LWChoosePayMentView.h"
+
+#import "LWPayMainView.h"
+#import "LWLoginViewController.h"
+#import "HYBaseNavigationController.h"
+@interface ViewController ()
+@property (nonatomic, strong) UISlider * sliderView;
+@property (nonatomic, strong) BMKMapView * mapView;
+@property(nonatomic , strong) BMKUserLocation *userLocation;
+@property (nonatomic, strong) UIButton * btn;
+
+@property (nonatomic, strong) HYCircleView * cricleView;
+
+@end
+
+@implementation ViewController
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+//    self.btn = [[UIButton alloc] initWithFrame:CGRectMake(100, 100, 100, 400)];
+//    self.btn.backgroundColor = [UIColor redColor];
+//    [self.view addSubview:self.btn];
+//    self.btn.lw_acceptEventInterval = 2;
+//    [self.btn addTarget:self action:@selector(clickbtn) forControlEvents:UIControlEventTouchUpInside];
+
+//    LWPayMainView *mainview = [LWPayMainView getPayMainView:PAYMENTTYPE_RECHARGE];
+//    [self.view addSubview:mainview];
+//
+//    [mainview mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.width.offset(SCREEN_WIDTH);
+//        make.edges.mas_equalTo(self.view);
+//    }];
+//
+//    mainview.clickBtn = ^(id sender) {
+//        if ([sender integerValue] == 2){
+//            LWChoosePayMentView *temp = [[LWChoosePayMentView alloc] init];
+////            [temp showChoosePayTypeViewWithTitle:@"房租缴费" desc:@"1000"
+////                                  callBlackBlock:^(id sender) {
+////                                      LWLog(@"**************%@",sender);
+////                                  }];
+//        }else{
+//            NSLog(@"*******");
+//        }
+//    };
+    
+    
+    
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    LWLoginViewController *loginvc = [LWLoginViewController new];
+//    HYBaseNavigationController *nav = [[HYBaseNavigationController alloc] initWithRootViewController:loginvc];
+//    [self presentViewController:nav animated:YES completion:nil];
+//    [self.navigationController pushViewController:loginvc animated:YES];
+    
+    [self selectPhoto:nil];
+   
+}
+
+- (void)selectPhoto:(UIBarButtonItem *)itemCamera {
+    
+    //创建UIImagePickerController对象，并设置代理和可编辑
+    UIImagePickerController * imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.editing = YES;
+    imagePicker.delegate = self;
+    imagePicker.allowsEditing = YES;
+    
+    //创建sheet提示框，提示选择相机还是相册
+    UIAlertController * alert = [UIAlertController alertControllerWithTitle:@"请选择打开方式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    //相机选项
+    UIAlertAction * camera = [UIAlertAction actionWithTitle:@"相机" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+        //选择相机时，设置UIImagePickerController对象相关属性
+        imagePicker.sourceType =  UIImagePickerControllerSourceTypeCamera;
+        imagePicker.modalPresentationStyle = UIModalPresentationFullScreen;
+        //        imagePicker.mediaTypes = @[(NSString *)kUTTypeImage];
+        imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+        //跳转到UIImagePickerController控制器弹出相机
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    //相册选项
+    UIAlertAction * photo = [UIAlertAction actionWithTitle:@"相册" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+        //选择相册时，设置UIImagePickerController对象相关属性
+        imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        //跳转到UIImagePickerController控制器弹出相册
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    //取消按钮
+    UIAlertAction * cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }];
+    
+    //添加各个按钮事件
+    [alert addAction:camera];
+    [alert addAction:photo];
+    [alert addAction:cancel];
+    
+    //弹出sheet提示框
+    [self presentViewController:alert animated:YES completion:nil];
+}
+- (void)clickbtn
+{
+    NSLog(@"**************************%@",[NSDate date]);
+}
+
+- (HYCircleView *)cricleView{
+    if(!_cricleView){
+        _cricleView = [[HYCircleView alloc] init];
+    }
+    return _cricleView;
+}
+
+@end

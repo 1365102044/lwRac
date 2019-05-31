@@ -1,0 +1,93 @@
+//
+//  HYHuXingInforModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+#import "HYpicObjModel.h"
+
+//
+@interface zhuangXiuModel : HYBaseModel
+/**
+ id true string
+ 字典id
+ type
+ true string
+ 字典的类型
+ value
+ true string
+ 自定义value
+ key
+ true string
+ 自定义key
+ mark
+ true string
+ 字典类型标识
+ */
+@end
+
+
+
+//户型对象
+@interface huXingModel : HYBaseModel
+
+//字典id customId
+
+//字典类型标识
+@property (nonatomic, copy) NSString * mark;
+
+@end
+
+
+
+@interface HYHuXingInforModel : HYBaseModel
+//项目详细地址
+@property (nonatomic, copy) NSString * houseItemAddress;
+
+//户型对象
+@property (nonatomic, strong) NSDictionary * huXing;
+@property (nonatomic, strong) huXingModel * huxingModel;
+
+@property (nonatomic, strong) NSDictionary * zhuangXiu;
+@property (nonatomic, strong) zhuangXiuModel * zhuangXiuModel;
+
+//公司编码
+@property (nonatomic, copy) NSString * gcid;
+//户型名称
+@property (nonatomic, copy) NSString * roomTypeName;
+//项目id
+@property (nonatomic, copy) NSString * houseItemId;
+//户型id
+@property (nonatomic, copy) NSString * huXingId;
+//装修id
+@property (nonatomic, copy) NSString * zhuangXiuId;
+//房型介绍
+@property (nonatomic, copy) NSString * roomTypeIntro;
+//最低租金
+@property (nonatomic, copy) NSString * minZujin;
+//室
+@property (nonatomic, copy) NSString * shi;
+//最高租金
+@property (nonatomic, copy) NSString * maxMianji;
+//厅
+@property (nonatomic, copy) NSString * ting;
+
+//图片对象
+@property (nonatomic, strong) NSDictionary * picObj;
+@property (nonatomic, strong) HYpicObjModel * picObjModel;
+
+//户型id  customId
+
+//出租价
+@property (nonatomic, copy) NSString * rentPrice;
+//最小面积
+@property (nonatomic, copy) NSString * minMianji;
+//图片集合
+@property (nonatomic, copy) NSString * pics;
+//面积
+@property (nonatomic, copy) NSString * mianji;
+
+@end

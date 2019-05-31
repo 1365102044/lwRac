@@ -1,0 +1,30 @@
+//
+//  HYPayViewController.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseViewController.h"
+
+/**
+ 支付的付款方式
+ */
+typedef NS_ENUM(NSInteger, PayMentMethod) {
+    WeiXinPayMethod = 1,   //微信支付
+    AlipayPayMethod,     //支付宝
+};
+
+@interface HYPaymentViewController : HYBaseViewController
+
+/**
+ rechargePayMentType     extend:  {@"num":@"",@"houseId":@"",@"meterId":@""}
+ billPayMentType         extend:  {@"ids":["id"],@"deptId":@"",}
+ billDiscountPayMentType extend:  {@"ids":["id"],@"deptId":@"","json":[{@"cid":@[],@"bid":@[]]},]}
+ */
++ (void)pushPayViewController:(HYBaseViewController *)soruceVC
+                  PayMentType:(PayMentType)PayMentType
+                               extend:(id)extend;
+
+@end

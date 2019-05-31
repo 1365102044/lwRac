@@ -1,0 +1,170 @@
+//
+//  LWNetworkManager.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/30.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+import Alamofire
+import SwiftyJSON
+
+///状态码 根据自家后台数据更改
+let STATECODE_SUCCESS = 200
+let STATECODE_FAIL = 100
+
+enum httpRequestType {
+    case Post
+    case Get
+}
+
+class requestBaseModel: Decodable {
+    var code: Int
+    var msg: String
+    @available(*, deprecated, message: "Do not use.")
+    init() {
+        fatalError("Swift 4.1")
+    }
+}
+
+class RetModels: Decodable {
+    var result:String?
+    var status:[requestBaseModel]
+    @available(*, deprecated, message: "Do not use.")
+    init() {
+        fatalError("Swift 4.1")
+    }
+}
+
+
+
+//定义属性
+class LWNetworkManager {
+    
+    typealias SuccessBlock = (([String: Any]) -> Void)
+    typealias FailureBlock = ((Int?,String) -> Void)
+    
+    var requestType: httpRequestType = .Post
+    var url:String?
+    var params:[String:String]?
+    var success:SuccessBlock?
+    var failure:FailureBlock?
+    var httpRequst:Request?
+    var showHudBool:Bool = false
+}
+
+//配置属性
+extension LWNetworkManager {
+    //设置url
+    func url(url:String) ->Self{
+        self.url = url
+        return self
+    }
+    //设置requestType
+    func requestType(requetType:httpRequestType) ->Self {
+        self.requestType = requetType
+        return self
+    }
+    //设置参数
+    func params(para:[String:String]) -> Self{
+        self.params = para
+        self.params!["gcid"] = String("0371070")
+        return self
+    }
+    //成功回调
+    func success(success:@escaping SuccessBlock) -> Self{
+        self.success = success
+        return self
+    }
+    //失败回调
+    func failure(fail:@escaping FailureBlock) -> Self{
+        self.failure = fail
+        return self
+    }
+    func showHud() -> Self{
+        self.showHudBool = true
+        return self;
+    }
+}
+
+extension LWNetworkManager {
+    
+    func request() ->Void {
+        
+        //alamofire请求后的返回值
+        var dataRequest:DataRequest?
+        
+        //发起请求
+        if var URLString = url {
+            //请求头
+            LWPrint(message: "params:\(String(describing: self.params))")
+            //将requestHeader 添加进request参数中
+            if URLString.contains("v2"){
+                URLString = (BASE_URL + URLString)
+            }else{
+                URLString = (BASE_URL + BASE_VSERSON_URL + URLString)
+            }
+            if (self.showHudBool) {LWHud.show()}
+            let method = requestType == .Get ? HTTPMethod.get : HTTPMethod.post
+            dataRequest = Alamofire.request(URLString, method: method, parameters: self.params , encoding: JSONEncoding.default).validate(statusCode: (200...300)).responseJSON(completionHandler: { (response) in
+                
+               if (self.showHudBool) {LWHud.dismiss()}
+                switch response.result {
+                //访问成功,且数据是我们想要的类型
+                case .success:
+                    let dic: Dictionary<String, Any> = response.result.value as! Dictionary<String, Any>
+                    guard let myresult = dic["result"] as? Dictionary<String,Any>else {
+                        self.failure?(100,"请求失败")
+                        LWAlertView.show(text: "请求失败")
+                        return;
+                    }
+                    
+                    let json = JSON(response.result.value ?? String())
+                    LWPrint(message: "***********json:\(json)")
+                    let code = Int(json["status","code"].string!)!
+                    let msg = json["status"]["msg"].string
+                    if code == 200 {
+                        LWPrint(message: "\n\n***********res:\(String(describing: json["result"]))")
+                        self.success?(myresult)
+                    }else if(code == 207){
+                        LWAlertView.show(text: "登录异常，重新登录")
+                        UserDefaults.standard.removeObject(forKey: "token")
+                    }else{
+                        LWPrint(message: "**********code:\(code)******msg:\(String(describing: msg))")
+                        LWAlertView.show(text: "请求失败：code:\(code) msg:\(String(describing: msg))")
+                        self.failure?(code,msg!)
+                    }
+                //访问失败 , 状态码不对或者数据类型不对
+                case .failure:
+                    LWAlertView.show(text: "网络异常！")
+                    
+                    NotificationCenter.default.post(name: NSNotification.Name("requestErrorNoti"), object: nil)
+                    print("xxxxxxxxxxxxxxxxxxx\(response.result.error.debugDescription)")
+                }
+            })
+            
+            httpRequst = dataRequest
+        }
+        
+        //错误处理 - 弹出错误信息
+        func failureHandle(fail:FailureBlock?, stateCode:Int?, message:String){
+            if let failhandle = fail  {
+                failhandle(stateCode, message)
+            }
+        }
+    }
+    
+    func cancleRequst() {
+        httpRequst?.cancel()
+    }
+    
+}
+
+
+
+
+
+
+
+

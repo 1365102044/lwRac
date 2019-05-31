@@ -1,0 +1,343 @@
+//
+//  HYQianYueFillInforFirstView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYueFillInforFirstView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYAddTongZhuRenView.h"
+#import "HYTongZhuRenView.h"
+@interface HYQianYueFillInforFirstView ()<UIScrollViewDelegate>
+{
+    CGFloat HEI;
+}
+@property (nonatomic, strong) HYBaseView * personInforView;
+@property (nonatomic, strong) HYBaseView * bankInforView;
+@property (nonatomic, strong) HYBaseView * contactsView;
+@property (nonatomic, strong) HYBaseScrollView * contentScrollView;
+@property (nonatomic, strong) HYTongZhuRenView * tongZhuRenView;
+@property (nonatomic, strong) HYLeftRightArrowView * zhengjianleixingView;
+
+@end
+@implementation HYQianYueFillInforFirstView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        HEI = ADJUST_PERCENT_FLOAT(50);
+        [self addSubview:self.contentScrollView];
+        [self.contentScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self);
+        }];
+
+    }
+    return self;
+}
+/**
+ 个人信息
+ */
+- (HYBaseView*)personInforView
+{
+    if (!_personInforView) {
+        _personInforView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(15)
+                                                              text:@"个人信息"
+                                                         textColor:HYCOLOR.color_c4];
+        HYLeftRightArrowView *nameview = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*姓名"
+                                                                                                  rightStr:@"请输入姓名"
+                                                                                             showArrowIcon:NO
+                                                                                             CallBackBlock:^(id sender) {
+                                                                                                 [self creatParam:sender key:@"name"];
+                                                                                             }];
+        
+        HYLeftRightArrowView *phoneView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*手机号："
+                                                                                                   rightStr:@"请输入手机号"
+                                                                                              showArrowIcon:NO
+                                                                                              CallBackBlock:^(id sender) {
+                                                                                                  [self creatParam:sender key:@"phone"];
+                                                                                              }];
+        phoneView.rightTextField.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+        HYLeftRightArrowView *zhengjianleixingView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"*证件类型："
+                                                                                                          rightStr:@"身份证"
+                                                                                                     showArrowIcon:NO
+                                                                                                     CallBackBlock:^(id sender) {
+                                                                                                         
+                                                                                                     }];
+        
+        _zhengjianleixingView = zhengjianleixingView;
+        HYLeftRightArrowView *emilView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*邮箱："
+                                                                                                  rightStr:@"请输入邮箱"
+                                                                                             showArrowIcon:NO
+                                                                                             CallBackBlock:^(id sender) {
+                                                                                                 [self creatParam:sender key:@"emil"];
+                                                                                             }];
+        [_personInforView addSubview:nameview];
+        [_personInforView addSubview:titleLable];
+        [_personInforView addSubview:phoneView];
+        [_personInforView addSubview:zhengjianleixingView];
+        [_personInforView addSubview:emilView];
+        
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.mas_equalTo(_personInforView).mas_offset(MARGIN);
+        }];
+        [nameview mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_offset(HEI);
+            make.left.mas_equalTo(_personInforView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_personInforView).mas_offset(-MARGIN);
+        }];
+        [phoneView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(nameview.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.mas_equalTo(_personInforView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_personInforView).mas_offset(-MARGIN);
+        }];
+        [zhengjianleixingView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(phoneView.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.mas_equalTo(_personInforView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_personInforView).mas_offset(-MARGIN);
+        }];
+        [emilView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(zhengjianleixingView.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.mas_equalTo(_personInforView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_personInforView).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(_personInforView).mas_offset(-MARGIN);
+        }];
+    }
+    return _personInforView;
+}
+
+/**
+ 银行信息
+ */
+- (HYBaseView*)bankInforView
+{
+    if (!_bankInforView) {
+        _bankInforView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(15)
+                                                              text:@"预留银行信息"
+                                                         textColor:HYCOLOR.color_c4];
+        HYDefaultLabel *desclable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                             text:@"为便于后期的退款操作，需要预留您的退款账号信息"
+                                                        textColor:HYCOLOR.color_c2];
+        
+        HYLeftRightArrowView *kaiHuHangView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*开户行："
+                                                                                                   rightStr:@"请输入开户行"
+                                                                                              showArrowIcon:NO
+                                                                                              CallBackBlock:^(id sender) {
+                                                                    [self creatParam:sender key:@"cardName"];                          }];
+        HYLeftRightArrowView *kaHaoView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*卡号："
+                                                                                                   rightStr:@"请输入卡号"
+                                                                                              showArrowIcon:NO
+                                                                                              CallBackBlock:^(id sender) {
+                                                                                                  [self creatParam:sender key:@"cardNo"];
+                                                                                              }];
+        kaHaoView.rightTextField.width = 30*MARGIN;
+        kaHaoView.rightTextField.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+        HYLeftRightArrowView *zhiHangNameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*支行名称："
+                                                                                                         rightStr:@"请输入支行名称"
+                                                                                                    showArrowIcon:NO
+                                                                                                    CallBackBlock:^(id sender) {
+                                                                                           [self creatParam:sender key:@"cardType"];
+                                                                                                    }];
+        
+        [_bankInforView addSubview:titleLable];
+        [_bankInforView addSubview:desclable];
+        [_bankInforView addSubview:kaiHuHangView];
+        [_bankInforView addSubview:kaHaoView];
+        [_bankInforView addSubview:zhiHangNameView];
+        
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_bankInforView).mas_offset(MARGIN);
+            make.left.mas_equalTo(_bankInforView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_bankInforView).mas_offset(-MARGIN);
+        }];
+        [desclable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(titleLable);
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN);
+        }];
+        [kaiHuHangView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(desclable.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_offset(HEI);
+            make.left.right.mas_equalTo(titleLable);
+        }];
+        [kaHaoView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(kaiHuHangView.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.right.mas_equalTo(titleLable);
+        }];
+        [zhiHangNameView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(kaHaoView.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.right.mas_equalTo(titleLable);
+            make.bottom.mas_equalTo(_bankInforView).mas_offset(-MARGIN);
+        }];
+    }
+    return _bankInforView;
+}
+
+/**
+ 紧急联系人
+ */
+- (HYBaseView*)contactsView
+{
+    if (!_contactsView) {
+        _contactsView = [[HYBaseView alloc] init];
+        HYLeftRightArrowView *contactNameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*联系人："
+                                                                                                         rightStr:@"请输入姓名"
+                                                                                                    showArrowIcon:NO
+                                                                                                    CallBackBlock:^(id sender) {
+                                                                                                        [self creatParam:sender key:@"emergencyPeo"];
+                                                                                                    }];
+        HYLeftRightArrowView *contactPhoneView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"*联系人手机号："
+                                                                                                          rightStr:@"请输入手机号"
+                                                                                                     showArrowIcon:NO
+                                                                                                     CallBackBlock:^(id sender) {
+                                                                                                         [self creatParam:sender key:@"emergencyPeoPhone"];
+                                                                                                     }];
+        contactPhoneView.rightTextField.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+        [_contactsView addSubview:contactNameView];
+        [_contactsView addSubview:contactPhoneView];
+        [contactNameView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_contactsView.mas_top).mas_offset(MARGIN);
+            make.height.mas_offset(HEI);
+            make.left.mas_equalTo(_contactsView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_contactsView).mas_offset(-MARGIN);
+        }];
+        [contactPhoneView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(contactNameView.mas_bottom).mas_offset(MARGIN*0);
+            make.height.mas_offset(HEI);
+            make.left.right.mas_equalTo(contactNameView);
+            make.bottom.mas_equalTo(_contactsView.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+    return _contactsView;
+}
+
+/**
+ 同住人试图
+ */
+- (HYBaseView*)tongZhuRenView
+{
+    if (!_tongZhuRenView) {
+        _tongZhuRenView = [[HYTongZhuRenView   alloc] init];
+    }
+    return _tongZhuRenView;
+}
+
+- (NSMutableDictionary*)param
+{
+    if (!_param) {
+        _param = [[NSMutableDictionary alloc] init];
+    }
+    return _param;
+}
+/**
+ 添加主视图模块
+ */
+- (UIScrollView*)contentScrollView
+{
+    if (!_contentScrollView) {
+        _contentScrollView = [[HYBaseScrollView alloc] init];
+        _contentScrollView.backgroundColor = HYCOLOR.color_c1;
+        [_contentScrollView addSubview:self.personInforView];
+        [_contentScrollView addSubview:self.bankInforView];
+        [_contentScrollView addSubview:self.contactsView];
+        [_contentScrollView addSubview:self.tongZhuRenView];
+        [self.personInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_contentScrollView);
+            make.left.mas_equalTo(_contentScrollView).mas_offset(MARGIN);
+            make.right.mas_equalTo(_contentScrollView).mas_offset(-MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+        }];
+        [self.bankInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_personInforView.mas_bottom).mas_offset(MARGIN);
+            make.left.right.mas_equalTo(_personInforView);
+            make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+        }];
+        [self.contactsView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_bankInforView.mas_bottom).mas_offset(MARGIN);
+            make.left.right.mas_equalTo(_personInforView);
+            make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+        }];
+        [self.tongZhuRenView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_contactsView.mas_bottom).mas_offset(MARGIN);
+            make.left.right.mas_equalTo(_personInforView);
+            make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+            make.bottom.mas_equalTo(_contentScrollView.mas_bottom).mas_offset(-MARGIN*3);
+        }];
+        
+        [_personInforView setBoundWidth:0 cornerRadius:6];
+        [_bankInforView setBoundWidth:0 cornerRadius:6];
+        [_contactsView setBoundWidth:0 cornerRadius:6];
+    }
+    return _contentScrollView;
+}
+
+/**
+ 创建参数
+ */
+- (void)creatParam:(HYLeftRightArrowView *)sender key:(NSString *)key
+{
+    NSString *value = [sender.rightTextField.text isNullToString];
+    [self.param setObject:value forKey:key];
+}
+
+/**
+ 检查参数
+ */
+- (BOOL)isCheckPara
+{
+    self.param[@"certificateType"] = _zhengjianleixingView.rightLable.text;
+    if ([[HYStringTool checkString:self.param[@"name"]] isEqualToString:@""]) {
+        ALERT(@"请输入姓名");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"phone"]] isEqualToString:@""]) {
+        ALERT(@"请输入手机号");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"certificateType"]] isEqualToString:@""]) {
+        ALERT(@"请输入证件类型");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"emil"]] isEqualToString:@""]) {
+        ALERT(@"请输入邮箱");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"cardName"]] isEqualToString:@""]) {
+        ALERT(@"请输入开户行");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"cardNo"]] isEqualToString:@""]) {
+        ALERT(@"请输入卡号");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"cardType"]] isEqualToString:@""]) {
+        ALERT(@"请输入支行名称");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"emergencyPeo"]] isEqualToString:@""]) {
+        ALERT(@"请输入联系人姓名");
+        return NO;
+    }
+    if ([[HYStringTool checkString:self.param[@"emergencyPeoPhone"]] isEqualToString:@""]) {
+        ALERT(@"请输入联系人手机号");
+        return NO;
+    }
+    
+    ////证件类型：1.身份证，2.护照，3.港澳通行证，4.台湾同胞证
+    self.param[@"certificateType"] = @"1";
+    //同住人信息
+    self.param[@"cotenantList"] = _tongZhuRenView.dataArr;
+    self.param[@"contractZuKeNowNum"] = [NSString stringWithFormat:@"%ld",_tongZhuRenView.dataArr.count + 1];//合同中租客当前租住人数
+    return YES;
+}
+
+@end

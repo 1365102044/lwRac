@@ -1,0 +1,254 @@
+//
+//  LWProjectMacro.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/28.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+import Foundation
+
+extension UIColor {
+    class var background: UIColor {
+        return UIColor(red: 242, green: 242, blue: 242,alpha:1)
+    }
+    
+    class var theme: UIColor {
+        return UIColor(red: 29, green: 221, blue: 43,alpha:1)
+    }
+}
+
+
+/**
+ 根据屏幕大小，适配
+ */
+public func ADJUSET (myfloat:CGFloat) -> CGFloat {
+    if (IPHONE6s_DEV){
+        
+        return myfloat
+    }else if(IPHONE6p_DEV){
+        
+        return myfloat * LWScreen_W / 375
+    }else if(IPHONE4_DEV ||
+        IPHONE5_DEV){
+        
+        return myfloat * LWScreen_W / 375
+    }else{
+        return myfloat
+    }
+}
+
+
+/**
+ 获取字并根据大小适配_系统字体
+ */
+public let LWSystem:((CGFloat) -> UIFont) = { (myfont : CGFloat) -> UIFont in
+    return UIFont.systemFont(ofSize: myfont)
+}
+
+/**
+ 获取字并根据大小适配_Regular
+ */
+ public let LWSytem_Regular:((CGFloat) -> UIFont) = {
+    (myfloat:CGFloat) -> UIFont in
+    if #available(iOS 8.2, *) {
+        return  UIFont.systemFont(ofSize: ADJUSET(myfloat: myfloat), weight:UIFont.Weight.regular)
+    } else {
+        // Fallback on earlier versions
+      return  UIFont.systemFont(ofSize: ADJUSET(myfloat: myfloat))
+    }
+}
+
+/**
+ *获取字并根据大小适配_Light
+ */
+public let LWSytem_Light:((CGFloat) -> UIFont) = {
+    (myfloat:CGFloat) -> UIFont in
+    return UIFont.systemFont(ofSize: ADJUSET(myfloat: myfloat), weight: UIFont.Weight.light)
+}
+
+/**
+ *  获取字并根据大小适配_Medium
+ */
+public let LWSytem_Medium:((CGFloat) -> UIFont) = {
+    (myfloat:CGFloat) -> UIFont in
+    return UIFont.systemFont(ofSize: ADJUSET(myfloat: myfloat), weight: UIFont.Weight.medium)
+}
+
+// add by 2017年10月10日17:07:38 liu 添加bold字体
+/**
+ *  获取字并根据大小适配_Bold
+ */
+public let LWSytem_Bold:((CGFloat) -> UIFont) = {
+    (myfloat:CGFloat) -> UIFont in
+    return UIFont.systemFont(ofSize: ADJUSET(myfloat: myfloat), weight: UIFont.Weight.bold)
+}
+
+
+/// MARK: 系统相关
+/// Info
+public let LWAppBundleInfoVersion = Bundle.main.infoDictionary ?? Dictionary()
+/// plist:  AppStore 使用VersionCode 1.0.1
+public let LWAppBundleVersion = (LWAppBundleInfoVersion["CFBundleShortVersionString" as String] as? String ) ?? ""
+/// plist: 例如 1
+public let lwAppBundleBuild = (LWAppBundleInfoVersion["CFBundleVersion"] as? String ) ?? ""
+public let LWAppDisplayName = (LWAppBundleInfoVersion["CFBundleDisplayName"] as? String ) ?? ""
+
+
+
+// MARK: 系统相关
+public let LWiOSBase = 8.0
+public let LWiOSGreaterOrEqualToiOS8 = ( (Double(UIDevice.current.systemVersion) ?? LWiOSBase) > 8.0 ) ? true : false;
+public let LWiOSGreaterOrEqualToiOS9 = ((Double(UIDevice.current.systemVersion) ?? LWiOSBase) >= 9.0 ) ? true : false;
+public let LWiOSGreaterOrEqualToiOS10 = ((Double(UIDevice.current.systemVersion) ?? LWiOSBase) >= 10.0 ) ? true : false;
+public let LWiOSGreaterOrEqualToiOS11 = ((Double(UIDevice.current.systemVersion) ?? LWiOSBase) >= 11.0 ) ? true : false;
+
+
+//设备宽高、机型
+// 屏幕的物理宽度
+let LWScreen_W = UIScreen.main.bounds.size.width
+// 屏幕的物理高度
+let LWScreen_H = UIScreen.main.bounds.size.height
+public let LWStatusBar_H = UIApplication.shared.statusBarFrame.size.height
+
+public let LWNavBarH_StatusH: ((UIViewController)-> CGFloat) = {(vc : UIViewController ) -> CGFloat in
+    weak var weakVC = vc;
+    var navHeight = weakVC?.navigationController?.navigationBar.bounds.size.height ?? 0.0
+    return (navHeight + LWStatusBar_H)
+}
+public let LWNavBar_H: ((UIViewController)-> CGFloat) = {(vc : UIViewController ) -> CGFloat in
+    weak var weakVC = vc;
+    var navHeight = weakVC?.navigationController?.navigationBar.bounds.size.height ?? 0.0
+    return (navHeight)
+}
+
+
+
+// MARK: ============================================================================
+// MARK: Dictory Array Strig Object 闭包方式
+///过滤null对象
+public let LWFilterNullOfObj:((Any)->Any?) = {(obj: Any) -> Any? in
+    if obj is NSNull {
+        return nil
+    }
+    return obj
+}
+
+///过滤null的字符串，当nil时返回一个初始化的空字符串
+public let LWFilterNullOfString:((Any)->String) = {(obj: Any) -> String in
+    if obj is String {
+        return obj as! String
+    }
+    return ""
+}
+
+/// 过滤null的数组，当nil时返回一个初始化的空数组
+public let kFilterNullOfArray:((Any)->Array<Any>) = {(obj: Any) -> Array<Any> in
+    if obj is Array<Any> {
+        return obj as! Array<Any>
+    }
+    return Array()
+}
+
+/// 过滤null的字典，当为nil时返回一个初始化的字典
+public let kFilterNullOfDictionary:((Any) -> Dictionary<AnyHashable, Any>) = {( obj: Any) -> Dictionary<AnyHashable, Any> in
+    if obj is Dictionary<AnyHashable, Any> {
+        return obj as! Dictionary<AnyHashable, Any>
+    }
+    return Dictionary()
+}
+
+
+
+
+// MARK: ============================================================================
+// MARK: 设置Nib、Stryboard、UIImage
+
+///// 根据imageName创建一个UIImage
+//public let imageNamed:((String) -> UIImage? ) = { (imageName : String) -> UIImage? in
+//    return UIImage.init(named: imageName)
+//}
+
+
+/// 根据Main.storyboard建立ViewController
+public let VC_From_Main_SB:((String)-> UIViewController? ) = {(SBID : String) -> UIViewController? in
+    return UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier:SBID)
+}
+
+
+// MARK: ============================================================================
+// MARK: 设置颜色
+/// 设置颜色值
+public let HexRGB:((Int) -> UIColor) = { (rgbValue : Int) -> UIColor in
+    return HexRGBAlpha(rgbValue,1.0)
+}
+
+/// 通过 十六进制与alpha来设置颜色值  （ 样式： 0xff00ff ）
+public let HexRGBAlpha:((Int,Float) -> UIColor) = { (rgbValue : Int, alpha : Float) -> UIColor in
+    return UIColor(red: CGFloat(CGFloat((rgbValue & 0xFF0000) >> 16)/255), green: CGFloat(CGFloat((rgbValue & 0xFF00) >> 8)/255), blue: CGFloat(CGFloat(rgbValue & 0xFF)/255), alpha: CGFloat(alpha))
+}
+
+
+/// 通过 red 、 green 、blue 、alpha 颜色数值
+public let RGBAlpa:((Float,Float,Float,Float) -> UIColor ) = { (r: Float, g: Float , b: Float , a: Float ) -> UIColor in
+    return UIColor.init(red: CGFloat(CGFloat(r)/255.0), green: CGFloat(CGFloat(g)/255.0), blue: CGFloat(CGFloat(b)/255.0), alpha: CGFloat(a))
+}
+
+/**
+ 随机色
+ */
+public let  LWRandomColor:(() -> UIColor) = { () -> UIColor in
+    let red = CGFloat(arc4random()%256)/255.0
+    let green = CGFloat(arc4random()%256)/255.0
+    let blue = CGFloat(arc4random()%256)/255.0
+    return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+}
+
+///**
+// 创建para字典
+// */
+//var para:NSMutableDictionary?
+//public let PARA_CREART:(() -> NSMutableDictionary) = { () -> NSMutableDictionary in
+//    para = NSMutableDictionary()
+//    return para!
+//}
+//
+//func PARA_SET(value:String ,key: String) {
+//    para?.setValue(value, forKey: key)
+//}
+
+// MARK: ============================================================================
+//判断iPhone4
+let IPHONE4_DEV:Bool! = (UIScreen.main.bounds.size.height == 480) ? true : false
+
+//判断iPhone5/5c/5s
+let IPHONE5_DEV:Bool! = (UIScreen.main.bounds.size.height == 568) ? true : false
+
+//判断iPhone6/6s
+let IPHONE6s_DEV:Bool! = (UIScreen.main.bounds.size.height == 667) ? true : false
+
+//判断iPhone6p
+let IPHONE6p_DEV:Bool! = (UIScreen.main.bounds.size.height > 667) ? true : false
+
+//判断iPad
+let IPAD_DEV:Bool! = (UIDevice.current.userInterfaceIdiom == .pad) ? true : false
+
+
+func LWPrint<N>(message: N, fileName: String = #file, methodName: String = #function, lineNumber: Int = #line){
+    
+    #if DEBUGSWIFT // 若是Debug模式下，则打印
+    print("\(fileName as NSString)\n方法:\(methodName)\n行号:\(lineNumber)\n打印信息\(message)");
+    #endif
+}
+
+
+/// 保存信息 UserDefaults - set
+public func LWUSERDEFAULT_SET(_ value:Any?, forKey:String) {
+    UserDefaults.standard.set(value, forKey: forKey)
+}
+/// 保存信息 UserDefaults - get
+public func LWUSERDEFAULT_GET(forKey:String) -> Any? {
+    let value = UserDefaults.standard.value(forKey: forKey)
+    return value
+}

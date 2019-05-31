@@ -1,0 +1,276 @@
+//
+//  HYQianYueFillInforSecondView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYueFillInforSecondView.h"
+#import "HYHeTongYouQiXianView.h"
+#import "HYPayItemView.h"
+#import "HYLeftRightLableView.h"
+@interface HYQianYueFillInforSecondView ()
+@property (nonatomic, strong) HYBaseScrollView * contentScrollView;
+@property (nonatomic, strong) HYBaseView * topInforView;
+@property (nonatomic, strong) HYDefaultLabel * sotreLable;
+@property (nonatomic, strong) HYDefaultLabel * whereLable;
+@property (nonatomic, strong) HYDefaultLabel * zujinLable;
+
+@property (nonatomic, strong) HYHeTongYouQiXianView * heTongTimeView;
+@property (nonatomic, strong) HYBaseView * youhuiView;
+@property (nonatomic, strong) HYBaseView * youhuiItemsBgView;
+
+@property (nonatomic, strong) HYBaseView * heTongFeiYongView;
+@property (nonatomic, strong) NSArray  * youhuiArray;
+/**
+ 上次选择的优惠券
+ */
+@property (nonatomic, strong) HYPayItemView * lastSelectYouHuiItem;
+
+
+@end
+
+@implementation HYQianYueFillInforSecondView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        [self addSubview:self.contentScrollView];
+        [self.contentScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self);
+        }];
+        [self setData];
+        self.youhuiArray = @[@"端午节大放送立减100",@"新用户立减200"];
+    }
+    return self;
+}
+- (void)setData
+{
+    _sotreLable.text = @"好寓北京-牡丹园店";
+    _whereLable.text = @"1栋120室";
+    _zujinLable.text = @"2500元/月";
+}
+/**
+ 添加主视图模块
+ */
+- (UIScrollView*)contentScrollView
+{
+    if (!_contentScrollView) {
+        _contentScrollView = [[HYBaseScrollView alloc] init];
+        _contentScrollView.backgroundColor = HYCOLOR.color_c1;
+        [self addSubUI];
+    }
+    return _contentScrollView;
+}
+
+- (void)addSubUI
+{
+    [_contentScrollView addSubview:self.topInforView];
+    [_contentScrollView addSubview:self.heTongTimeView];
+    [_contentScrollView addSubview:self.youhuiView];
+    [_contentScrollView addSubview:self.heTongFeiYongView];
+    [_topInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_contentScrollView);
+        make.left.mas_equalTo(_contentScrollView).mas_offset(MARGIN);
+        make.right.mas_equalTo(_contentScrollView).mas_offset(-MARGIN);
+        make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+    }];
+    [_heTongTimeView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.topInforView.mas_bottom).mas_offset(MARGIN);
+        make.left.right.mas_equalTo(_topInforView);
+        make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+    }];
+    [_youhuiView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_heTongTimeView.mas_bottom).mas_offset(MARGIN);
+        make.left.right.mas_equalTo(_topInforView);
+        make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+    }];
+    [_heTongFeiYongView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_youhuiView.mas_bottom).mas_offset(MARGIN);
+        make.left.right.mas_equalTo(_topInforView);
+        make.width.mas_offset(SCREEN_WIDTH-MARGIN*2);
+        make.bottom.mas_equalTo(_contentScrollView.mas_bottom).mas_offset(-MARGIN*6);
+    }];
+    [_topInforView setBoundWidth:0 cornerRadius:6];
+    [_heTongFeiYongView setBoundWidth:0 cornerRadius:6];
+    [_heTongTimeView setBoundWidth:0 cornerRadius:6];
+}
+
+-(void)setYouhuiArray:(NSArray *)youhuiArray
+{
+    _youhuiArray = youhuiArray;
+    [self updateYouhuiItemsView];
+}
+/**
+ 根据数据 布局优惠券列表
+ */
+- (void)updateYouhuiItemsView
+{
+    NSMutableArray *temp = [NSMutableArray array];
+    for (int i = 0 ; i<self.youhuiArray.count; i ++) {
+        HYPayItemView *item = [[HYPayItemView alloc] init];
+        item.descLable.text = self.youhuiArray[i];
+        [_youhuiItemsBgView addSubview:item];
+        item.tag = i + 1;
+        [item mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_youhuiItemsBgView);
+            make.height.mas_offset(MARGIN*6);
+            if (i == 0) {
+                make.top.mas_equalTo(_youhuiItemsBgView.mas_top).mas_offset(0);
+            }else{
+                HYBaseView *lastLable = temp.lastObject;
+                make.top.mas_equalTo(lastLable.mas_bottom).mas_offset(MARGIN);
+            }
+            if(i == _youhuiArray.count - 1){
+                make.bottom.mas_equalTo(_youhuiItemsBgView.mas_bottom);
+            }
+        }];
+        [item.descLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(item.mas_left).mas_offset(MARGIN);
+            make.centerY.mas_equalTo(item.mas_centerY);
+        }];
+        item.lineview.hidden = YES;
+        item.tag = i + 1;
+        [temp addObject:item];
+
+        WEAKSELF(self);
+        [item bk_whenTapped:^{
+            [weakself clickYouHuiItems:item];
+        }];
+    }
+}
+/**
+ 点击优惠券item
+ */
+- (void)clickYouHuiItems:(HYPayItemView *)items
+{
+    self.lastSelectYouHuiItem.rightIcon.selected = NO;
+    items.rightIcon.selected = YES;
+    self.lastSelectYouHuiItem = items;
+    LWLog(@"++++++%ld=====%@",items.tag,items);
+}
+/**
+ 上部视图
+ */
+- (HYBaseView*)topInforView
+{
+    if (!_topInforView) {
+        _topInforView = [[HYBaseView alloc] init];
+        _sotreLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                               text:@""
+                                          textColor:HYCOLOR.color_c4];
+        _whereLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                               text:@""
+                                          textColor:HYCOLOR.color_c4];
+        _zujinLable =  [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(22)
+                                 text:@""
+                            textColor:HYCOLOR.color_c3];
+        _zujinLable.textAlignment = NSTextAlignmentRight;
+        [_topInforView addSubview:_sotreLable];
+        [_topInforView addSubview:_whereLable];
+        [_topInforView addSubview:_zujinLable];
+        [_sotreLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_topInforView).mas_offset(MARGIN);
+             make.top.mas_equalTo(_topInforView).mas_offset(MARGIN*2);
+        }];
+        [_whereLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_sotreLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_sotreLable);
+            make.bottom.mas_equalTo(_topInforView.mas_bottom).mas_equalTo(-MARGIN*2);
+        }];
+        [_zujinLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_topInforView.mas_right).mas_offset(-MARGIN);
+            make.centerY.mas_equalTo(_topInforView.mas_centerY);
+            make.left.mas_equalTo(_sotreLable.mas_right).mas_offset(MARGIN);
+        }];
+    }
+    return _topInforView;
+}
+- (HYHeTongYouQiXianView*)heTongTimeView
+{
+    if (!_heTongTimeView) {
+        _heTongTimeView = [[HYHeTongYouQiXianView alloc] init];
+    }
+    return _heTongTimeView;
+}
+/**
+ 优惠视图
+ */
+- (HYBaseView*)youhuiView
+{
+    if (!_youhuiView) {
+        _youhuiView = [[HYBaseView alloc] init];
+        HYDefaultLabel *title = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                         text:@"优惠活动:"
+                                                    textColor:HYCOLOR.color_c4];
+        _youhuiItemsBgView = [[HYBaseView alloc] init];
+        _youhuiView.backgroundColor = HYCOLOR.color_c1;
+        title.backgroundColor = _youhuiView.backgroundColor;
+        [_youhuiView addSubview:title];
+        [_youhuiView addSubview:_youhuiItemsBgView];
+        [title mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_youhuiView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_youhuiView.mas_left).mas_offset(MARGIN);
+        }];
+        [_youhuiItemsBgView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(title.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_youhuiView.mas_left);
+            make.right.mas_equalTo(_youhuiView.mas_right);
+            make.bottom.mas_equalTo(_youhuiView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        [_youhuiItemsBgView setBoundWidth:0 cornerRadius:6];
+        _youhuiItemsBgView.backgroundColor = _youhuiView.backgroundColor;
+    }
+    return _youhuiView;
+}
+/**
+ 合同费项
+ */
+- (HYBaseView*)heTongFeiYongView
+{
+    if (!_heTongFeiYongView) {
+        _heTongFeiYongView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titlelabe = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(15)
+                                                             text:@"合同费项"
+                                                        textColor:HYCOLOR.color_c4];
+        [_heTongFeiYongView addSubview:titlelabe];
+        NSArray *feiyonyArr = @[@{@"left":@"押金",@"right":@"1900元"},
+                                @{@"left":@"管理费",@"right":@"190元"},
+                                @{@"left":@"水费",@"right":@"10元/吨"},
+                                @{@"left":@"押金",@"right":@"1900元"},
+                                @{@"left":@"电费",@"right":@"1.5元/度"},];
+        NSMutableArray *temp = [NSMutableArray array];
+        [titlelabe mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.top.mas_equalTo(_heTongFeiYongView).mas_offset(MARGIN);
+        }];
+        for (int i = 0 ; i < feiyonyArr.count; i ++) {
+            NSDictionary *dic = feiyonyArr[i];
+            HYLeftRightLableView *feiyong = [HYLeftRightLableView creatOnlyLeftRightLableView:dic[@"left"]
+                                                                                     rightStr:dic[@"right"]
+                                                                                CallBackBlock:^(id sender) {
+                                                                                    
+                                                                                }];
+            [_heTongFeiYongView addSubview:feiyong];
+            [feiyong mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.left.right.mas_equalTo(_heTongFeiYongView);
+                make.height.mas_offset(MARGIN*4);
+                if (i == 0) {
+                    make.top.mas_equalTo(titlelabe.mas_bottom).mas_offset(MARGIN);
+                }else{
+                    HYLeftRightLableView *lastLable = temp.lastObject;
+                    make.top.mas_equalTo(lastLable.mas_bottom).mas_offset(MARGIN);
+                }
+                if(i == feiyonyArr.count - 1){
+                    make.bottom.mas_equalTo(_heTongFeiYongView.mas_bottom);
+                }
+            }];
+            [temp addObject:feiyong];
+        }
+    }
+    return _heTongFeiYongView;
+}
+
+@end

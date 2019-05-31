@@ -1,0 +1,60 @@
+
+//
+//  HYCollectListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYCollectListTableViewCell.h"
+#import "HYWaterSurfaceCellView.h"
+@interface HYCollectListTableViewCell ()
+@property (nonatomic, strong) HYWaterSurfaceCellView * cellView;
+@end
+
+@implementation HYCollectListTableViewCell
+- (void)setDataModel:(HYCollectModel *)dataModel
+{
+    _dataModel = dataModel;
+    _cellView.houseNameLable.text = dataModel.hiItemName;
+    [_cellView.houseImage sd_setImageWithURL:[NSURL URLWithString:HYIMAGEURLSTRING(HYProjectImageURLStringMid, dataModel.roomTypePic)] placeholderImage:IMAGENAME(@"list_default_icon")];
+    _cellView.houseWhereLable.text = [NSString stringWithFormat:@"%@室%@厅",dataModel.shi,dataModel.ting];
+    _cellView.houseLayoutLable.text = dataModel.hiDetailedAddress;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if(self == [super initWithStyle:style reuseIdentifier:reuseIdentifier])
+    {
+        self.cellView = [[HYWaterSurfaceCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.cellView.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.bottom.mas_equalTo(self.contentView);
+        }];
+        
+        self.cellView.houseWhereLable.font = SYSTEM_REGULARFONT(14);
+        self.cellView.houseLayoutLable.textColor = HYCOLOR.color_c2;
+        
+        UIImageView *localIcon = [[UIImageView alloc] init];
+        localIcon.image = IMAGENAME(@"location_icon");
+        [self.cellView addSubview:localIcon];
+        [localIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(15), ADJUST_PERCENT_FLOAT(15)));
+            make.left.mas_equalTo(self.cellView.houseImage.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.centerY.mas_equalTo(self.cellView.houseLayoutLable.mas_centerY);
+        }];
+        [self.cellView.houseLayoutLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(localIcon.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.top.mas_equalTo(self.cellView.houseWhereLable.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(20));
+        }];
+        self.cellView.houseLayoutLable.userInteractionEnabled = YES;
+//        [self.cellView.houseLayoutLable bk_whenTapped:^{
+//            ALERT_MSG(@"定位开发中...");
+//        }];
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,63 @@
+//
+//  HYPayViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayListViewController.h"
+#import "HYPayListTableViewCell.h"
+#import "HYPayDeatilViewController.h"
+#import "HYContractModel.h"
+#define PAYLISTCELLIDENTIFITER @"PAYLISTCELLIDENTIFITER"
+@interface HYPayListViewController ()
+
+@end
+
+@implementation HYPayListViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.赋值
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYPayListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:PAYLISTCELLIDENTIFITER];
+    if (!cell) {
+        cell  = [[HYPayListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:PAYLISTCELLIDENTIFITER];
+    }
+    cell.indexPath = indexPath;
+    WEAKSELF(self);
+    cell.clickBlock = ^(NSIndexPath *indexPath) {
+        HYPayDeatilViewController *deatilVC = [[HYPayDeatilViewController alloc] init];
+        [weakself.navigationController pushViewController:deatilVC animated:YES];
+    };
+    HYContractModel *model =  self.HeTongDataArr[indexPath.row];
+    cell.contractModel = model;
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return  self.HeTongDataArr.count;
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"缴费/充值";
+    
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(130);
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+@end

@@ -1,0 +1,27 @@
+//
+//  RemotePushService.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/11/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "LWRemotePushService.h"
+#import "LWJpushManager.h"
+
+@implementation LWRemotePushService
+- (BOOL)lw_application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
+    LWLog(@"**************========");
+    return YES;
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    [LWJpushManager.share lw_registerDeviceTokenFotJpushWithDeviceToken:deviceToken];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    [LWJpushManager.share lw_registerFailForRemoteNotificationsWithError: error];
+}
+@end

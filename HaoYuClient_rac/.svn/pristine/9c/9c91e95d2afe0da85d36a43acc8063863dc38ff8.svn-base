@@ -1,0 +1,18 @@
+//
+//  LWNotiKeyString.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/29.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+/**
+ 点击首页的collectionviewcell
+ */
+public let CLICKHOMECOLLECTCELLNOTI_KEY:String = "CLICKHOMECOLLECTCELLNOTI_KEY"
+/**
+ 选择上次的index
+ */
+public let SELECTTABOFLASEINDEX_KEY:String = "SELECTTABOFLASEINDEX_KEY"

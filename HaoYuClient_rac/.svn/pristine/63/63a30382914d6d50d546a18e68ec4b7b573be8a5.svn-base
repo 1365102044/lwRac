@@ -1,0 +1,41 @@
+//
+//  HYRequstGlobalDataTool.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HYRequstGlobalDataTool : NSObject
+/**
+ 请求成功后的回掉
+ */
+@property (nonatomic, copy) HYEventCallBackBlock callBackBlock;
+/**
+ 请求失败后的回掉
+ */
+@property (nonatomic, copy) HYEventCallBackBlock failureBlock;
+
+/**
+ 获取城市列表数据
+ */
+- (void)requestCityData;
+
+/**
+ 获取合同信息
+ */
+- (void)requestUserHeTongInfor;
+
+/**
+ 获取个人信息
+ */
+- (void)requestUserInforCallBackBlock:(HYEventCallBackBlock)callBackBlock;
+
+/**
+ 首页的数据
+ */
+- (void)requestHomePageInforCallBackBlock:(HYEventCallBackBlock)callBackBlock failureBlock:(HYEventCallBackBlock)failureBlock;
+
+@end

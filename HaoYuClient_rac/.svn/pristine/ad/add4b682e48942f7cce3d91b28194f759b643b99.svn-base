@@ -1,0 +1,218 @@
+//
+//  HYLoginMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYLoginMainView.h"
+#import "UIControl+LWdelay.h"
+
+@interface HYLoginMainView ()
+@property (nonatomic, assign) NSInteger timeCount;
+@property (nonatomic, strong) UIView * contentView;
+
+@end
+
+@implementation HYLoginMainView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.timeCount = 60;
+        [self configUI];
+    }
+    return self;
+}
+
+/**
+ 点击按钮:
+     10:关闭
+     11:发送验证码
+     12:立即登录
+ @param sender 按钮
+ */
+- (void)clickFunctBtn:(UIButton *)sender
+{
+    if (sender.tag == 11 || sender.tag == 12) {
+        if (![_accountTF.text ex_isMobileNumber]) {
+            ALERT(@"手机号格式不正确！");
+            return;
+        }
+    }else if (sender.tag == 12){
+        if (![_accountTF.text ex_isMobileNumber]) {
+            ALERT(@"请输入手机号！！");
+            return;
+        }else if ([[_pwTF.text isNullToString] isEqualToString:@""]){
+            ALERT(@"请输入验证码！！");
+            return;
+        }
+    }
+    if (self.clickBtnBlock) {
+        self.clickBtnBlock(sender);
+    }
+}
+
+/**
+ 配置UI界面
+ */
+- (void)configUI
+{
+    UIImageView *bgImageView = [[UIImageView alloc] init];
+    bgImageView.image = IMAGENAME(@"login_bg");
+    
+    HYDefaultButton *colseBtn = [HYDefaultButton buttonImageWithImageNamed:@"public_offwhite_h" type:HYProjectButtonSetBackgroundImage target:self selector:@selector(clickFunctBtn:)];
+    colseBtn.tag = 10;
+    
+    UIImageView *logoImageView = [[UIImageView alloc] init];
+    logoImageView.image = IMAGENAME(@"aboutsicon");
+    
+    [self addSubviews:@[bgImageView,colseBtn,logoImageView,self.contentView]];
+    
+    [bgImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+    [colseBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(ADJUST_PERCENT_FLOAT(50), ADJUST_PERCENT_FLOAT(50)));
+        make.right.equalTo(self.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(20));
+        make.top.equalTo(self).mas_offset((iPhoneX) ? ADJUST_PERCENT_FLOAT(50): ADJUST_PERCENT_FLOAT(30));
+    }];
+    [logoImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(ADJUST_PERCENT_FLOAT(160), ADJUST_PERCENT_FLOAT(80)));
+        make.centerX.equalTo(self);
+        make.top.equalTo(colseBtn.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(35));
+    }];
+    [self.contentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self);
+        make.centerY.equalTo(self).mas_offset(ADJUST_PERCENT_FLOAT(20));
+    }];
+}
+
+- (UIView*)contentView
+{
+    if (!_contentView) {
+        _contentView = [[UIView alloc] init];
+        
+        UIImageView *accountIcon = [[UIImageView alloc] init];
+        accountIcon.image = IMAGENAME(@"login_ac");
+        HYDefaultTextField *accountTF = [HYDefaultTextField creatDefaultTextField:@"请输入手机号" font:SYSTEM_LIGHTFONT(14) textColor:HYCOLOR.color_c0];
+        accountTF.backgroundColor = [UIColor clearColor];
+        accountTF.maxCount = 11;
+        _accountTF = accountTF;
+        _accountTF.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+        UIImageView *pwIcon = [[UIImageView alloc] init];
+        pwIcon.image = IMAGENAME(@"login_pw");
+        HYDefaultTextField *pwTF = [HYDefaultTextField creatDefaultTextField:@"请输入验证码" font:SYSTEM_LIGHTFONT(14) textColor:HYCOLOR.color_c0];
+        pwTF.backgroundColor = [UIColor clearColor];
+        pwTF.maxCount = 6;
+        _pwTF = pwTF;
+        _pwTF.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+        
+        [accountTF.textFiled setValue:HYCOLOR.color_c0 forKeyPath:@"_placeholderLabel.textColor"];
+        [pwTF.textFiled setValue:HYCOLOR.color_c0 forKeyPath:@"_placeholderLabel.textColor"];
+        
+        HYDefaultButton *sendCodeBtn = [HYDefaultButton buttonWithTitleStringKey:@"获取验证码" titleColor:HYCOLOR.color_c0 titleFont:SYSTEM_LIGHTFONT(14) target:self selector:@selector(clickFunctBtn:)];
+        sendCodeBtn.tag = 11;
+        _sendCodeBtn = sendCodeBtn;
+        
+        HYDefaultButton *loginBtn = [HYDefaultButton buttonWithTitleStringKey:@"立即登录" titleColor:HYCOLOR.color_c0 titleFont:SYSTEM_LIGHTFONT(20) target:self selector:@selector(clickFunctBtn:)];
+        loginBtn.tag = 12;
+        [loginBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c0];
+        
+        
+        UIView *line1 = [self getLine];
+        UIView *line2 = [self getLine];
+        UIView *line3 = [self getLine];
+    
+        
+        [_contentView addSubviews:@[accountIcon,accountTF,pwIcon,pwTF,sendCodeBtn,loginBtn,line1,line2,line3]];
+        
+        
+        CGFloat LR = 50;
+        
+        [accountIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(20), ADJUST_PERCENT_FLOAT(20)));
+            make.left.equalTo(_contentView).mas_offset(ADJUST_PERCENT_FLOAT(LR));
+            make.centerY.mas_equalTo(accountTF.mas_centerY);
+        }];
+        [accountTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_contentView);
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+            make.left.mas_equalTo(accountIcon.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(8));
+            make.right.mas_equalTo(sendCodeBtn.mas_left).mas_offset(4);
+        }];
+        [sendCodeBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_contentView.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(-LR));
+            make.width.mas_offset(ADJUST_PERCENT_FLOAT(100));
+            make.centerY.mas_equalTo(accountTF);
+        }];
+        [pwIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(20), ADJUST_PERCENT_FLOAT(20)));
+            make.left.mas_equalTo(accountIcon.mas_left);
+            make.centerY.mas_equalTo(pwTF.mas_centerY);
+        }];
+        [pwTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(accountTF.mas_bottom).mas_equalTo(6);
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+            make.left.mas_equalTo(pwIcon.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(8));
+            make.right.mas_equalTo(_contentView.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(-LR));
+        }];
+        [loginBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(pwIcon.mas_left);
+            make.right.mas_equalTo(pwTF.mas_right);
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+            make.bottom.mas_equalTo(_contentView.mas_bottom).mas_offset(-5);
+            make.top.mas_equalTo(pwTF.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(30));
+        }];
+        
+        [line1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(25);
+            make.width.mas_offset(1);
+            make.centerY.mas_equalTo(accountTF.mas_centerY);
+            make.right.mas_equalTo(sendCodeBtn.mas_left).mas_offset(-2);
+        }];
+        [line2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(1);
+            make.right.mas_equalTo(sendCodeBtn.mas_right);
+            make.left.mas_equalTo(accountIcon.mas_left);
+            make.top.mas_equalTo(accountTF.mas_bottom).mas_offset(1);
+        }];
+        [line3 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(1);
+            make.left.right.mas_equalTo(line2);
+            make.top.mas_equalTo(pwTF.mas_bottom).mas_offset(1);
+        }];
+    }
+    return _contentView;
+}
+
+- (UIView *)getLine{
+    UIView *line = [[UIView alloc] init];
+    line.backgroundColor = HYCOLOR.color_c0;
+    return line;
+}
+
+- (void)startTimer
+{
+    [self.accountTF becomeFirstResponder];
+    [self.sendCodeBtn setTitle:[NSString stringWithFormat:@"%lds",(long)self.timeCount] forState:UIControlStateNormal];
+    self.sendCodeBtn.enabled = NO;
+
+    [[HYTimerManager shareTimer] startTimerWithTimeInterVal:1.0];
+    [[HYTimerManager shareTimer] callBackBlock:^(id sender) {
+        if (self.timeCount > 0) {
+            self.timeCount --;
+            [self.sendCodeBtn setTitle:[NSString stringWithFormat:@"%lds",(long)self.timeCount] forState:UIControlStateNormal];
+            self.sendCodeBtn.enabled = NO;
+        }else{
+            self.timeCount = 60;
+            [self.sendCodeBtn setTitle:[NSString stringWithFormat:@"获取验证码"] forState:UIControlStateNormal];
+            self.sendCodeBtn.enabled = YES;
+            [[HYTimerManager shareTimer] stopTimer];
+        }
+    }];
+}
+
+@end

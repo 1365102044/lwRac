@@ -1,0 +1,105 @@
+//
+//  HYServiceManager.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYServiceManager.h"
+
+@interface HYServiceManager ()
+{
+    NSURLSessionTask *requestTask;
+}
+@end
+@implementation HYServiceManager
+
++(instancetype)share{
+    static HYServiceManager *instance     = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance                          = [[HYServiceManager alloc] init];
+    });
+    return instance;
+}
+
+/**
+ 有加载动画的请求
+ */
+- (void)postRequestAnWithurl:(NSString *)url
+                   paramters:(NSDictionary *)paramters
+                successBlock:(HYNetRequestSuccessBlock)successBlock
+                failureBlock:(HYNetRequestFailureBlock)failBlock
+{
+    [SVProgressHUD show];
+    /**
+     *  请求并获取task
+     */
+    __weak HYServiceManager *weakSelf      = self;
+    requestTask                            = [[HYProjectNetRequestManager sharedNetRequestManager] connectNetWithUrl:url
+                                                                                                  requestNetworkType:HYProjectNetRequestPost
+                                                                                                          parameters:paramters
+                                                                                                     timeoutInterval:SEVRIES_TIMEOUT
+                                                                                                        successBlock:^(id objc, id requestInfo) {
+                                                                                                            [SVProgressHUD dismiss];
+                                                                                                            [weakSelf handleRequestSuccess:objc
+                                                                                                                              requestModel:requestInfo
+                                                                                                                                  sucBlock:successBlock
+                                                                                                                                 failBlock:failBlock];
+                                                                                                        }
+                                                                                                        failureBlock:^(id error, id requestInfo) {
+                                                                                                            [SVProgressHUD dismiss];
+                                                                                                            [weakSelf handleRequestFailed:error
+                                                                                                                             requestModel:requestInfo
+                                                                                                                                failBlock:failBlock];}];
+}
+
+/**
+ 没有加载动画的请求
+ */
+- (void)postRequestWithurl:(NSString *)url
+                 paramters:(NSDictionary *)paramters
+              successBlock:(HYNetRequestSuccessBlock)successBlock
+              failureBlock:(HYNetRequestFailureBlock)failBlock
+{
+    /**
+     *  请求并获取task
+     */
+    __weak HYServiceManager *weakSelf      = self;
+    requestTask                            = [[HYProjectNetRequestManager sharedNetRequestManager] connectNetWithUrl:url
+                                                                                                  requestNetworkType:HYProjectNetRequestPost
+                                                                                                          parameters:paramters
+                                                                                                     timeoutInterval:SEVRIES_TIMEOUT
+                                                                                                        successBlock:^(id objc, id requestInfo) {
+                                                                                                            [weakSelf handleRequestSuccess:objc
+                                                                                                                              requestModel:requestInfo
+                                                                                                                                  sucBlock:successBlock
+                                                                                                                                 failBlock:failBlock];
+                                                                                                        }
+                                                                                                        failureBlock:^(id error, id requestInfo) {
+                                                                                                            [weakSelf handleRequestFailed:error
+                                                                                                                             requestModel:requestInfo
+                                                                                                                                failBlock:failBlock];}];
+}
+
+/**
+ 上传图片
+ */
+- (void)uploadImageWithurl:(NSString *)url
+                  ImageArr:(NSArray *)imageArr
+                  fileName:(NSArray *)fileName
+                parameters:(NSDictionary *)parameters
+                   Success:(HYNetRequestSuccessBlock)successBlock
+                      fail:(HYNetRequestFailureBlock)failBlock
+{
+    [[HYProjectNetRequestManager sharedNetRequestManager] uploadImageWithUrl:url
+                                                                   parameter:parameters
+                                                                      images:imageArr
+                                                                    fileName:fileName
+                                                             timeoutInterval:30
+                                                                successBlock:successBlock
+                                                                failureBlock:failBlock];
+}
+
+@end

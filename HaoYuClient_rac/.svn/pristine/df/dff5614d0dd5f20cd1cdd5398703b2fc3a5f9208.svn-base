@@ -1,0 +1,299 @@
+//
+//  HYMapView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMapView.h"
+#import "HYLocationTool.h"
+#import "HYAnnotationView.h"
+#import "HYPaoView.h"
+#import "HYPointAnnotation.h"
+#import "BMKClusterManager.h"
+#import "HYHouseRescourcesModel.h"
+#import "HYPointAnnotationView.h"
+#import "XJClusterAnnotation.h"
+#import "XJCluster.h"
+#import "XJClusterAnnotationView.h"
+
+#define animationTime 0.5
+#define viewMultiple 2
+@interface HYMapView ()<XJClusterAnnotationViewDelegate>
+{
+    BMKClusterManager *_clusterManager;//点聚合管理类
+    NSInteger _clusterZoom;//聚合级别
+    NSMutableArray *_clusterCaches;//点聚合缓存标注
+    BOOL _isDisplayMyLoction;
+}
+/// 当前地图的中心点
+@property (nonatomic) CLLocationCoordinate2D cCoordinate;
+@property (nonatomic, assign) LWMapType myMapType;
+
+@end
+
+@implementation HYMapView
+
+- (void)setHousesDatas:(NSArray *)HousesDatas
+{
+    _HousesDatas = HousesDatas;
+    [self updateModelDatas];
+}
+
++ (instancetype)creatMyMapView:(CGRect)frame mapType:(LWMapType)type
+{
+    HYMapView *mymapview = [[HYMapView alloc] initWithFrame:frame];
+    mymapview.myMapType = type;
+    return mymapview;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        _myMapView=[[BMKMapView alloc] initWithFrame:frame];
+        [_myMapView setMapType:BMKMapTypeStandard];
+        _myMapView.delegate = self;
+        _myMapView.zoomLevel = 12;//地图级别
+        _myMapView.showsUserLocation = YES;//可以显示用户位置
+        [self addSubview:_myMapView];
+        
+        HYLocationTool *locationTool =  [HYLocationTool new];
+        [locationTool initLocation];
+        locationTool.myMapView = _myMapView;
+        
+        _clusterManager = [[BMKClusterManager alloc] init];
+        
+        if(_myMapType == LWJuHeType){
+            [self addCluster];
+        }
+    }
+    return self;
+}
+
+- (void)addCluster
+{
+    //在此处理正常结果
+    _clusterCaches = [[NSMutableArray alloc] init];
+    for (NSInteger i = 3; i < 22; i++) {
+        [_clusterCaches addObject:[NSMutableArray array]];
+    }
+}
+
+/**
+ 根据经纬度显示大头针位置
+ */
+- (void)addPointViewWithlat:(double)lat lng:(double)lng
+{
+    _isDisplayMyLoction = YES;
+    BMKPointAnnotation * annotation = [[BMKPointAnnotation alloc]init];
+    CLLocationCoordinate2D coor;
+    coor.latitude = lat;
+    coor.longitude = lng;
+    annotation.title = @"title";
+    annotation.subtitle = @"subtitle";
+    annotation.coordinate = coor;
+    [_myMapView addAnnotation:annotation];
+    [_myMapView setCenterCoordinate:coor animated:YES];
+    [self setMapRegion:0.1];
+    
+    //这句代码是添加第一个标注就显示标准的内容
+    [_myMapView selectAnnotation:annotation animated:YES];
+}
+
+/**
+ *用户位置更新后，会调用此函数
+ *@param userLocation 新的用户位置
+ */
+- (void)didUpdateBMKUserLocation:(BMKUserLocation *)userLocation{
+    [_myMapView updateLocationData:userLocation];
+    if (userLocation != nil) {
+        NSLog(@"%f %f", userLocation.location.coordinate.latitude, userLocation.location.coordinate.longitude);
+    }
+}
+
+#pragma mark - XJClusterAnnotationViewDelegate
+- (void)didAddreesWithClusterAnnotationView:(XJCluster *)cluster clusterAnnotationView:(XJClusterAnnotationView *)clusterAnnotationView{
+    
+    if (clusterAnnotationView.size > 1) {
+        [_myMapView setCenterCoordinate:clusterAnnotationView.annotation.coordinate];
+        [_myMapView zoomIn];
+    }
+}
+
+#pragma mark - BMKMapViewDelegate
+- (void)mapView:(BMKMapView *)mapView didSelectAnnotationView:(BMKAnnotationView *)view {
+    XJClusterAnnotationView *clusterAnnotation = (XJClusterAnnotationView*)view.annotation;
+    if ([clusterAnnotation.title isEqualToString:@"我的位置"]) {
+        return;
+    }
+    NSLog(@"点击了%@小吃店面", clusterAnnotation.title);
+    if (self.clickHouseItemBlock) {
+        self.clickHouseItemBlock(clusterAnnotation.cluster.HouseInfomodel);
+    }
+    
+}
+/**
+ *当点击annotation view弹出的泡泡时，调用此接口
+ *@param mapView 地图View
+ *@param view 泡泡所属的annotation view
+ */
+- (void)mapView:(BMKMapView *)mapView annotationViewForBubble:(BMKAnnotationView *)view {
+    if ([view isKindOfClass:[XJClusterAnnotationView class]]) {
+        XJClusterAnnotationView *clusterAnnotation = (XJClusterAnnotationView*)view.annotation;
+        if (clusterAnnotation.size > 1) {
+            [mapView setCenterCoordinate:view.annotation.coordinate];
+            [mapView zoomIn];
+        }
+    }
+}
+
+#pragma mark -BMKMapViewDelegate
+- (BMKAnnotationView *)mapView:(BMKMapView *)mapView viewForAnnotation:(id <BMKAnnotation>)annotation
+{
+    if (_isDisplayMyLoction) {
+        BMKPinAnnotationView *annotationView = [[BMKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"MapSample"];
+        annotationView.canShowCallout = NO;
+        annotationView.image = [UIImage imageNamed:@"annotion_icon"];
+        annotationView.animatesDrop = YES;
+        return annotationView;
+    }
+    //普通annotation
+    NSString *AnnotationViewID = @"ClusterMark";
+    XJClusterAnnotation *cluster = (XJClusterAnnotation*)annotation;
+    XJClusterAnnotationView *annotationView = [[XJClusterAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:AnnotationViewID];
+    annotationView.title = cluster.title;
+    annotationView.size = cluster.size;
+    annotationView.cluster = cluster.cluster;
+    annotationView.delegate = self;
+    annotationView.canShowCallout = NO;//在点击大头针的时候会弹出那个黑框框
+    annotationView.draggable = NO;//禁止标注在地图上拖动
+    annotationView.annotation = cluster;
+    
+    UIView *viewForImage=[[UIView alloc]init];
+    UIImageView *imageview=[[UIImageView alloc]init];
+    CGSize contentSize = [self contentSizeWithTitle:cluster.title];
+    CGFloat XJ_OffsetX = 15.0f;
+    [viewForImage setFrame:CGRectMake(0, 0, (contentSize.width + XJ_OffsetX ) *viewMultiple, (contentSize.height + XJ_OffsetX ) *viewMultiple)];
+    [imageview setFrame:CGRectMake(0, 0, (contentSize.width + XJ_OffsetX ) *viewMultiple, (contentSize.height + XJ_OffsetX ) *viewMultiple)];
+    annotationView.mj_size = CGSizeMake(contentSize.width, contentSize.height);
+    
+    [imageview setImage:[UIImage imageNamed:@"kong"]];
+    
+    imageview.layer.masksToBounds=YES;
+    imageview.layer.cornerRadius = 10;
+    [viewForImage addSubview:imageview];
+    annotationView.image = [self getImageFromView:viewForImage];
+    return annotationView;
+}
+- (CGSize)contentSizeWithTitle:(NSString *)title {
+    CGSize maxSize = CGSizeMake(SCREEN_RECT.size.width *0.5, MAXFLOAT);
+    // 计算文字的高度
+    return  [title boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:15]} context:nil].size;
+}
+
+-(UIImage *)getImageFromView:(UIView *)view{
+    UIGraphicsBeginImageContext(view.bounds.size);
+    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
+/**
+ *点中底图空白处会回调此接口
+ *@param mapview 地图View
+ *@param coordinate 空白处坐标点的经纬度
+ */
+- (void)mapView:(BMKMapView *)mapView onClickedMapBlank:(CLLocationCoordinate2D)coordinate
+{
+    if (self.clickMapBlankBlock) {
+        self.clickMapBlankBlock(nil);
+    }
+}
+
+#pragma mark - 添加PT********************************
+- (void)addAnnoWithPT:(XJCluster *)cluster {
+    BMKClusterItem *clusterItem = [[BMKClusterItem alloc] init];
+    clusterItem.coor = cluster.pt;
+    clusterItem.title = cluster.name;
+    clusterItem.cluster = cluster;
+    [_clusterManager addClusterItem:clusterItem];
+}
+
+//更新聚合状态
+- (void)updateClusters
+{
+    _clusterZoom = (NSInteger)_myMapView.zoomLevel;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        ///获取聚合后的标注
+        __block NSArray *array = [_clusterManager getClusters:_clusterZoom];
+        NSMutableArray *clusters = [NSMutableArray array];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (BMKCluster *item in array) {
+                XJClusterAnnotation *annotation = [[XJClusterAnnotation alloc] init];
+                annotation.coordinate = item.coordinate;
+                annotation.size = item.size;
+                annotation.title = item.title;
+                annotation.cluster = item.cluster;
+                [clusters addObject:annotation];
+            }
+            [_myMapView removeOverlays:_myMapView.overlays];
+            [_myMapView removeAnnotations:_myMapView.annotations];
+            [_myMapView addAnnotations:clusters];
+            
+        });
+    });
+}
+
+/**
+ *地图初始化完毕时会调用此接口
+ *@param mapView 地图View
+ */
+- (void)mapViewDidFinishLoading:(BMKMapView *)mapView {
+    BMKLocationViewDisplayParam *displayParam = [[BMKLocationViewDisplayParam alloc]init];
+    displayParam.isAccuracyCircleShow = NO;//精度圈是否显示
+    [_myMapView updateLocationViewWithParam:displayParam];
+    self.cCoordinate = _myMapView.centerCoordinate;//中心点
+//    [self updateModelDatas];
+    if (!_isDisplayMyLoction) {
+        [self setMapRegion:0.8];
+        [self updateClusters];
+    }
+}
+
+- (void)updateModelDatas
+{
+    for (HYHouseRescourcesModel *model in _HousesDatas) {
+        XJCluster *cluster = [[XJCluster alloc] init];
+        cluster.name = model.hiItemName;
+        CLLocationCoordinate2D coor = CLLocationCoordinate2DMake([model.lat doubleValue], [model.lng doubleValue]);
+        cluster.pt = coor;
+        cluster.HouseInfomodel = model;
+        [self addAnnoWithPT:cluster];
+    }
+}
+
+- (void)setMapRegion:(double)delta
+{
+    BMKCoordinateRegion region ;//表示范围的结构体
+    region.center = _myMapView.centerCoordinate;//中心点
+    region.span.latitudeDelta = delta;//经度范围（设置为0.1表示显示范围为0.2的纬度范围）
+    region.span.longitudeDelta = delta;//纬度范围
+    [_myMapView setRegion:region animated:YES];
+}
+
+/**
+ *地图渲染每一帧画面过程中，以及每次需要重绘地图时（例如添加覆盖物）都会调用此接口
+ *@param mapView 地图View
+ *@param status 此时地图的状态
+ */
+- (void)mapView:(BMKMapView *)mapView onDrawMapFrame:(BMKMapStatus *)status {
+    if (_clusterZoom != 0 && _clusterZoom != (NSInteger)mapView.zoomLevel) {
+        [self updateClusters];
+    }
+}
+
+
+@end

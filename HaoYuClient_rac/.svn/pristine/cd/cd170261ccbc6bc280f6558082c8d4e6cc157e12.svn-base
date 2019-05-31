@@ -1,0 +1,632 @@
+//
+//  HYQianYueViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYueViewController.h"
+#import "HYYuDingXuanFangView.h"
+#import "HYTopBarView.h"
+#import "HYPaymentViewController.h"
+#import "HYQianYueFillInforMainView.h"
+#import "HYQianYue_XieYiView.h"
+#import "HYQianYue_IdCardView.h"
+#import "HYQianYueSureInforView.h"
+#import "AipOcrServiceManger.h"
+#import "HYHouseProjectInforTool.h"
+#import "HYHouseRescourcesModel.h"
+#import "HYQianYueBillViewController.h"
+#import "HYQianYueBillModel.h"
+#import "HYBaseBarButtonItem.h"
+@interface HYQianYueViewController ()<UIScrollViewDelegate>
+@property (nonatomic, strong) HYBaseView * bottomView;
+@property (nonatomic, strong) HYTopBarView * TopBarView;
+@property (nonatomic, strong) HYYuDingXuanFangView * xuanfangView;
+@property (nonatomic, strong) HYQianYue_XieYiView * XieYiView;
+@property (nonatomic, strong) HYQianYue_IdCardView * IdCardView;
+@property (nonatomic, strong) HYQianYueFillInforMainView * fillInforMainView;
+@property (nonatomic, strong) HYQianYueSureInforView * sureQianYueInforView;
+
+@property (nonatomic, assign) NSInteger pageIndex;
+@property (nonatomic, strong) HYDefaultButton * leftBtn;
+@property (nonatomic, strong) HYDefaultButton * rightBtn;
+@property (nonatomic, strong) NSArray  * topDataArr;
+@property (nonatomic, strong) HYHouseProjectInforTool * projectInforTool;
+
+/**
+ 房源信息
+ */
+@property (nonatomic, strong) HYHouseRescourcesModel * houseInfor_M;
+@property (nonatomic, strong) NSMutableDictionary * TotalParam;
+//是否成功获取到房源信息
+@property (nonatomic, assign) BOOL isSuccess_getInfo;
+
+//选择项目，户型，房间号列表
+@property (nonatomic, strong) NSMutableArray * project_Array;
+@property (nonatomic, strong) NSMutableArray * huxing_Array;
+@property (nonatomic, strong) NSMutableArray * fangjianhao_Array;
+
+@property (nonatomic, strong) NSString * houseId;
+@property (nonatomic, strong) HYBaseViewController * sourceVc;
+//同意协议的视图
+@property (nonatomic, strong) HYBaseView * agreeXiYiView;
+//视图同意协议
+@property (nonatomic, assign) BOOL  agreeBool;
+@property (nonatomic, strong) UIButton * xiyi_icon_btn;
+
+@end
+
+
+@implementation HYQianYueViewController
+
+#pragma mark - First.通知
+- (void)getDiscontInforNoti:(NSNotification *)noti
+{
+    if (_pageIndex == 0) {
+        return;
+    }
+    NSDictionary *dic = noti.object;
+    [self requestDiscountInforWithStarTime:dic[@"beginDate"] endTime:dic[@"endDate"]];
+}
+
+#pragma mark - Second.网络请求
+/**
+ 获取项目列表
+ */
+- (void)requestProjectInfor
+{
+    if (self.project_Array.count != 0) {
+        self.xuanfangView.projectDatas = self.project_Array;
+        return;
+    }
+    WEAKSELF(self);
+    NSString *cityId = [HYPublic_LocalData share].location_City_Id;
+    [self.projectInforTool requestProjectInfor:cityId callBackBlock:^(id sender) {
+        [self.project_Array addObjectsFromArray:sender];
+        weakself.xuanfangView.projectDatas = self.project_Array;
+    }];
+}
+
+/**
+ 获取意向户型列表信息
+ */
+- (void)requestHuxingListInfor:(NSString *)houseItemId
+{
+    if (!houseItemId) {
+        ALERT(@"请先选择房源项目");
+        return;
+    }
+    if (self.huxing_Array.count != 0) {
+        self.xuanfangView.huxingDatas = self.huxing_Array;
+        return;
+    }
+    WEAKSELF(self);
+    [self.projectInforTool requestHuxingListInfor:houseItemId
+                                    callBackBlock:^(id sender) {
+                                        [self.huxing_Array addObjectsFromArray:sender];
+                                        weakself.xuanfangView.huxingDatas = self.huxing_Array;
+                                    }];
+}
+
+/**
+ 获取房间号
+ */
+- (void)requestFangJianHaoInfor:(NSString *)roomTypeId
+{
+    if (!roomTypeId) {
+        ALERT(@"请先选择房型");
+        return;
+    }
+    if (self.fangjianhao_Array.count != 0) {
+        self.xuanfangView.fangjianhaoDatas = self.fangjianhao_Array;
+        return;
+    }
+    WEAKSELF(self);
+    [self.projectInforTool requestFangJianHaoLevelInfor:roomTypeId
+                                          callBackBlock:^(id sender) {
+                                              [self.fangjianhao_Array addObjectsFromArray:sender];
+                                              weakself.xuanfangView.fangjianhaoDatas = self.fangjianhao_Array;
+                                          }];
+}
+
+/**
+ 选择房间号后 获取该房间的信息
+ */
+- (void)requestHouseInfor:(NSString *)houseId
+{
+    _isSuccess_getInfo = NO;
+    [[HYProjectNetRequestManager sharedNetRequestManager] cancelNetworkRequestWithUrlString:GET_YUDINGHOUSTE_DEATIL_INFOR_URL type:@"POST"];
+    PARA_CREART;
+    PARA_SET(houseId, @"houseId");
+    [[HYServiceManager share] postRequestWithurl:GET_YUDINGHOUSTE_DEATIL_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        _isSuccess_getInfo = YES;
+                                        LWLog(@"****\n选择房间号后 获取该房间的信息:%@",objc);
+                                        _houseInfor_M = [HYHouseRescourcesModel modelWithJSON:objc[@"result"]];
+                                        if ([self.sourceVc isKindOfClass:NSClassFromString(@"HYMineYuDingViewController")]) {
+                                            _houseInfor_M.isFramYuDingBool = YES;
+                                        }
+                                        _xuanfangView.houseInfor_M = _houseInfor_M;
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        _isSuccess_getInfo = NO;
+                                    }];
+}
+
+/**
+ 提交签约信息
+ */
+- (void)commitInforCreateBill
+{
+    [[HYHouseProjectInforTool new] ZuKeQianYuCreateBill:self.TotalParam
+                                          callBackBlock:^(id sender) {
+                                              NSArray *billArr =  (NSArray *)sender;
+                                              NSMutableArray *bill_MA = [[NSMutableArray alloc] init];
+                                              for (NSDictionary *dict in billArr) {
+                                                  HYQianYueBillModel *model = [HYQianYueBillModel modelWithJSON:dict];
+                                                  [bill_MA addObject:model];
+                                              }
+                                              self.TotalParam[@"shouZhiList"] = billArr;
+                                              HYQianYueBillViewController *billVC = [HYQianYueBillViewController qianYuBillViewControllerFromSoucrVC:self.sourceVc param:self.TotalParam extend:nil];
+                                              [billVC setDataArrayModel:bill_MA];
+                                              [self.navigationController pushViewController:billVC animated:YES];
+                                          }];
+}
+
+/**
+ 身份证照片识别信息
+ */
+- (void)idCardORC:(UIImage *)image
+{
+    _IdCardView.idcardModel = nil;
+    [[AipOcrServiceManger share] generalBasicOCR:image
+                                     ResultBlock:^(id sender) {
+                                         dispatch_async_on_main_queue(^{
+                                             _IdCardView.idcardModel = [AipOcrServiceManger share].idCardModel;
+                                             [AipOcrServiceManger share].idCardModel = nil;
+                                         });
+                                     } failBlock:^(id sender) {
+                                         
+                                     }];
+}
+
+/**
+ 获取优惠活动信息
+ */
+- (void)requestDiscountInforWithStarTime:(NSString *)starTime endTime:(NSString *)endTime
+{
+    [[HYHouseProjectInforTool new] requestDiscountInforWithhouseId:_xuanfangView.param[@"houseId"]
+                                                         startTime:starTime
+                                                           endTime:endTime
+                                                     callBackBlock:^(id sender) {
+                                                         LWLog(@"\n\n========优惠活动:%@",sender);
+                                                         if (sender) {
+                                                             self.fillInforMainView.secondView.youhuiArray = sender;
+                                                         }
+                                                     }];
+}
+
+
+//上传单张图片
+- (void)updateIdCardImage:(NSString *)imageKey image:(UIImage *)image
+{
+    if (image == nil || imageKey == nil) {
+        return;
+    }
+    if([imageKey isEqualToString:@"zukeSfzZheng"]) { [self idCardORC:image];}
+    
+    [[HYServiceManager share] uploadImageWithurl:UPLOAD_MINEWEIXIU_IMAGE_URL
+                                        ImageArr:@[image]
+                                        fileName:@[imageKey]
+                                      parameters:nil Success:^(id objc, id requestInfo) {
+                                          [_IdCardView setUrlPara:imageKey urlValue:objc[@"url"]];
+                                          [_IdCardView handleUploadResult:imageKey status:YES];
+                                      } fail:^(id error, id requestInfo) {
+                                          [_IdCardView handleUploadResult:imageKey status:NO];
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+- (void)clickAgreeBtn:(UIButton *)sender
+{
+    _xiyi_icon_btn.selected = !_xiyi_icon_btn.selected;
+    self.agreeBool = _xiyi_icon_btn.selected;
+}
+- (void)clickBottomBtn:(UIButton *)sender
+{
+    if ([sender.titleLabel.text isEqualToString:@"上一步"]) {
+        if (_pageIndex == 1) {
+            if (self.fillInforMainView.scrollViewIndex == 0) {
+                _pageIndex --;
+            }else{
+                [self.fillInforMainView scrollToIndex:0];
+            }
+        }else{
+            if (_pageIndex == 2) {
+                self.agreeXiYiView.hidden = YES;
+            }else if (_pageIndex == 3){
+                self.agreeXiYiView.hidden = NO;
+            }
+            _pageIndex --;
+        }
+    }else if([sender.titleLabel.text isEqualToString:@"下一步"]){
+        if (_pageIndex == 0) {
+            if(![self.xuanfangView isCheckPara]){
+                return;
+            }
+            if (!self.isSuccess_getInfo) {
+                return;
+            }
+            _houseInfor_M.houseId = _xuanfangView.param[@"houseId"];
+            [self.TotalParam addEntriesFromDictionary:_xuanfangView.param];
+        }else if (_pageIndex == 1){
+            if (self.fillInforMainView.scrollViewIndex == 1) {
+                if (![self.fillInforMainView.secondView.heTongTimeView checkParam]) {
+                    return;
+                }
+                self.agreeXiYiView.hidden = NO;
+                [self.TotalParam addEntriesFromDictionary:self.fillInforMainView.secondView.heTongTimeView.param];
+                [self.TotalParam addEntriesFromDictionary:self.fillInforMainView.secondView.para];
+            }else{
+                if (![_fillInforMainView.firstView isCheckPara]) {
+                    return;
+                }
+                POST_NOTI(GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY, self.fillInforMainView.secondView.heTongTimeView.param);
+                self.fillInforMainView.secondView.houseInfor_M = _houseInfor_M;
+                [self.TotalParam addEntriesFromDictionary:self.fillInforMainView.firstView.param];
+            }
+        }else if (_pageIndex == 2){
+            if (!self.agreeBool) {
+                ALERT(@"请先同意协议");
+                return;
+            }
+             self.agreeXiYiView.hidden = YES;
+        }else if (_pageIndex == 3){
+           
+            if(![_IdCardView checkParaLegal]){
+                return;
+            }
+            [self.TotalParam addEntriesFromDictionary:self.IdCardView.param];
+            _sureQianYueInforView.dataDict = self.TotalParam;
+        }
+        if ( _pageIndex == 1) {
+            if (self.fillInforMainView.scrollViewIndex == 1) {
+                _pageIndex ++;
+            }else {
+                [self.fillInforMainView scrollToIndex:1];
+            }
+        }else{
+            _pageIndex ++;
+        }
+    }else if ([sender.titleLabel.text isEqualToString:@"提交签约"]){
+        [self commitInforCreateBill];
+        return;
+    }
+    [self.TopBarView selectIndex:_pageIndex];
+    [self.MainScrollView setContentOffset:CGPointMake(SCREEN_WIDTH*_pageIndex, 0) animated:YES];
+    [self setBottomContrans];
+}
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
+
+/**
+ 先判断是否登录 在选择跳转
+ */
++ (void)onLineQianYueViewControllerFrom:(HYBaseViewController *)sourceVc Extend:(id)extend
+{
+    HYQianYueViewController *instance = [[HYQianYueViewController alloc] init];
+    instance.houseId  = extend ? extend : @"";
+    instance.sourceVc = sourceVc;
+    if([HYUserInfor_LocalData share].isLogin){
+        instance.hidesBottomBarWhenPushed = YES;
+        [sourceVc.navigationController pushViewController:instance animated:YES];
+    }else{
+        [HYUserInfor_LocalData LoginWithVC:sourceVc];
+    }
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.closePopGesture = YES;
+    
+    _pageIndex = 0;
+    self.title = @"在线签约";
+    [self addNoti];
+    [self setUI];
+    [self setNavi];
+    if ([self.sourceVc isKindOfClass:NSClassFromString(@"HYMineYuDingViewController")]) {
+        self.xuanfangView.param[@"houseId"] = self.houseId;
+        [self requestHouseInfor:self.houseId];
+        self.xuanfangView.isFromYuDing = YES;
+    }
+}
+
+- (void)setNavi
+{
+    HYBaseBarButtonItem *backItem = [HYBaseBarButtonItem backbarButtonItemWithCallBack:^(id sender) {
+        [HYWraingAlert showAlert:self
+                           title:@"确定退出签约？"
+                         message:@""
+              defaultButtonTitle:@"确定"
+               cancelButtonTitle:@"取消"
+      defaultButtonCallBackBlock:^(id sender) {
+          
+          [self.navigationController popViewControllerAnimated:YES];
+      } cancelButtonCallBackBlock:^(id sender) {
+          
+      }];
+    }];
+    self.navigationItem.leftBarButtonItem = backItem;
+}
+
+/**
+ 注册通知
+ */
+- (void)addNoti
+{
+    //改变合同时间 获取优惠活动信息
+    ADD_NOTI(getDiscontInforNoti:, GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY);
+}
+
+- (void)setUI
+{
+    [self.view addSubview:self.TopBarView];
+    [self.view addSubview:self.MainScrollView];
+    [self.view addSubview:self.bottomView];
+    [self.view addSubview:self.agreeXiYiView];
+    
+    self.TopBarView.frame = CGRectMake(0, NAVIGATOR_HEIGHT, SCREEN_WIDTH, ADJUST_PERCENT_FLOAT(40));
+    [self.TopBarView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self.view);
+        make.top.mas_equalTo(self.view.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+        make.height.mas_offset(MARGIN*4);
+    }];
+    [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(MARGIN*5);
+        make.left.right.mas_equalTo(self.view);
+        make.bottom.mas_equalTo(self.view.mas_bottom).mas_offset(-ADJUST_PERCENT_BOTTOM(0));
+    }];
+    [self.agreeXiYiView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.view.mas_left).mas_offset(MARGIN*2);
+        make.right.mas_equalTo(self.view.mas_right).mas_offset(-MARGIN*2);
+        make.height.mas_offset(MARGIN*3);
+        make.bottom.mas_equalTo(self.bottomView.mas_top).mas_offset(-MARGIN/2);
+    }];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self.view);
+        make.top.mas_equalTo(self.TopBarView.mas_bottom).mas_offset(MARGIN);
+        make.bottom.mas_equalTo(self.self.bottomView.mas_top);
+    }];
+    self.MainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*6, 1);
+    self.MainScrollView.pagingEnabled = YES;
+    self.MainScrollView.delegate = self;
+    self.MainScrollView.showsHorizontalScrollIndicator = NO;
+    self.MainScrollView.scrollEnabled = NO;
+    [self creatSubViews];
+    
+  
+    
+}
+/**
+ 添加子试图
+ */
+- (void)creatSubViews
+{
+    _XieYiView = [[HYQianYue_XieYiView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*2, 0, SCREEN_WIDTH, SCREEN_HEIGHT-MARGIN*4-MARGIN*4.5-NAVIGATOR_HEIGHT)];
+    _IdCardView = [[HYQianYue_IdCardView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*3, 0, SCREEN_WIDTH, SCREEN_HEIGHT-MARGIN*4-MARGIN*4.5-NAVIGATOR_HEIGHT)];
+    _sureQianYueInforView = [[HYQianYueSureInforView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*4, 0, SCREEN_WIDTH, SCREEN_HEIGHT-MARGIN*4-MARGIN*4.5-NAVIGATOR_HEIGHT)];
+    [self.MainScrollView addSubview:self.xuanfangView];
+    [self.MainScrollView addSubview:self.fillInforMainView];
+    [self.MainScrollView addSubview:_XieYiView];
+    [self.MainScrollView addSubview:_IdCardView];
+    [self.MainScrollView addSubview:_sureQianYueInforView];
+    [_XieYiView setWebUrlWithType:1];
+    _IdCardView.viewController = self;
+    
+    WEAKSELF(self);
+    _IdCardView.uploadImageBlock = ^(NSString *imageKey, UIImage *image) {
+        [weakself updateIdCardImage:imageKey image:image];
+    };
+}
+
+#pragma mark - Sixth.界面配置
+- (void)setBottomContrans
+{
+    if (_pageIndex == 0) {
+        _leftBtn.hidden = YES;
+        [_rightBtn setTitle:@"下一步" forState:UIControlStateNormal];
+        [_rightBtn mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(SCREEN_WIDTH*0.7, MARGIN*3));
+            make.centerX.mas_equalTo(_bottomView.mas_centerX);
+            make.centerY.mas_equalTo(_bottomView.mas_centerY);
+        }];
+        [_leftBtn mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3);
+            make.width.mas_offset(0);
+            make.centerX.mas_equalTo(_bottomView.mas_centerX);
+            make.centerY.mas_equalTo(_bottomView.mas_centerY);
+        }];
+    }else{
+        _leftBtn.hidden = NO;
+        [_leftBtn mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3);
+            make.width.mas_offset((SCREEN_WIDTH-MARGIN*6)/2);
+            make.left.mas_equalTo(_bottomView.mas_left).mas_offset(MARGIN*2);
+            make.centerY.mas_equalTo(_bottomView.mas_centerY);
+        }];
+        [_rightBtn mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3);
+            make.width.mas_equalTo(_leftBtn.mas_width);
+            make.right.mas_equalTo(_bottomView.mas_right).mas_offset(-MARGIN*2);
+            make.centerY.mas_equalTo(_bottomView.mas_centerY);
+        }];
+        if (_pageIndex == 4) {
+            [_rightBtn setTitle:@"提交签约" forState:UIControlStateNormal];
+        }else{
+            [_rightBtn setTitle:@"下一步" forState:UIControlStateNormal];
+        }
+    }
+}
+
+
+#pragma mark - Seventh.懒加载
+- (HYBaseView*)bottomView
+{
+    if (!_bottomView) {
+        _bottomView = [[HYBaseView alloc] init];
+        
+        _leftBtn = [HYDefaultButton buttonWithTitleStringKey:@"上一步"
+                                                  titleColor:HYCOLOR.color_c4
+                                                   titleFont:SYSTEM_REGULARFONT(15)
+                                                      target:self
+                                                    selector:@selector(clickBottomBtn:)];
+        _rightBtn = [HYDefaultButton buttonWithTitleStringKey:@"下一步"
+                                                   titleColor:HYCOLOR.color_c4
+                                                    titleFont:SYSTEM_REGULARFONT(15)
+                                                       target:self
+                                                     selector:@selector(clickBottomBtn:)];
+        [_bottomView addSubview:_leftBtn];
+        [_bottomView addSubview:_rightBtn];
+        [_leftBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c3];
+        [_rightBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c3];
+        [self setBottomContrans];
+    }
+    return _bottomView;
+}
+
+- (HYTopBarView*)TopBarView
+{
+    if (!_TopBarView) {
+        
+        _TopBarView = [HYTopBarView creatTopBarWithDataArr:self.topDataArr
+                                               selectColor:[UIColor redColor]
+                                                  callBack:^(NSInteger index) {
+                                                      
+                                                  }];
+        _TopBarView.isNotCanClickBool = YES;
+    }
+    return _TopBarView;
+}
+- (NSArray*)topDataArr
+{
+    if (!_topDataArr) {
+        _topDataArr = [[NSArray alloc] init];
+        _topDataArr = @[@"签约选房",@"信息填写",@"签约协议",@"身份验证",@"信息确认"];
+    }
+    return _topDataArr;
+}
+
+- (HYHouseProjectInforTool*)projectInforTool
+{
+    if (!_projectInforTool) {
+        _projectInforTool = [[HYHouseProjectInforTool alloc] init];
+    }
+    return _projectInforTool;
+}
+
+/**
+ 签约选房
+ */
+- (HYYuDingXuanFangView*)xuanfangView
+{
+    if (!_xuanfangView) {
+        _xuanfangView = [[HYYuDingXuanFangView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT-MARGIN*4-MARGIN*4.5-NAVIGATOR_HEIGHT)];
+        WEAKSELF(self);
+        _xuanfangView.clickProjectBlock = ^(id sender) {
+            [weakself requestProjectInfor];
+            [weakself.huxing_Array removeAllObjects];
+            [weakself.fangjianhao_Array removeAllObjects];
+        };
+        _xuanfangView.clickHuxignBlock = ^(id sender) {
+            [weakself requestHuxingListInfor:sender];
+            [weakself.fangjianhao_Array removeAllObjects];
+        };
+        _xuanfangView.clickFangJianHaoBlock = ^(id sender) {
+            [weakself requestFangJianHaoInfor:sender];
+        };
+        _xuanfangView.requestHouseInforBlock = ^(id sender) {
+            [weakself requestHouseInfor:sender];
+        };
+    }
+    return _xuanfangView;
+}
+/**
+ 信息填写
+ */
+- (HYQianYueFillInforMainView*)fillInforMainView
+{
+    if (!_fillInforMainView) {
+        _fillInforMainView = [[HYQianYueFillInforMainView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT-MARGIN*4-MARGIN*4.5-NAVIGATOR_HEIGHT) sourcevc:self];
+    }
+    return _fillInforMainView;
+}
+
+- (NSMutableDictionary*)TotalParam
+{
+    if (!_TotalParam) {
+        _TotalParam = [[NSMutableDictionary alloc] init];
+    }
+    return _TotalParam;
+}
+
+- (NSMutableArray*)project_Array
+{
+    if (!_project_Array) {
+        _project_Array = [[NSMutableArray alloc] init];
+    }
+    return _project_Array;
+}
+- (NSMutableArray*)huxing_Array
+{
+    if (!_huxing_Array) {
+        _huxing_Array = [[NSMutableArray alloc] init];
+    }
+    return _huxing_Array;
+}
+- (NSMutableArray*)fangjianhao_Array
+{
+    if (!_fangjianhao_Array) {
+        _fangjianhao_Array = [[NSMutableArray alloc] init];
+    }
+    return _fangjianhao_Array;
+}
+- (HYBaseView*)agreeXiYiView
+{
+    if (!_agreeXiYiView) {
+        _agreeXiYiView = [[HYBaseView alloc] init];
+        [_agreeXiYiView setBoundWidth:0 cornerRadius:6];
+        
+        HYDefaultButton *btn = [HYDefaultButton buttonImageAndTitleWithTitleStringKey:@"  勾选此项表示您认同以上签约协议"
+                                                                           titleColor:HYCOLOR.color_c4
+                                                                            titleFont:SYSTEM_REGULARFONT(13)
+                                                                           imageNamed:@""
+                                                                                 type:HYProjectButtonSetImage
+                                                                               target:self
+                                                                             selector:@selector(clickAgreeBtn:)];
+        [_agreeXiYiView addSubview:btn];
+        [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(_agreeXiYiView.mas_centerX).mas_offset(MARGIN*3);
+            make.centerY.mas_equalTo(_agreeXiYiView.mas_centerY);
+        }];
+        UIButton *icon = [[UIButton alloc] init];
+        [_agreeXiYiView addSubview:icon];
+        [icon addTarget:self action:@selector(clickAgreeBtn:) forControlEvents:UIControlEventTouchUpInside];
+        [icon setImage:IMAGENAME(@"mine_bill_select_n") forState:UIControlStateNormal];
+        [icon setImage:IMAGENAME(@"mine_bill_select_s") forState:UIControlStateSelected];
+        [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*2, MARGIN*2));
+            make.right.mas_equalTo(btn.mas_left).mas_offset(5);
+            make.centerY.mas_equalTo(btn.mas_centerY);
+        }];
+        _xiyi_icon_btn = icon;
+        _agreeXiYiView.hidden = YES;
+    }
+    return _agreeXiYiView;
+}
+#pragma mark - Eigth.Other
+
+@end

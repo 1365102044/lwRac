@@ -1,0 +1,55 @@
+//
+//  HYStringTool.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HYStringTool : NSObject
+
++ (instancetype)share;
+
+/**
+ 金额 逗号 分割(内部 分->元) 2位小数
+ */
+-(NSString*)strmethodCommaWith:(NSString *)price;
+
+/**
+ 金额 逗号 分割(内部 分->元) 没有小数
+ */
+-(NSString*)strmethodIntCommaWith:(NSString *)price;
+/**
+ 金额 逗号 分割(内部 元->元) 2位小数
+ */
+-(NSString*)strmethodYUANCommaWith:(NSString *)price;
+
+/**
+ 打电话
+ */
++(void)CallPhoneWith:(UIView*)backview phone:(NSString *)phone;
+
+/**
+ 获取到的毫秒->需要到时间格式
+ timestyle 时间格式 字符 @“yyyy-MM-dd hh:mm”
+ */
+- (NSString *)returnTimeStrformeTimestr:(NSString *)str timestyle:(NSString *)timestyle;
+
+/**
+ 过滤 HTML标签
+ */
+-(NSString *)filterHTML:(NSString *)html;
+
+/**
+ 倒计时展示
+ */
+- (NSString *)getTimeStrWithDifftime:(NSString *)diffTime;
+
+- (NSString*)iphoneType;
+
+//获取某个字符串或者汉字的首字母.
+- (NSString *)firstCharactorWithString:(NSString *)string;
+
+@end

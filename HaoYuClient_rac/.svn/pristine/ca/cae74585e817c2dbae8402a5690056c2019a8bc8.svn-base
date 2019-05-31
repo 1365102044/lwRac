@@ -1,0 +1,70 @@
+//
+//  HYYuYueResultView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuYueResultView.h"
+
+@interface HYYuYueResultView ()
+@property (nonatomic, strong) UIImageView * icon;
+@property (nonatomic, strong) HYDefaultLabel * titleLable;
+@property (nonatomic, strong) HYDefaultLabel * descLable;
+@property (nonatomic, strong) HYFillLongButton * btn;
+
+@end
+
+@implementation HYYuYueResultView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        _icon = [[UIImageView alloc] init];
+        _icon.image = IMAGENAME(@"11");
+        _titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                               text:@"预约成功"
+                                          textColor:HYCOLOR.color_c2];
+        _descLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                               text:@"快来现场看房吧"
+                                          textColor:HYCOLOR.color_c4];
+        _btn = [HYFillLongButton buttonCorWithTitleStringKey:@"我的预约"
+                                                      target:self
+                                                    selector:@selector(clickBtn)];
+        _titleLable.textAlignment  = NSTextAlignmentCenter;
+        _descLable.textAlignment  = NSTextAlignmentCenter;
+        [self addSubview:_icon];
+        [self addSubview:_titleLable];
+        [self addSubview:_descLable];
+        [self addSubview:_btn];
+        
+        [_icon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*10, MARGIN*10));
+            make.centerX.mas_equalTo(self.mas_centerX);
+            make.centerY.mas_equalTo(self.mas_centerY).mas_offset(-MARGIN*10);
+        }];
+        [_titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.mas_centerX);
+            make.top.mas_equalTo(_icon.mas_bottom).mas_offset(MARGIN*2);
+        }];
+        [_descLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.mas_centerX);
+            make.top.mas_equalTo(_titleLable.mas_bottom).mas_offset(MARGIN*2);
+        }];
+        [_btn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.mas_centerX);
+            make.top.mas_equalTo(_descLable.mas_bottom).mas_offset(MARGIN*4);
+            make.size.mas_offset(CGSizeMake(SCREEN_WIDTH-MARGIN*4, MARGIN*4));
+        }];
+        [_icon setBoundWidth:0 cornerRadius:MARGIN*5];
+    }
+    return self;
+}
+- (void)clickBtn
+{
+    [_sourceVC.navigationController popToRootViewControllerAnimated:YES];
+}
+@end

@@ -1,0 +1,79 @@
+//
+//  HYYouHuiQuanCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYouHuiQuanCellView.h"
+
+@interface HYYouHuiQuanCellView ()
+@property (nonatomic, strong) HYBaseView * bgView;
+
+@end
+
+@implementation HYYouHuiQuanCellView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setSubUI];
+           self.backgroundColor = HYCOLOR.color_c1;
+    }
+    return self;
+}
+
+- (void)setSubUI
+{
+    _bgView = [[HYBaseView alloc] init];
+    
+    _titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                           text:@""
+                                      textColor:HYCOLOR.color_c4];
+    _youxiaoTimeLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c2];
+    _priceLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                    text:@""
+                                               textColor:HYCOLOR.color_c3];
+    _lijishiyongLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                 text:@"立即使用"
+                                            textColor:HYCOLOR.color_c0];
+    _lijishiyongLable.backgroundColor = [UIColor greenColor];
+    _lijishiyongLable.userInteractionEnabled = YES;
+    _lijishiyongLable.textAlignment = NSTextAlignmentCenter;
+    [self addSubview:_bgView];
+    [_bgView addSubview:_titleLable];
+    [_bgView addSubview:_youxiaoTimeLable];
+    [_bgView addSubview:_lijishiyongLable];
+    [_bgView addSubview:_priceLable];
+    [_bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(self).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom);
+    }];
+    [_titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN);
+        make.left.mas_equalTo(_bgView.mas_left).mas_offset(MARGIN*2);
+    }];
+    [_youxiaoTimeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_titleLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_titleLable.mas_left);
+    }];
+    
+    [_priceLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(_titleLable.mas_centerY).mas_offset(MARGIN/2);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN*2);
+    }];
+    [_lijishiyongLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_priceLable.mas_bottom).mas_offset(MARGIN);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN*2);
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(60), ADJUST_PERCENT_FLOAT(25)));
+    }];
+    [_bgView setBoundWidth:0 cornerRadius:6];
+    [_lijishiyongLable setBoundWidth:0 cornerRadius:4];
+}
+
+@end

@@ -1,0 +1,118 @@
+//
+//  HYYuYueMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuYueMainView.h"
+#import "HYLeftRightArrowView.h"
+@interface HYYuYueMainView ()
+
+@property (nonatomic, strong) HYLeftRightArrowView * nameView;
+@property (nonatomic, strong) HYLeftRightArrowView * phoneView;
+@property (nonatomic, strong) HYLeftRightArrowView * chooseMenDianView;
+@property (nonatomic, strong) HYLeftRightArrowView * huxingView;
+@property (nonatomic, strong) HYLeftRightArrowView * timeView;
+
+@end
+
+@implementation HYYuYueMainView
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        _nameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"姓名"
+                                                                             rightStr:@"请输入姓名"
+                                                                        showArrowIcon:NO CallBackBlock:^(id sender) {
+                                                                            
+                                                                        }];
+        _phoneView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"手机号"
+                                                                             rightStr:@"请输入手机号"
+                                                                        showArrowIcon:NO CallBackBlock:^(id sender) {
+                                                                            
+                                                                        }];
+        _chooseMenDianView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"选择门店"
+                                                                             rightStr:@"选择门店"
+                                                                        showArrowIcon:YES
+                                                                                 CallBackBlock:^(id sender) {
+                                                                            
+                                                                        }];
+        _huxingView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"意向户型"
+                                                                             rightStr:@"选择户型"
+                                                                        showArrowIcon:YES CallBackBlock:^(id sender) {
+                                                                            
+                                                                        }];
+        _timeView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"期望入住时间"
+                                                                             rightStr:@"选择时间"
+                                                                        showArrowIcon:YES CallBackBlock:^(id sender) {
+                                                                            
+                                                                        }];
+       
+        UIImageView *houstImage = [[UIImageView alloc] init];
+        houstImage.image = IMAGENAME(@"11");
+        HYDefaultLabel *titleLable  = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                               text:@"请认真填写您的个人真实信息，以便楼长尽快与你取得联系"
+                                                          textColor:HYCOLOR.color_c2];
+        titleLable.backgroundColor = [UIColor clearColor];
+        titleLable.textAlignment = NSTextAlignmentCenter;
+        
+        NSString *phoneStr = USERDEFAULTS_GET(USER_INFOR_PHONE);
+        if (phoneStr) {
+            _phoneView.rightTextField.text = phoneStr;
+        }
+        [self addSubview:titleLable];
+        [self addSubview:houstImage];
+        [self addSubview:_nameView];
+        [self addSubview:_phoneView];
+        [self addSubview:_chooseMenDianView];
+        [self addSubview:_timeView];
+        [self addSubview:_huxingView];
+        
+        [houstImage mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+            make.left.right.mas_equalTo(self);
+            make.height.mas_offset(MARGIN*22);
+        }];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3);
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(houstImage.mas_bottom).mas_offset(MARGIN*0.5);
+        }];
+        [_nameView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN*.5);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_phoneView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_nameView.mas_bottom).mas_offset(0);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_chooseMenDianView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_phoneView.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_huxingView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_chooseMenDianView.mas_bottom);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_timeView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_huxingView.mas_bottom);
+            make.height.mas_offset(MARGIN*5);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-(SCREEN_HEIGHT - ADJUST_PERCENT_FLOAT(580)));
+        }];
+    }
+    return self;
+}
+-(void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+}
+@end

@@ -1,0 +1,87 @@
+//
+//  HYPublic_LocalData.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPublic_LocalData.h"
+#import "HYQuYuModel.h"
+@implementation HYPublic_LocalData
++ (instancetype)share
+{
+    static dispatch_once_t onceToken;
+    static HYPublic_LocalData *instance;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYPublic_LocalData alloc]init];
+    });
+    return instance;
+}
+
+/**
+ 保存当前版本号
+ */
+- (void)saveCurrentVersionNumber
+{
+    NSString *current = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+    [SYSTEM_USERDEFAULTS setObject:current forKey:CURRENTVERSIONNUMBER_STRINGKEY];
+}
+/**
+ 是否是新安装此版本
+ */
+- (BOOL)isFristInstall
+{
+    NSString *currentVersionNumber = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+    NSString *lastVersionNumber = [SYSTEM_USERDEFAULTS objectForKey:CURRENTVERSIONNUMBER_STRINGKEY];
+    if ([currentVersionNumber isEqualToString:lastVersionNumber]) {
+        return NO;
+    }
+    return YES;
+}
+
+- (NSString *)location_City_Id
+{
+    _location_City_Id = _location_City_M.cityID;
+    if (!_location_City_Id) {
+        if (!_cityGroupDatas || _cityGroupDatas.count == 0) {
+            return @"";
+        }
+        for (HYCityGroupModel *city_m in _cityGroupDatas) {
+            if ([_location_City isEqualToString:city_m.name]) {
+                [self updateLoca_info:city_m];
+                return _location_City_Id;
+            }
+        }
+        for (HYCityGroupModel *city_m in _cityGroupDatas) {
+            if ([city_m.name isEqualToString:@"北京市"]) {
+                [self updateLoca_info:city_m];
+                return _location_City_Id;
+            }
+        }
+        [self updateLoca_info:_cityGroupDatas.firstObject];
+        return _location_City_Id;
+    }
+    return _location_City_Id;
+}
+
+- (void)updateLoca_info:(HYCityGroupModel *)city_m
+{
+    _location_City_M = city_m;
+    _location_City = city_m.name;
+    _location_City_Id = city_m.cityID;
+}
+
+- (NSArray *)QuYu_ByCityId_Arr_M
+{
+    HYQuYuModel *quyu_M =  _QuYu_ByCityId_Arr_M.firstObject;
+    if ([quyu_M.cityName isEqualToString:_location_City]) {
+        
+        return _QuYu_ByCityId_Arr_M;
+    }else{
+        return nil;
+    }
+    return nil;
+}
+
+@end

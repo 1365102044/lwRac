@@ -1,0 +1,126 @@
+//
+//  RemotePushService.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/11/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "LWRemotePushService.h"
+#import "HYMessageDeatilViewController.h"
+#import "HYBaseNavigationController.h"
+#import "HYBaseTabBarController.h"
+/**
+ *  是否是线上环境
+ */
+#ifdef DEBUG
+BOOL isProduction = NO;
+#else
+BOOL isProduction = YES;
+#endif
+
+@implementation LWRemotePushService
+
+/**
+ 初始化 APNs 代码 / 初始化 JPush 代码
+ */
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    [[XGPush defaultManager] startXGWithAppID:2200320758 appKey:@"I6A2SLA1I83A"  delegate:self];
+    //打开debug开关
+    [[XGPush defaultManager] setEnableDebug:YES];
+    [[XGPush defaultManager] setXgApplicationBadgeNumber:0];
+    [[XGPush defaultManager] reportXGNotificationInfo:launchOptions];
+//    [[XGPush defaultManager] setBadge:[UIApplication sharedApplication].applicationIconBadgeNumber];
+    return YES;
+}
+
+//前台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    LWLog(@"*******************didReceiveRemoteNotification**\nuserInfo:%@***********",userInfo);
+    
+    application.applicationIconBadgeNumber = 0;
+
+//    [EBBannerView bannerWithBlock:^(EBBannerViewMaker *make) {}];
+}
+
+//后台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    LWLog(@"*******************didReceiveRemoteNotification_fetchCompletionHandler**\nuserInfo:%@***********",userInfo);
+    [[XGPush defaultManager] reportXGNotificationInfo:userInfo];
+    
+    [self lw_handleRemoteNotificationWithInfo:userInfo];
+    
+    completionHandler(UIBackgroundFetchResultNewData);
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    [application setApplicationIconBadgeNumber:0];
+}
+
+#pragma mark- ********************************* XGPushDelegate *********************************
+
+/**
+ @brief 监控信鸽推送服务地启动情况
+ 
+ @param isSuccess 信鸽推送是否启动成功
+ @param error 信鸽推送启动错误的信息
+ */
+- (void)xgPushDidFinishStart:(BOOL)isSuccess error:(nullable NSError *)error
+{
+    if(isSuccess) NSLog(@"\n\n信鸽推送启动成功!");
+    else NSLog(@"\n\n信鸽推送启动失败，error：%@",error);
+}
+
+/**
+ @brief 向信鸽服务器注册设备token的回调
+ 
+ @param deviceToken 当前设备的token
+ @param error 错误信息
+ @note 当前的token已经注册过之后，将不会再调用此方法
+ */
+- (void)xgPushDidRegisteredDeviceToken:(nullable NSString *)deviceToken error:(nullable NSError *)error
+{
+    NSLog(@"\n\n**********信鸽服务器注册设备deviceToken:%@",deviceToken);
+}
+
+//  后台接收消息/点击前台消息弹框事件
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >=     __IPHONE_10_0
+- (void)xgPushUserNotificationCenter:(UNUserNotificationCenter *)center
+      didReceiveNotificationResponse:(UNNotificationResponse *)response
+               withCompletionHandler:(void (^)(void))completionHandler
+API_AVAILABLE(ios(10.0)){
+    [[XGPush defaultManager] reportXGNotificationResponse:response];
+    [self lw_handleRemoteNotificationWithInfo:response.notification.request.content.userInfo];
+    completionHandler();
+}
+
+// App 在前台弹通知需要调用这个接口
+- (void)xgPushUserNotificationCenter:(UNUserNotificationCenter *)center
+             willPresentNotification:(UNNotification *)notification
+               withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
+API_AVAILABLE(ios(10.0)){
+    POST_NOTI(GETMESSAGEINFORKNOEISORNOTNOLOOKMESSAGE_FOR_PUSH, nil);
+    [[XGPush defaultManager] reportXGNotificationInfo:notification.request.content.userInfo];
+    completionHandler(0 | UNNotificationPresentationOptionSound | UNNotificationPresentationOptionAlert);
+}
+#endif
+
+
+/**
+ 处理消息
+ */
+- (void)lw_handleRemoteNotificationWithInfo:(NSDictionary *)info
+{
+    NSLog(@"***********************info:%@",info);
+    HYMessageDeatilViewController *message = [HYMessageDeatilViewController creatMessageDeatilWithTitleStr:@"消息" msgType:1 extend:nil];
+    message.hidesBottomBarWhenPushed = YES;
+    HYBaseTabBarController * tabbarViewController = (HYBaseTabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+    HYBaseNavigationController *navi = (HYBaseNavigationController *)tabbarViewController.childViewControllers[tabbarViewController.selectedIndex];
+    [navi pushViewController:message animated:YES];
+}
+
+@end

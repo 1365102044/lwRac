@@ -1,0 +1,24 @@
+//
+//  HYQianYue_IdCardView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+@interface HYQianYue_IdCardView : HYBaseView
+@property (nonatomic, copy) HYEventCallBackBlock callBlock;
+
+/**
+ 选择的图片
+ */
+@property (nonatomic, strong) NSMutableArray * selectImageArrary;
+@property (nonatomic, strong) NSMutableDictionary * param;
+
+/**
+ 检查参数的合法性
+ */
+- (BOOL)checkParaLegal;
+@end

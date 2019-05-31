@@ -1,0 +1,312 @@
+//
+//  HYUserInfor_LocalData.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYUserInfor_LocalData.h"
+#import "HYLoginViewController.h"
+#import "HYBaseNavigationController.h"
+#import "NSString+Extension.h"
+#import "HYBaseTabBarController.h"
+#import "HYContractModel.h"
+//#import <JPUSHService.h>
+#import "XGPush.h"
+#import "LWFmdb.h"
+#import "LWLoginViewController.h"
+@implementation HYUserInfor_LocalData
+
++ (instancetype)share
+{
+    static HYUserInfor_LocalData * instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYUserInfor_LocalData alloc] init];
+    });
+    return instance;
+}
+
+/**
+ 如果未登录状态下，跳转登录界面
+ 如果已经登录，不做操作
+ */
++ (void)LoginWithVC:(UIViewController *)VC
+{
+    if (!VC) {
+        HYBaseTabBarController *tabBarController                = (HYBaseTabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+        VC  = tabBarController;
+    }
+    if (![[HYUserInfor_LocalData share] isLogin]) {
+        LWLoginViewController *loginVC = [[LWLoginViewController alloc] init];
+        HYBaseNavigationController *navi = [[HYBaseNavigationController alloc] initWithRootViewController:loginVC];
+        [VC presentViewController:navi animated:YES completion:nil];
+    }
+}
+
+/**
+ 为登录时，添加收藏
+ */
+- (void)addCollectWithID:(NSString *)ID
+{
+    NSArray * currentIDs = USERDEFAULTS_GET(@"USER_NOLGOIN_COLLECTIDS");
+    NSMutableArray *tempArr = [[NSMutableArray alloc] initWithArray:currentIDs];
+    [tempArr addObject:ID];
+    USERDEFAULTS_SET(tempArr, @"USER_NOLGOIN_COLLECTIDS");
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+
+/**
+ 获取收藏数组
+ */
+- (NSArray *)getCollectIDs
+{
+    NSArray * currentIDs = USERDEFAULTS_GET(@"USER_NOLGOIN_COLLECTIDS");
+    return currentIDs;
+}
+
+/**
+ 返回是否登录
+ */
+- (BOOL)isLogin {
+    NSString *TOKEN = USERDEFAULTS_GET(USER_TOKEN_KEY);
+    if (TOKEN && ![TOKEN isEqualToString:@""]) {
+        return YES;
+    }
+    return NO;
+}
+
+/**
+  退出登录
+  */
+- (void)LoginOut
+{
+    /**
+     切换tabbarindex
+     */
+    POST_NOTI(CHANGETABBAR_INDEX_KEY, @"0");
+    
+    [self deleteXGPushTagOrAccount];
+    
+    /**
+     清除本地用户数据
+     */
+    USERDEFAULTS_RE(USER_TOKEN_KEY);
+    USERDEFAULTS_RE(USER_HEADER_ICON);
+    USERDEFAULTS_RE(USER_INFOR_MAIL);
+    USERDEFAULTS_RE(USER_INFOR_PHONE);
+    USERDEFAULTS_RE(USER_INFOR_NAME);
+    USERDEFAULTS_RE(USER_INFOR_QIANMING);
+    USERDEFAULTS_RE(USER_INFOR_USERID);
+    USERDEFAULTS_RE(USER_INFOR_HEADERICON_URL);
+    USERDEFAULTS_RE(USER_HETONGMODEL_INFOR);
+    USERDEFAULTS_RE(USER_INFOR_PASSWORD_KEY);
+    
+    //清除本地消息上次更新时间，切换账号重新请求新的数据
+    USERDEFAULTS_RE(SAVE_DB_MESSAGE_LAST_UPDATE_DATE);
+    LWLog(@"******清除本地信息");
+    
+    //保存有新的未读消息标识
+    [SYSTEM_USERDEFAULTS setBool:NO forKey:ISHAVENOTLOOKMESSAGE];
+    [SYSTEM_USERDEFAULTS synchronize];
+    
+    //发送通知，改变图标
+    POST_NOTI(GETMESSAGEINFORKNOEISORNOTNOLOOKMESSAGE, nil);
+    
+    //清空本地数据库
+    USERDEFAULTS_RE(SAVE_DB_MESSAGE_LAST_UPDATE_DATE);
+    [[LWFmdb share] deleteTableWithTableType:LWDBTableTypeMessge];
+}
+
+/**
+ 保存登录信息
+ */
+- (void)saveLoginInfor:(id)info
+{
+    [self saveUser_Info:info];
+    /**
+     登录成功移除本地收藏数据
+     */
+    USERDEFAULTS_RE(USER_NOLGOIN_COLLECTIDS);
+    [SYSTEM_USERDEFAULTS synchronize];
+    
+    //重新登录后，刷新我的界面数据
+    POST_NOTI(CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI, nil);
+    
+    //登录后，刷新合同（我的界面）
+    self.isReHT_SuccessBooL = NO;
+    //刷新界面
+    POST_NOTI(CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI, nil);
+}
+
+/**
+ 保存 个人信息 - login
+ */
+- (void)saveUser_Info:(id)info
+{
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"token"]], USER_TOKEN_KEY);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"headpicUrl"]], USER_INFOR_HEADERICON_URL);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userName"]], USER_INFOR_NAME);
+        USERDEFAULTS_SET([HYStringTool checkString:[info[@"userSign"] ex_base64Decode]], USER_INFOR_QIANMING);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userMail"]], USER_INFOR_MAIL);
+        if (info[@"userPhoneNumber"]) USERDEFAULTS_SET([HYStringTool checkString:info[@"userPhoneNumber"]], USER_INFOR_PHONE);
+        if (info[@"phone"]) USERDEFAULTS_SET([HYStringTool checkString:info[@"phone"]], USER_INFOR_PHONE);
+        if (info[@"id"]) USERDEFAULTS_SET([HYStringTool checkString:info[@"id"]], USER_INFOR_USERID);
+        if (info[@"userId"]) USERDEFAULTS_SET([HYStringTool checkString:info[@"userId"]], USER_INFOR_USERID);
+        
+        [self setTagsForAccountWithGroupNames:info[@"groupNames"]];
+        [self setAliasForAccountWithUserId:info[@"userId"]];
+    }
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+
+/**
+ 根据获取信息接口
+ */
+- (void)saveUser_InforOfUserInfo:(id)info
+{
+    //清除二进制图片
+    USERDEFAULTS_RE(USER_HEADER_ICON);
+    
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"token"]], USER_TOKEN_KEY);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"id"]], USER_INFOR_USERID);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"picWeixin"]], USER_INFOR_HEADERICON_URL);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"username"]], USER_INFOR_NAME);
+        USERDEFAULTS_SET([HYStringTool checkString:[info[@"sign_"] ex_base64Decode]], USER_INFOR_QIANMING);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"phone"]], USER_INFOR_PHONE);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"email"]], USER_INFOR_MAIL);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"password"]], USER_INFOR_PASSWORD_KEY);
+    }
+    [SYSTEM_USERDEFAULTS synchronize];
+    
+    POST_NOTI(GET_USERINFOR_TOUPDATE_MINEMAININFOR, nil);
+    
+    [self setTagsForAccountWithGroupNames:info[@"groupNames"]];
+    [self setAliasForAccountWithUserId:info[@"id"]];
+}
+
+
+/**
+ 删除信鸽推送的标签、账号标识
+ */
+- (void)deleteXGPushTagOrAccount
+{
+    //解绑标签
+    [[XGPushTokenManager defaultTokenManager] clearAllIdentifiers:XGPushTokenBindTypeAccount];
+    //解绑账号：
+//    [[XGPushTokenManager defaultTokenManager] clearAllIdentifiers:XGPushTokenBindTypeTag];
+    
+    if (USERDEFAULTS_GET(USER_INFOR_USERID)){
+        [[XGPushTokenManager defaultTokenManager] unbindWithIdentifer:USERDEFAULTS_GET(USER_INFOR_USERID) type:XGPushTokenBindTypeAccount];
+    }
+//    [[XGPushTokenManager defaultTokenManager] bindWithIdentifier:@"" type:XGPushTokenBindTypeAccount];
+    
+    //停止接收消息
+    //    [[XGPush defaultManager] stopXGNotification];
+    
+    NSArray *tags = [[XGPushTokenManager defaultTokenManager] identifiersWithType:XGPushTokenBindTypeTag];
+    NSArray *accounts = [[XGPushTokenManager defaultTokenManager] identifiersWithType:XGPushTokenBindTypeAccount];
+    LWLog(@"tags:%@ \naccounts:%@",tags,accounts);
+}
+
+/**
+ 设置标签
+
+ @param groupNames 标签组
+ */
+- (void)setTagsForAccountWithGroupNames:(NSArray *)groupNames
+{
+    if (groupNames && [groupNames isKindOfClass:[NSArray class]]) {
+        //绑定标签：
+        [[XGPushTokenManager defaultTokenManager] updateBindedIdentifiers:groupNames bindType:XGPushTokenBindTypeTag];
+    }else{
+        LWLog(@"\n**********用户推送的标签设置失败！获取到的tags：%@*********\n",groupNames);
+    }
+}
+
+/**
+ 设置别名
+
+ @param userId 用户ID
+ */
+- (void)setAliasForAccountWithUserId:(NSString *)userId
+{
+    if (!userId) return;
+    LWLog(@"\n\n*********信鸽推送绑定的userId:%@",userId);
+    //绑定账号：
+    [[XGPushTokenManager defaultTokenManager] bindWithIdentifier:userId type:XGPushTokenBindTypeAccount];
+}
+
+/**
+ 异步保存头像
+ */
+- (void)saveUser_Headericon_Local:(UIImage *)icon
+{
+    if (!icon) {
+        return;
+    }
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *icon_data = UIImagePNGRepresentation(icon);
+        [SYSTEM_USERDEFAULTS setObject:icon_data forKey:USER_HEADER_ICON];
+    });
+}
+
+/**
+ 获取本地头像
+ */
+- (UIImage *)User_HeaderImageData_Local
+{
+    NSData *icon_data =  [SYSTEM_USERDEFAULTS objectForKey:USER_HEADER_ICON];
+    if (icon_data) {
+        UIImage *header_icon = [UIImage imageWithData:icon_data];
+        if (header_icon) {
+            return header_icon;
+        }
+    }
+    return nil;
+}
+
+/**
+ 保存合同
+ */
+- (void)saveHeTongInfor:(NSArray *)hetongInfor
+{
+//    _getHeTong234Infor = nil;
+    _getHeTong2Infor = nil;
+    self.isReHT_SuccessBooL = YES;
+    NSArray * array = [NSArray arrayWithArray:hetongInfor];
+    [SYSTEM_USERDEFAULTS setObject:array forKey:USER_HETONGMODEL_INFOR];
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+
+- (NSArray *)getHeTongInfor
+{
+    NSArray *hetong_infor = USERDEFAULTS_GET(USER_HETONGMODEL_INFOR);
+    NSMutableArray *hetongArr = [NSMutableArray array];
+    for (NSDictionary *dict in hetong_infor) {
+        HYContractModel *hetongmodel = [HYContractModel modelWithJSON:dict];
+        if ([hetongmodel.status integerValue] != 5) {
+            [hetongArr addObject:hetongmodel];
+        }
+    }
+    return (NSArray *)hetongArr;
+}
+
+- (NSArray *)getHeTong2Infor
+{
+    if (_getHeTong2Infor) {
+        return _getHeTong2Infor;
+    }
+    NSMutableArray *temp = [[NSMutableArray alloc] init];
+    for (HYContractModel *model in [self getHeTongInfor]) {
+        if ([model.status integerValue]== 2) {
+            [temp addObject:model];
+        }
+    }
+    return _getHeTong2Infor = temp;
+}
+
+@end

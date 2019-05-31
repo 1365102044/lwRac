@@ -1,0 +1,97 @@
+//
+//  HYHouseRescourcesModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+#import "HYHuXingInforModel.h"
+#import "HYpicObjModel.h"
+
+@interface hiCityModel :HYBaseModel
+@property (nonatomic, copy) NSString * quan;
+@property (nonatomic, copy) NSString * cityCode;
+@property (nonatomic, copy) NSString * name;
+//id
+@property (nonatomic, copy) NSString * jian;
+
+@end
+
+
+@interface sheshiArrModel: HYBaseModel
+//1存在；0不存在
+@property (nonatomic, copy) NSString * isHave;
+//基础设施名称
+@property (nonatomic, copy) NSString * name;
+//id 基础设施id
+//icon地址
+@property (nonatomic, copy) NSString * iconUrl;
+//基础设施种类
+@property (nonatomic, copy) NSString * type;
+
+@end
+
+
+@interface HYHouseRescourcesModel : HYBaseModel
+
+@property (nonatomic, copy) NSString * itemName;
+@property (nonatomic, copy) NSString * roomTypeCount;
+@property (nonatomic, copy) NSString * houseItemAddress;
+@property (nonatomic, copy) NSString * minRent;
+@property (nonatomic, copy) NSString * houseCount;
+@property (nonatomic, copy) NSDictionary * picObj;
+@property (nonatomic, strong) HYpicObjModel * picObjcModel;
+// id
+
+
+#pragma ---------------deatil------------
+//区域id
+@property (nonatomic, copy) NSString * hiAreaId;
+//图片数组
+@property (nonatomic, strong) NSArray * picArr;
+@property (nonatomic, strong) NSArray * picArrModel;
+
+@property (nonatomic, copy) NSString * lng;
+//是否删除-0:删除,1:有效,-1:彻底删除
+@property (nonatomic, strong) NSString * isDelete;
+@property (nonatomic, copy) NSString * gcid;
+//部门id
+@property (nonatomic, copy) NSString * departmentId;
+//设施对象
+@property (nonatomic, strong) NSArray * sheshiArr;
+@property (nonatomic, strong) NSArray * sheshiArrModel;
+//门店电话
+@property (nonatomic, copy) NSString * mendianPhone;
+//门店描述
+@property (nonatomic, copy) NSString * hiItemDesc;
+/*
+ {
+"name": "海淀",
+"id": "14"
+},
+ */
+@property (nonatomic, strong) NSDictionary * hiArea;
+//项目名称
+@property (nonatomic, copy) NSString * hiItemName;
+
+//城市对象
+@property (nonatomic, strong) NSDictionary * hiCity;
+@property (nonatomic, strong) hiCityModel * hiCityModel;
+
+//项目周边描述
+@property (nonatomic, copy) NSString * hiZhoubianDesc;
+//城市id
+@property (nonatomic, copy) NSString * hiCityId;
+//项目id
+//纬度
+@property (nonatomic, copy) NSString * lat;
+//项目详细地址
+@property (nonatomic, copy) NSString * hiDetailedAddress;
+
+@property (nonatomic, strong) NSArray * roomTypeArr;
+@property (nonatomic, strong) NSArray * roomTypeArrModel;
+
+
+@end

@@ -1,0 +1,133 @@
+//
+//  HYBaseBarButtonItem.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseBarButtonItem.h"
+
+@interface HYBaseBarButtonItem()
+/**
+ 当前的控件
+ */
+@property (nonatomic, strong) UIView *currentCustomView;
+
+@end
+@implementation HYBaseBarButtonItem
+
+- (void)inset:(UIEdgeInsets)inset
+{
+    HYDefaultButton *button = (HYDefaultButton *)self.currentCustomView;
+    button.contentEdgeInsets = inset;
+}
+
+- (void)setTextColor:(UIColor *)textColor
+{
+    _textColor = textColor;
+    
+    HYDefaultButton *button = (HYDefaultButton *)self.currentCustomView;
+    [button setTitleColor:textColor forState:UIControlStateNormal];
+    [button setTitleColor:textColor forState:UIControlStateHighlighted];
+    [button setTitleColor:textColor forState:UIControlStateDisabled];
+}
+
+- (void)setOffSet:(BOOL)offSet
+{
+    _offSet = offSet;
+    
+}
+
+- (void)setAlph:(CGFloat)alph
+{
+    _alph = alph;
+    
+    self.currentCustomView.alpha = alph;
+}
+
+/**
+ 点击事件
+ 
+ @param sender sender
+ */
+- (void)buttonClick:(UIButton *)sender
+{
+    self.actionBlock(sender);
+}
+
+/**
+ 创建BarButtonItem（文字）
+ 
+ @param titleStringKey                          title的文字Key
+ @return                                        barButtonItem
+ */
++ (instancetype)barButtonItemWithTitleStringKey:(NSString *)titleStringKey
+                                       callBack:(HYEventCallBackBlock)callBack
+{
+    HYDefaultButton *barButton              = [HYDefaultButton buttonWithTitleStringKey:titleStringKey
+                                                                             titleColor:HYCOLOR.color_c26
+                                                                              titleFont:SYSTEM_REGULARFONT(16.f)
+                                                                                 target:nil
+                                                                               selector:nil];
+    HYBaseBarButtonItem *barButtonItem      = [[HYBaseBarButtonItem alloc] initWithCustomView:barButton];
+    barButtonItem.currentCustomView         = barButton;
+    [barButton addTarget:barButtonItem
+                  action:@selector(buttonClick:)
+        forControlEvents:UIControlEventTouchUpInside];
+    
+    if (callBack) {
+        [barButtonItem setActionBlock:callBack];
+    }
+    return barButtonItem;
+}
+
+/**
+ 创建返回按钮（图片）
+ 
+ @return                                        barButtonItem
+ */
++ (instancetype)backbarButtonItemWithCallBack:(HYEventCallBackBlock)callBack
+{
+    HYDefaultButton *defaultButton          = [HYDefaultButton buttonImageWithImageNamed:@"public_back" type:(HYProjectButtonSetImage) target:nil selector:nil];
+    defaultButton.imageEdgeInsets           = UIEdgeInsetsMake(ADJUST_PERCENT_FLOAT(-6.f), ADJUST_PERCENT_FLOAT(-16), 0, 0);
+    HYBaseBarButtonItem *barButtonItem      = [[HYBaseBarButtonItem alloc] initWithCustomView:defaultButton];
+    barButtonItem.currentCustomView         = defaultButton;
+    
+    [defaultButton addTarget:barButtonItem
+                      action:@selector(buttonClick:)
+            forControlEvents:UIControlEventTouchUpInside];
+    
+    if (callBack) {
+        [barButtonItem setActionBlock:callBack];
+    }
+    return barButtonItem;
+}
+
+/**
+ 创建BarButtonItem（图片）
+ 
+ @param imageNamed                              图片名
+ @return                                        barButtonItem
+ */
++ (instancetype)barButtonItemWithimageNamed:(NSString *)imageNamed
+                                      callBack:(HYEventCallBackBlock)callBack
+{
+    HYDefaultButton *defaultButton          = [HYDefaultButton buttonImageWithImageNamed:imageNamed
+                                                                                    type:(HYProjectButtonSetImage)
+                                                                                  target:nil
+                                                                                selector:nil];
+    HYBaseBarButtonItem *barButtonItem      = [[HYBaseBarButtonItem alloc] initWithCustomView:defaultButton];
+    barButtonItem.currentCustomView         = defaultButton;
+    
+    [defaultButton addTarget:barButtonItem
+                      action:@selector(buttonClick:)
+            forControlEvents:UIControlEventTouchUpInside];
+    
+    if (callBack) {
+        [barButtonItem setActionBlock:callBack];
+    }
+    return barButtonItem;
+}
+
+@end

@@ -1,0 +1,137 @@
+//
+//  HYCityListViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYCityListViewController.h"
+#import "HYCityModel.h"
+
+@interface HYCityListViewController ()
+@property (nonatomic, strong) NSMutableArray * cityDatas;
+@property (nonatomic, copy) HYEventCallBackBlock  callBlock;
+@property (nonatomic, strong) NSMutableArray * seactionTitleArrary;
+@property (nonatomic, strong) HYBaseView * headerView;
+@property (nonatomic, strong) NSString * currentLocationCity;
+
+@end
+
+@implementation HYCityListViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
+    }
+    HYCityModel *cityModels = self.cityDatas[indexPath.section];
+    HYCityGroupModel *groupMode =  cityModels.cityGroupArrary[indexPath.row];
+    cell.textLabel.text = groupMode.cityName;
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    HYCityModel *cityModels = self.cityDatas[section];
+    return cityModels.cityGroupArrary.count;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.cityDatas.count;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYCityModel *cityModels = self.cityDatas[indexPath.section];
+    HYCityGroupModel *groupMode =  cityModels.cityGroupArrary[indexPath.row];
+    NSString *SelectCityName = groupMode.cityName;
+    if (self.callBlock) {
+        self.callBlock(SelectCityName);
+    }
+    [self.navigationController popViewControllerAnimated:YES];
+//    [self dismissViewControllerAnimated:YES completion:nil];
+}
+//- (NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView
+//{
+//    return self.seactionTitleArrary;
+//}
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return self.seactionTitleArrary[section];
+}
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatCityListViewController:(id)extend CallBlock:(HYEventCallBackBlock)callBlock
+{
+    HYCityListViewController *cityVC = [[HYCityListViewController alloc] init];
+    cityVC.callBlock = callBlock;
+    cityVC.currentLocationCity = extend;
+    return cityVC;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.rowHeight = MARGIN*5;
+    self.MainTableView.tableHeaderView = self.headerView;
+    self.MainTableView.tableHeaderView.height = MARGIN*7;
+    self.navigationItem.title = [NSString stringWithFormat:@"当前城市-%@",self.currentLocationCity];
+}
+
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (NSMutableArray*)cityDatas
+{
+    if (!_cityDatas) {
+        _cityDatas = [[NSMutableArray alloc] init];
+        _seactionTitleArrary = [[NSMutableArray alloc] init];
+        
+        NSArray *tem = @[@{@"groupName":@"A",@"cityGroup":@[
+                                   @{@"cityName":@"安阳"}]},
+                         @{@"groupName":@"B",@"cityGroup":@[
+                                   @{@"cityName":@"北京"}]},
+                         @{@"groupName":@"C",@"cityGroup":@[
+                                   @{@"cityName":@"成都"}]},];
+        for (NSDictionary *dict in tem) {
+            HYCityModel *citymodel = [HYCityModel modelWithJSON:dict];
+            [_seactionTitleArrary addObject:citymodel.groupName];
+            [_cityDatas addObject:citymodel];
+        }
+    }
+    return _cityDatas;
+}
+- (HYBaseView*)headerView
+{
+    if (!_headerView) {
+        _headerView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                              text:@"定位城市"
+                                                         textColor:HYCOLOR.color_c4];
+        HYDefaultLabel *locationCity = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                              text:self.currentLocationCity
+                                                         textColor:HYCOLOR.color_c4];
+        [_headerView addSubview:titleLable];
+        [_headerView addSubview:locationCity];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.mas_equalTo(_headerView).mas_offset(MARGIN);
+        }];
+        [locationCity mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_headerView).mas_offset(MARGIN);
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN);
+        }];
+    }
+    return _headerView;
+}
+#pragma mark - Eigth.Other
+
+@end

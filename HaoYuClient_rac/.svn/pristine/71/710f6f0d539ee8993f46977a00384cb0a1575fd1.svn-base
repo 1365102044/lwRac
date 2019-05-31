@@ -1,0 +1,77 @@
+//
+//  HYHomePageModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+#import "HYpicObjModel.h"
+
+@interface HYBaseHomeModel : HYBaseModel
+//100不需要点击
+@property (nonatomic, assign) NSInteger tag;
+@property (nonatomic, strong) NSDictionary * itemPic;
+
+@end
+
+//首页banner
+@interface HYHomeBannnerModel : HYBaseModel
+@property (nonatomic, copy) NSString * picUrl;
+@property (nonatomic, copy) NSString * bannerManagerId;
+//图片绑定链接
+@property (nonatomic, copy) NSString * picBindLink;
+//户型id
+@property (nonatomic, copy) NSString * houseRoomTypeId;
+//状态（0，禁用；1，启用）
+@property (nonatomic, copy) NSString * picStatus;
+//项目id
+@property (nonatomic, copy) NSString * houseItemId;
+//推广类型(0：网页链接 1：门店户型)
+@property (nonatomic, assign) NSInteger promotionType;
+//名称
+@property (nonatomic, copy) NSString * name;
+
+@end
+
+//推荐户型
+@interface HYHomeHuXingModel : HYBaseHomeModel
+@property (nonatomic, copy) NSString * popuPic;
+//户型所在项目名称
+@property (nonatomic, copy) NSString * itemName;
+@property (nonatomic, copy) NSString * roomTypeId;
+//户型名称
+@property (nonatomic, copy) NSString * roomTypeName;
+//户型图片
+@property (nonatomic, strong) HYpicObjModel * picModel;
+//户型面积
+//@property (nonatomic, copy) NSString * roomTypeArea;
+@property (nonatomic, copy) NSString * iosRoomTypeArea;
+
+//户型最小最小
+//@property (nonatomic, copy) NSString * roomTypeLowestprice;
+@property (nonatomic, copy) NSString * iosRoomTypeLowestprice;
+
+@property (nonatomic, strong) NSDictionary * roomTypePic;
+
+
+@end
+
+//推荐房源
+@interface HYHomePageModel : HYBaseHomeModel
+@property (nonatomic, copy) NSString * popuPic;
+@property (nonatomic, copy) NSString * itemName;
+@property (nonatomic, copy) NSString * itemId;
+@property (nonatomic, copy) NSString * roomTypeName;
+@property (nonatomic, strong) HYpicObjModel * picModel;
+/** add  2018年11月14日16:21:36 **/
+//项目最小租金
+//@property (nonatomic, copy) NSString * itemLowestprice;
+@property (nonatomic, copy) NSString * iosItemLowestprice;
+
+
+//项目地址
+@property (nonatomic, copy) NSString * itemAddress;
+
+@end

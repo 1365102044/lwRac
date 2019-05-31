@@ -1,0 +1,32 @@
+//
+//  HYBaseTableViewController.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "HYBaseViewController.h"
+@interface HYBaseTableViewController :HYBaseViewController<DZNEmptyDataSetSource, DZNEmptyDataSetDelegate,UITableViewDelegate,UITableViewDataSource>
+@property (nonatomic, strong) HYBaseTableView * MainTableView;
+/**
+ 点击按钮的回调
+ */
+- (void)refreshData;
+
+/**
+ imageName 图标
+ noData_title     标题
+ noData_des       描述文字
+ noData_BtnTitle  按钮文字
+ */
+- (void)setNoDataImageName:(NSString *)imageName
+              noData_title:(NSString *)noData_title
+                noData_des:(NSString *)noData_des
+           noData_BtnTitle:(NSString *)noData_BtnTitle;
+
+- (void)requestListInfor;
+- (void)requestListInfor_LoadMore;
+
+@end

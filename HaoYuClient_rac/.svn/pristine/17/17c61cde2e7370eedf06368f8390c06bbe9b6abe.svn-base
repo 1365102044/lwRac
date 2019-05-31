@@ -1,0 +1,72 @@
+//
+//  HYOnLineYuYueViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYOnLineYuYueViewController.h"
+#import "HYYuYueMainView.h"
+#import "HYYuYueResultViewController.h"
+@interface HYOnLineYuYueViewController ()
+@property (nonatomic, strong) HYYuYueMainView * mainView;
+
+@end
+
+@implementation HYOnLineYuYueViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+- (void)clickCommitBtn:(UIButton *)sender
+{
+    HYYuYueResultViewController * resultVC = [[HYYuYueResultViewController alloc] init];
+    [self.navigationController pushViewController:resultVC animated:YES];
+}
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"预约看房";
+    self.view.backgroundColor = HYCOLOR.color_c0;
+    [self.MainScrollView addSubview:self.mainView];
+    [self.view addSubview:self.MainScrollView];
+    [self.mainView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_offset(SCREEN_WIDTH);
+        make.edges.mas_equalTo(self.MainScrollView);
+    }];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.left.right.mas_equalTo(self.view);
+        make.bottom.mas_equalTo(self.view.mas_bottom).mas_offset(-MARGIN*5);
+    }];
+    self.MainScrollView.backgroundColor = HYCOLOR.color_c1;
+    
+    HYFillLongButton *commitBtn = [HYFillLongButton buttonCorWithTitleStringKey:@"提交预约"
+                                                                         target:self
+                                                                       selector:@selector(clickCommitBtn:)];
+    [self.view addSubview:commitBtn];
+    [commitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(SCREEN_WIDTH - MARGIN*4, MARGIN*4));
+        make.bottom.mas_equalTo(self.view.mas_bottom).mas_offset(-MARGIN/2);
+        make.centerX.mas_equalTo(self.view.mas_centerX);
+    }];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (HYYuYueMainView*)mainView
+{
+    if (!_mainView) {
+        _mainView = [[HYYuYueMainView alloc] init];
+    }
+    return _mainView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

@@ -1,0 +1,133 @@
+//
+//  HYPayDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayDeatilViewController.h"
+#import "HYPayDeatilHeaderView.h"
+#import "HYNoPayBillTableViewCell.h"
+#import "HYBillModel.h"
+#define PAYDEATILCELLIDENTIFITER @"PAYDEATILCELLIDENTIFITER"
+
+@interface HYPayDeatilViewController ()
+@property (nonatomic, strong) HYPayDeatilHeaderView * MainHeaderView;
+@property (nonatomic, strong) NSString * indentChengzuId;
+
+@end
+
+@implementation HYPayDeatilViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestListInfor
+{
+    [super requestListInfor];
+    
+    PARA_CREART;
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"phone");
+    PARA_SET(_indentChengzuId, @"indentChengzuId");
+    PARA_SET(@"1", @"indentType");
+    [[HYServiceManager share] postRequestAnWithurl:GET_MINEBILLLISTINFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          [self handleData:objc];
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      }];
+}
+
+/**
+ 处理数据
+ */
+- (void)handleData:(id)objc
+{
+    NSArray *temp = objc[@"result"][@"list"];
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    for (NSDictionary *dict in temp) {
+        NSMutableArray *items = [NSMutableArray array];
+        HYBillModel *billModel = [HYBillModel modelWithJSON:dict];
+        NSMutableArray *lastItems = [[NSMutableArray alloc] init];
+        lastItems = dataDict[billModel.beginTime];
+        if (lastItems.count > 0 && lastItems != nil) {
+            items = lastItems;
+            [items addObject:billModel];
+        }else{
+            [items addObject:billModel];
+        }
+        [dataDict setValue:items forKey:billModel.beginTime];
+    }
+    NSArray *allVaules = dataDict.allValues;
+    [self.dataMutableArray addObjectsFromArray:allVaules];
+    [self.MainTableView reloadData];
+    
+    NSArray *firstArr  =  self.dataMutableArray.firstObject;
+    HYBillModel *billModel = firstArr.firstObject;
+    self.MainHeaderView.billModel = billModel;
+}
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    HYNoPayBillTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:PAYDEATILCELLIDENTIFITER];
+    if (!cell) {
+        cell = [[HYNoPayBillTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:PAYDEATILCELLIDENTIFITER];
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+      [cell setDataArr:self.dataMutableArray[indexPath.row]];
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    LWLog(@"========");
+}
+
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatPayDeatilViewController:(NSString *)indentChengzuId
+{
+    HYPayDeatilViewController *instance = [[HYPayDeatilViewController alloc] init];
+    instance.indentChengzuId = indentChengzuId;
+    return instance;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"缴费/充值";
+    [self setUI];
+    [self requestListInfor];
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    self.MainTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.height);
+    self.MainTableView.rowHeight = UITableViewAutomaticDimension;
+    self.MainTableView.estimatedRowHeight = ADJUST_PERCENT_FLOAT(150);
+    self.MainTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.MainTableView.backgroundColor = HYCOLOR.color_c1;
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.tableHeaderView = self.MainHeaderView;
+    self.MainTableView.tableHeaderView.height = ADJUST_PERCENT_FLOAT(400);
+    
+}
+#pragma mark - Seventh.懒加载
+- (HYPayDeatilHeaderView*)MainHeaderView
+{
+    if (!_MainHeaderView) {
+        _MainHeaderView                 = [[HYPayDeatilHeaderView alloc] init];
+        _MainHeaderView.backgroundColor = HYCOLOR.color_c1;
+        _MainHeaderView.viewController  = self;
+    }
+    return _MainHeaderView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

@@ -1,0 +1,47 @@
+//
+//  LWBaseBarButtonItem.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+public typealias LWEvenCallBackBlock =  (Any) -> ()
+
+class LWBaseBarButtonItem: UIBarButtonItem {
+    
+    var callBlock: LWEvenCallBackBlock?
+    
+    
+    static func barButtonItemOftitle(titleString : String, callBackBlock:@escaping LWEvenCallBackBlock) -> LWBaseBarButtonItem {
+        let barItem = LWBaseBarButtonItem()
+        let btn = UIButton.init(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+        btn.setTitle(titleString, for: .normal)
+        btn.setTitleColor(UIColor.black, for: .normal)
+        btn.titleLabel?.font = LWSytem_Regular(15)
+        btn.addTarget(barItem.self, action: #selector(clickItem), for: .touchUpInside)
+        barItem.customView = btn
+        barItem.callBlock = callBackBlock
+        return barItem
+    }
+    static func barButtonItemOfImage(image : UIImage, callBackBlock:@escaping LWEvenCallBackBlock) -> LWBaseBarButtonItem {
+        let barItem = LWBaseBarButtonItem()
+        let btn = UIButton.init(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+        btn.setImage(image, for: .normal)
+        btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -20, bottom: 0, right: 0)
+        btn.addTarget(barItem.self, action: #selector(clickItem), for: .touchUpInside)
+        barItem.customView = btn
+        barItem.callBlock = callBackBlock
+        return barItem
+    }
+    
+    @objc func clickItem(){
+    if self.callBlock != nil{
+        callBlock!("")
+        }
+    }
+    
+}
+
+

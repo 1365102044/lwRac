@@ -1,0 +1,31 @@
+//
+//  HYMineInformationView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYLeftRightArrowView.h"
+
+@protocol MineInforDelegate <NSObject>
+- (void)handleClickCellView:(NSString *)leftStr;
+@end
+
+@interface HYMineInformationView : HYBaseView
+
+@property(weak,nonatomic) id<MineInforDelegate> delegate;
+@property (nonatomic, strong) HYLeftRightArrowView * headerIconView;
+@property (nonatomic, strong) HYLeftRightArrowView * userNameView;
+@property (nonatomic, strong) HYLeftRightArrowView * qianMingView;
+@property (nonatomic, strong) HYLeftRightArrowView * phoneView;
+@property (nonatomic, strong) HYLeftRightArrowView * mailView;
+@property (nonatomic, strong) HYLeftRightArrowView * clearCacheView;
+//@property (nonatomic, assign) double cacheNumber;
+
+//切换服务器 需重新登录
+@property (nonatomic, copy) HYEventCallBackBlock againLogin;
+
+
+@end

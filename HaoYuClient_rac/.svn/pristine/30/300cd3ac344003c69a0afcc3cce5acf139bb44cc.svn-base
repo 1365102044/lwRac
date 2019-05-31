@@ -1,0 +1,16 @@
+//
+//  HYHuXingPicView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+@interface HYHuXingPicView : HYBaseView
+@property (nonatomic, strong) HYDefaultLabel * shitingLable;
+@property (nonatomic, strong) HYDefaultLabel * fangxiangLable;
+@property (nonatomic, strong) UIImageView * pic;
+
+@end

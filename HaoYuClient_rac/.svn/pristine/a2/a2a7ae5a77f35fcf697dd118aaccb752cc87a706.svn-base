@@ -1,0 +1,76 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+#import "HYAnnotationView.h"
+#import "HYPaoView.h"
+#import "HYPointAnnotation.h"
+#import "HYPointModel.h"
+#import "CoustomSlider.h"
+#import "UIControl+LWdelay.h"
+#import "HaoYuClient-Swift.h"
+
+#import "HYCircleView.h"
+#import "LWChoosePayMentView.h"
+
+@interface ViewController ()
+@property (nonatomic, strong) UISlider * sliderView;
+@property (nonatomic, strong) BMKMapView * mapView;
+@property(nonatomic , strong) BMKUserLocation *userLocation;
+@property (nonatomic, strong) UIButton * btn;
+
+@property (nonatomic, strong) HYCircleView * cricleView;
+
+@end
+
+@implementation ViewController
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+//    self.btn = [[UIButton alloc] initWithFrame:CGRectMake(100, 100, 100, 400)];
+//    self.btn.backgroundColor = [UIColor redColor];
+//    [self.view addSubview:self.btn];
+//    self.btn.lw_acceptEventInterval = 2;
+//    [self.btn addTarget:self action:@selector(clickbtn) forControlEvents:UIControlEventTouchUpInside];
+
+
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+//    LWLoginViewController *loginvc = [LWLoginViewController new];
+//    LWBaseNavigatorViewController *nav = [[LWBaseNavigatorViewController alloc] initWithRootViewController:loginvc];
+//    [self presentViewController:nav animated:YES completion:nil];
+    
+    
+    LWChoosePayMentView *temp = [[LWChoosePayMentView alloc] init];
+    [temp showChoosePayTypeViewWithTitle:@"房租缴费" desc:@"1000"
+                          callBlackBlock:^(id sender) {
+                              LWLog(@"**************%@",sender);
+                          }];
+}
+
+- (void)clickbtn
+{
+    NSLog(@"**************************%@",[NSDate date]);
+}
+
+- (HYCircleView *)cricleView{
+    if(!_cricleView){
+        _cricleView = [[HYCircleView alloc] init];
+    }
+    return _cricleView;
+}
+
+@end

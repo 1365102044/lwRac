@@ -1,0 +1,195 @@
+
+//
+//  HYTongZhuRenView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/20.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYTongZhuRenView.h"
+#import "HYAddTongZhuRenView.h"
+#import "HYAddTongZhuRenView.h"
+@interface HYTongZhuRenView ()
+@property (nonatomic, strong) HYBaseView * tongZhuRenView;
+@property (nonatomic, strong) HYBaseView * tongZhuRenSubView;
+@property (nonatomic, strong) HYDefaultLabel* tongzhurenAddLable;
+
+@end
+@implementation HYTongZhuRenView
+
+- (void)setIsHiddenAdd:(BOOL)isHiddenAdd
+{
+    _isHiddenAdd = isHiddenAdd ;
+    _tongzhurenAddLable.hidden = isHiddenAdd;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame sourcevc:(HYBaseViewController *)sourcevc
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.viewController = sourcevc;
+        self.backgroundColor = HYCOLOR.color_c1;
+        _dataArr = [[NSMutableArray alloc] init];
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    [self addSubview:self.tongZhuRenView];
+    [self.tongZhuRenView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+}
+
+- (void)setDataArr:(NSMutableArray *)dataArr
+{
+    _dataArr = dataArr;
+    [self updateTongZhuRenSubViews];
+}
+
+/**
+ 同住人试图
+ */
+- (HYBaseView*)tongZhuRenView
+{
+    if (!_tongZhuRenView) {
+        _tongZhuRenView = [[HYBaseView   alloc] init];
+        HYDefaultLabel* tongzhurenTitleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                                        text:@"同住人信息"
+                                                                   textColor:HYCOLOR.color_c2];
+        HYDefaultLabel* tongzhurenAddLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                                      text:@"添加同住人"
+                                                                 textColor:HYCOLOR.color_c4];
+        _tongzhurenAddLable = tongzhurenAddLable;
+        [_tongZhuRenView addSubview:tongzhurenTitleLable];
+        [_tongZhuRenView addSubview:tongzhurenAddLable];
+        tongzhurenAddLable.textAlignment = NSTextAlignmentCenter;
+        _tongZhuRenSubView = [[HYBaseView alloc] init];
+        [_tongZhuRenView addSubview:_tongZhuRenSubView];
+        [tongzhurenTitleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.top.mas_equalTo(_tongZhuRenView).mas_offset(MARGIN);
+        }];
+        [tongzhurenAddLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_tongZhuRenView).mas_offset(-MARGIN);
+            make.centerY.mas_equalTo(tongzhurenTitleLable.mas_centerY);
+            make.height.mas_offset(MARGIN*2.5);
+            make.width.mas_offset(MARGIN*7);
+        }];
+        [_tongZhuRenSubView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_tongZhuRenView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_tongZhuRenView.mas_right).mas_offset(-MARGIN);
+            make.top.mas_equalTo(tongzhurenTitleLable.mas_bottom).mas_offset(MARGIN);
+            make.bottom.mas_equalTo(_tongZhuRenView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        tongzhurenTitleLable.backgroundColor = [UIColor clearColor];
+        tongzhurenAddLable.backgroundColor = [UIColor greenColor];
+        tongzhurenAddLable.userInteractionEnabled = YES;
+        [tongzhurenAddLable bk_whenTapped:^{
+            [self clickAddHeZhuRen];
+        }];
+        _tongZhuRenView.backgroundColor = [UIColor clearColor];
+        _tongZhuRenSubView.backgroundColor = HYCOLOR.color_c1;
+    }
+    return _tongZhuRenView;
+}
+
+- (void)clickAddHeZhuRen
+{
+    HYAddTongZhuRenView *instance = [HYAddTongZhuRenView showAddHeZhuRenViewHZinfor:nil callbackBlock:^(id sender) {
+        NSMutableDictionary *dic = sender;
+        if (dic.allKeys.count > 0) {
+            [_dataArr insertObject:dic atIndex:0];
+        }
+        [self updateTongZhuRenSubViews];
+    }];
+    instance.viewController = self.viewController;
+}
+
+/**
+ 更新同住人的视图
+ */
+- (void)updateTongZhuRenSubViews
+{
+    [_tongZhuRenSubView removeAllSubviews];
+    for (int i = 0; i < self.dataArr.count; i ++) {
+        NSDictionary *dict = self.dataArr[i];
+        UIView *temp = [self creatCellViewleftStr:dict[@"nickname"] rightStr:dict[@"phone"]];
+        temp.tag = i ;
+        [_tongZhuRenSubView addSubview:temp];
+        [temp mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_tongZhuRenSubView);
+            make.right.mas_equalTo(_tongZhuRenSubView);
+            make.height.mas_offset(MARGIN*4);
+            if (i == 0) {
+                make.top.mas_equalTo(_tongZhuRenSubView.mas_top).mas_offset(MARGIN);
+            }else{
+                UIView *lastview = _tongZhuRenSubView.subviews[i - 1];
+                make.top.mas_equalTo(lastview.mas_bottom).mas_offset(MARGIN/2);
+            }
+            if (i == self.dataArr.count - 1) {
+                make.bottom.mas_equalTo(_tongZhuRenSubView.mas_bottom).mas_offset(-MARGIN);
+            }
+        }];
+        WEAKSELF(self);
+        if (!_isHiddenAdd) {
+            UIImageView *deleIcon = [[UIImageView alloc] init];
+            deleIcon.image = IMAGENAME(@"public_offwhite_h");
+            deleIcon.tag = i;
+            [temp addSubview:deleIcon];
+            [deleIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.size.mas_offset(CGSizeMake(MARGIN*3, MARGIN*3));
+                make.right.mas_equalTo(temp.mas_right).mas_offset(MARGIN*.8);
+                make.centerY.mas_equalTo(temp.mas_centerY).mas_offset(-MARGIN);
+            }];
+            deleIcon.userInteractionEnabled = YES;
+            //删除
+            [deleIcon bk_whenTapped:^{
+                [weakself.dataArr removeObjectAtIndex:deleIcon.tag];
+                [weakself updateTongZhuRenSubViews];
+            }];
+            //修改信息
+            temp.userInteractionEnabled = YES;
+            [temp bk_whenTapped:^{
+                [HYAddTongZhuRenView showAddHeZhuRenViewHZinfor:weakself.dataArr[temp.tag] callbackBlock:^(id sender) {
+                    NSMutableDictionary *dic = sender;
+                    if (dic.allKeys.count > 0) {
+                        [_dataArr replaceObjectAtIndex:temp.tag withObject:dic];
+                    }
+                    [self updateTongZhuRenSubViews];
+                }];
+            }];
+        }
+    }
+}
+
+/**
+ 同住人cellview
+ */
+- (UIView *)creatCellViewleftStr:(NSString *)leftStr rightStr:(NSString *)rightStr
+{
+    HYBaseView *tempview =  [[HYBaseView alloc] init];
+    HYDefaultLabel *left = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                    text:[leftStr isNullToString]
+                                               textColor:HYCOLOR.color_c4];
+    HYDefaultLabel *right = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                     text:[rightStr isNullToString]
+                                                textColor:HYCOLOR.color_c4];
+    [tempview addSubview:left];
+    [tempview addSubview:right];
+    [left mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(tempview.mas_centerY);
+        make.left.mas_equalTo(tempview.mas_left).mas_offset(MARGIN);
+        make.height.mas_offset(MARGIN*2);
+    }];
+    [right mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(tempview.mas_centerY);
+        make.right.mas_equalTo(tempview.mas_right).mas_offset((_isHiddenAdd) ? (-MARGIN) :(-MARGIN*2.5));
+        make.height.mas_equalTo(left.mas_height);
+    }];
+    return tempview;
+}
+
+@end

@@ -1,0 +1,51 @@
+//
+//  HYPublic_LocalData.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPublic_LocalData.h"
+@implementation HYPublic_LocalData
++ (instancetype)share
+{
+    static dispatch_once_t onceToken;
+    static HYPublic_LocalData *instance;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYPublic_LocalData alloc]init];
+    });
+    return instance;
+}
+
+/**
+ 保存当前版本号
+ */
+- (void)saveCurrentVersionNumber
+{
+    NSString *current = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+    [SYSTEM_USERDEFAULTS setObject:current forKey:CURRENTVERSIONNUMBER_STRINGKEY];
+}
+/**
+ 是否是新安装此版本
+ */
+- (BOOL)isFristInstall
+{
+    NSString *currentVersionNumber = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+    NSString *lastVersionNumber = [SYSTEM_USERDEFAULTS objectForKey:CURRENTVERSIONNUMBER_STRINGKEY];
+    if ([currentVersionNumber isEqualToString:lastVersionNumber]) {
+        return NO;
+    }
+    return YES;
+}
+
+
+//- (HYLocationTool*)locationTool
+//{
+//    if (!_locationTool) {
+//        _locationTool = [[HYLocationTool alloc] init];
+//    }
+//    return _locationTool;
+//}
+
+@end

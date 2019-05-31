@@ -1,0 +1,209 @@
+//
+//  LWRegisterSetPWViewController.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/17.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWRegisterSetPWViewController: LWBaseViewController {
+    
+    var accountNameTF:LWDefaultTextField?
+    var pwTF:LWDefaultTextField?
+    var confimPwTF:LWDefaultTextField?
+    var xieyiIcon:UIImageView?
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.title = "设置用户名和密码"
+        confiUI()
+        
+    }
+    
+    //    提交信息
+    @objc func submitInfor() {
+       
+        if !checkTFlegal() { return }
+        
+        //            网络请求
+        
+        self.navigationController?.popToRootViewController(animated: true)
+    }
+    
+    func checkTFlegal() -> Bool {
+        if accountNameTF?.textField?.text == "" {
+            LWAlertView.show(text: "用户名不能为空")
+            return false
+        }
+        if confimPwTF?.textField?.text == "" {
+            LWAlertView.show(text: "新密码不能为空")
+            return false
+        }
+        if pwTF?.textField?.text == "" {
+            LWAlertView.show(text: "确认密码不能为空")
+            return false
+        }
+        if pwTF?.textField?.text != confimPwTF?.textField?.text{
+            LWAlertView.show(text: "2次数输入的密码不一致")
+            return false
+        }
+        return true
+    }
+    
+    @objc func clickXieYi(sender:UITapGestureRecognizer) {
+        if self.xieyiIcon?.backgroundColor == .red {
+            self.xieyiIcon?.backgroundColor = .blue
+        }else{
+            self.xieyiIcon?.backgroundColor = .red
+        }
+    }
+    
+    // 配置界面
+    func confiUI() {
+        let headerImageView = UIImageView.init()
+        view.addSubview(headerImageView)
+        headerImageView.backgroundColor = .red
+        
+        let accountView = accountNameView()
+        view.addSubview(accountView)
+        
+        let pwView = confiPwView()
+        view.addSubview(pwView)
+        let confirmPwView = confirmPWView()
+        view.addSubview(confirmPwView)
+        
+        let submitinforBtn = LWDefaultButton.defaultButton(title: "确定", textfont: LWSytem_Regular(15), textColor: .black, target: self, sel: #selector(submitInfor))
+        view.addSubview(submitinforBtn)
+        submitinforBtn.backgroundColor = .red
+        submitinforBtn.setBoundCorners(radius: ADJUSET(myfloat: 20), boundWidth: 0)
+        
+        headerImageView.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 20))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 20))
+            make.top.equalTo(view.snp.top).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 200))
+        }
+        accountView.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 30))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 30))
+            make.top.equalTo(headerImageView.snp.bottom).offset(ADJUSET(myfloat: 30))
+        }
+        pwView.snp.makeConstraints { (make) in
+            make.left.right.equalTo(accountView)
+            make.top.equalTo(accountView.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+        confirmPwView.snp.makeConstraints { (make) in
+            make.left.right.equalTo(accountView)
+            make.top.equalTo(pwView.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+      
+        let btnsView = addBtns()
+        view.addSubview(btnsView)
+        btnsView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(self.view)
+            make.top.equalTo(confirmPwView.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+        
+        submitinforBtn.snp.makeConstraints { (make) in
+            make.left.right.equalTo(confirmPwView)
+            make.top.equalTo(btnsView.snp.bottom).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+    }
+    
+    func addBtns() -> LWBaseView {
+        let btnsView = LWBaseView()
+        
+        xieyiIcon = UIImageView()
+        xieyiIcon?.backgroundColor = .red
+        let rightL = LWDefaultLable.defaultLable(text: "勾选代表您同意《好寓注册协议》", textColor: .blue, textFont: LWSystem(ADJUSET(myfloat: 12)))
+        btnsView.addSubview(xieyiIcon!)
+        btnsView.addSubview(rightL)
+        xieyiIcon?.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: 20, height: 20))
+            make.left.equalTo(btnsView.snp.left).offset(ADJUSET(myfloat: 5))
+            make.centerY.equalTo(rightL)
+        }
+        rightL.snp.makeConstraints { (make) in
+            make.centerY.right.equalTo(btnsView)
+            make.left.equalTo((xieyiIcon?.snp.right)!).offset(ADJUSET(myfloat: 20))
+            make.height.bottom.top.equalTo(btnsView)
+            make.height.equalTo(ADJUSET(myfloat: 30))
+        }
+        btnsView.isUserInteractionEnabled = true
+        
+        let tap = UITapGestureRecognizer.init(target: self, action: #selector(clickXieYi(sender:)))
+        btnsView.addGestureRecognizer(tap)
+        
+        return btnsView
+    }
+    
+    func accountNameView() -> LWBaseView {
+        let accountNameView = LWBaseView()
+        accountNameTF = LWDefaultTextField.defaultTextField(placeholder: "请输入用户名", textFont: LWSytem_Regular(15), textColor: .black)
+        accountNameTF?.maxLenght = 20
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        accountNameView.addSubview(lefticon)
+        accountNameView.addSubview(accountNameTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(accountNameView)
+            make.centerY.equalTo(accountNameView.snp.centerY)
+        }
+        accountNameTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(accountNameView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        accountNameView.addBottomLine()
+        return accountNameView
+    }
+    
+    func confiPwView() -> LWBaseView{
+        let pwView = LWBaseView()
+        pwTF = LWDefaultTextField.defaultTextField(placeholder: "请输入新密码", textFont: LWSytem_Regular(15), textColor: .black)
+        pwTF?.maxLenght = 20
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        pwView.addSubview(lefticon)
+        pwView.addSubview(pwTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(pwView)
+            make.centerY.equalTo(pwView.snp.centerY)
+        }
+        pwTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(pwView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        pwView.addBottomLine()
+        return pwView
+    }
+    
+    
+    func confirmPWView() -> LWBaseView {
+        let confirmView = LWBaseView()
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        confimPwTF = LWDefaultTextField.defaultTextField(placeholder: "请输入确认密码", textFont: LWSytem_Regular(15), textColor: .black)
+        confimPwTF?.maxLenght = 20
+        confirmView.addSubview(lefticon)
+        confirmView.addSubview(confimPwTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(confirmView)
+            make.centerY.equalTo(confirmView.snp.centerY)
+        }
+        confimPwTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(confirmView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        confirmView.addBottomLine()
+        return confirmView
+    }
+}

@@ -1,0 +1,36 @@
+//
+//  LWProjectKeyString.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/18.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+//MARK: - ------------------------ 登录保存的信息 ------------------------
+
+/// token
+let ACCOUNT_INFOR_TOKEN = "ACCOUNT_INFOR_TOKEN"
+
+/// userId
+let ACCOUNT_INFOR_USERID = "ACCOUNT_INFOR_USERID"
+
+/// headPicUrl
+let ACCOUNT_INFOR_HEADPICURL = "ACCOUNT_INFOR_HEADPICURL"
+
+/// userName
+let ACCOUNT_INFOR_USERNAME = "ACCOUNT_INFOR_USERNAME"
+
+/// userPhoneNumber
+let ACCOUNT_INFOR_USERPHONENUMBER = "ACCOUNT_INFOR_USERPHONENUMBER"
+
+/// userSign
+let ACCOUNT_INFOR_USERSIGN = "ACCOUNT_INFOR_USERSIGN"
+
+/// userMail
+let ACCOUNT_INFOR_USERMAIL = "ACCOUNT_INFOR_USERMAIL"
+
+
+
+

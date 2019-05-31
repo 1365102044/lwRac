@@ -1,0 +1,35 @@
+//
+//  HYPayMentManager.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "WXApi.h"
+
+@protocol payMentResultDelegate<NSObject>
+/**
+ payMethod    WX / ALI
+ code 100 成功！
+ */
+- (void)payMentResultHandleWithpayMethod:(NSString *)payMethod code:(NSInteger)code errordesc:(NSString *)errordesc;
+
+@end
+
+@interface HYPayMentManager : NSObject<WXApiDelegate>
+
+//支付回调
+//@property (nonatomic, copy) HYEventCallBackBlock PayResultBlock;
+
++ (instancetype)shareManager;
+
+- (void)WechatPay:(NSDictionary *)param;
+
+//测试调用微信支付
++ (NSString *)jumpToBizPay;
+
+@property (nonatomic, assign) id<payMentResultDelegate> resultDelegate;
+
+@end

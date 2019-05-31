@@ -1,0 +1,59 @@
+//
+//  HYBaseTextFiled.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/8.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTextFiled.h"
+
+@interface HYBaseTextFiled ()<UITextFieldDelegate>
+
+@end
+
+@implementation HYBaseTextFiled
+
+- (NSString *)text
+{
+    return _textFiled.text;
+}
+
+- (void)setText:(NSString *)text
+{
+    _textFiled.text = text;
+}
+
+- (void)setUI
+{
+    _textFiled = [[UITextField alloc] init];
+    _maxCount = 400;
+    [self addSubview:_textFiled];
+    _textFiled.delegate = self;
+    [_textFiled mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.right.bottom.mas_equalTo(self);
+        make.left.mas_equalTo(self.mas_left).mas_offset(3);
+    }];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSString *totalString;
+    if (string.length <= 0) {
+        @try {
+            totalString = [textField.text substringToIndex:textField.text.length-1];
+        } @catch (NSException *exception) {
+            
+        } @finally {
+            
+        }
+    }
+    else {
+        totalString = [NSString stringWithFormat:@"%@%@",textField.text,string];
+    }
+    if (totalString.length == self.maxCount + 1) {
+        return NO;
+    }
+    return YES;
+}
+@end

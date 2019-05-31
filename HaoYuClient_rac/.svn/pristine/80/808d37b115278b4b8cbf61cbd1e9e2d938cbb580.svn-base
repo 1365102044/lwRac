@@ -1,0 +1,28 @@
+
+#import "HYNotificationConst.h"
+
+//** =========================================================================================== */
+//** ============================================Timer========================================== */
+//** =========================================================================================== */
+
+/**
+ *  定时器调用方法通知
+ */
+NSString * const TIMER_NOTIFICATION                                                                 = @"TIMER_NOTIFICATION";
+
+/**
+ 监听改变tabbarindex
+ */
+NSString *const CHANGETABBAR_INDEX_KEY                              = @"CHANGETABBAR_INDEX_KEY";
+
+/**
+ 签约 填写信息 选择合同起止日期后，获取优惠活动请求
+ */
+NSString *const GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY                              = @"GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY";
+
+/**
+ 获取个人信息后，更新界面信息
+ */
+NSString *const GET_USERINFOR_TOUPDATE_MINEMAININFOR                                  = @"GET_USERINFOR_TOUPDATE_MINEMAININFOR";
+
+

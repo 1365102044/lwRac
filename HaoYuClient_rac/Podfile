@@ -1,0 +1,27 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '8.0'
+
+target 'HaoYuClient' do
+    pod 'AFNetworking'
+    pod 'FMDB'
+    pod 'Masonry'
+    pod 'YYKit'
+    pod 'SDWebImage'
+    pod 'MJRefresh'
+    pod 'IQKeyboardManager'
+    pod 'SVProgressHUD'
+    pod 'BaiduMapKit','~>4.1.1' #更新地图 3.3.0 -> 4.1.1
+    pod 'BlocksKit'
+    pod 'DZNEmptyDataSet'
+    pod 'Bugly'
+    pod 'ReactiveObjC'
+
+
+    pod 'SDWebImage'
+    pod 'GPUImage'
+    pod 'ZLPhotoBrowser'
+
+#    检查循环引用
+#    pod 'FBRetainCycleDetector'
+end
+

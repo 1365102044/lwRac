@@ -1,0 +1,211 @@
+//
+//  LWLoginViewController.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/15.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import Foundation
+import UIKit
+import SwiftyJSON
+
+@objc(LWLoginViewController)
+
+class LWLoginViewController: LWBaseViewController {
+    
+    var pwTF:LWDefaultTextField?
+    var phoneTF:LWDefaultTextField?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.title = "登录"
+        confiUI()
+        
+        let leftItem = LWBaseBarButtonItem.barButtonItemOfImage(image: UIImage.init(named: "public_back_n")!) { (sender) in
+            self.dismiss(animated: true, completion: nil)
+        }
+        self.navigationItem.leftBarButtonItem = leftItem
+        
+        phoneTF?.textField?.text = "18801040890"
+        pwTF?.textField?.text = "666888"
+    }
+    
+    //    提交信息
+    @objc func submitInfor() {
+        
+        if !checkTFlegal() { return }
+        
+        //        网络请求
+        let para = NSMutableDictionary()
+        para.setValue(phoneTF?.textField?.text, forKey: "phone")
+        para.setValue(pwTF?.textField?.text, forKey: "checkCode")
+        LWNetworkManager().url(url: LOGIN_WITHCODE_URL).params(para: para as! [String : String]).success { (json) in
+
+            let res = JSON.init(json)
+            let accountModel = LWAccountInforModel.init(jsonData: res)
+            LWPrint(message: res)
+            
+            LWLocalData.saveUserInforFromLogin(infor: accountModel)
+            let token:String = LWUSERDEFAULT_GET(forKey: ACCOUNT_INFOR_TOKEN) as! String
+            LWPrint(message: "*********"+token)
+            }.failure { (code, msg) in
+            
+        }.request()
+    }
+    
+    func checkTFlegal() -> Bool {
+        if phoneTF?.textField?.text == ""{
+            LWAlertView.show(text: "手机号/用户名不能为空")
+            return false
+        }
+        if pwTF?.textField?.text == "" {
+            LWAlertView.show(text: "密码不能为空")
+            return false
+        }
+        return true
+    }
+    
+    
+    // 密码和明文切换
+    @objc func opentPWTF(openBtn:UIButton) {
+        pwTF?.textField?.isEnabled = false
+        pwTF?.textField?.isSecureTextEntry = openBtn.isSelected
+        pwTF?.textField?.isEnabled = true
+        pwTF?.textField?.becomeFirstResponder()
+        openBtn.isSelected = !openBtn.isSelected
+    }
+    
+    @objc func clickForgetPW() {
+        let registerVC = LWRegisterViewController()
+        registerVC.fromType = 1
+        self.navigationController?.pushViewController(registerVC, animated: true)
+    }
+    @objc func clickRegister() {
+        let registerVC = LWRegisterViewController()
+        registerVC.fromType = 2
+        self.navigationController?.pushViewController(registerVC, animated: true)
+    }
+    
+    // 配置界面
+    func confiUI() {
+        let headerImageView = UIImageView.init()
+        view.addSubview(headerImageView)
+        headerImageView.backgroundColor = .red
+        
+        view.addSubview(login_phoneView)
+        let login_pwView = login_pwview()
+        view.addSubview(login_pwView)
+        
+        let login_submit = LWDefaultButton.defaultButton(title: "登录", textfont: LWSytem_Regular(15), textColor: .black, target: self, sel: #selector(submitInfor))
+        view.addSubview(login_submit)
+        login_submit.backgroundColor = .red
+        login_submit.setBoundCorners(radius: ADJUSET(myfloat: 20), boundWidth: 0)
+        
+        headerImageView.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 20))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 20))
+            make.top.equalTo(view.snp.top).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 200))
+        }
+        login_phoneView.snp.makeConstraints { (make) in
+            make.left.equalTo(view).offset(ADJUSET(myfloat: 30))
+            make.right.equalTo(view).offset(-ADJUSET(myfloat: 30))
+            make.top.equalTo(headerImageView.snp.bottom).offset(ADJUSET(myfloat: 30))
+        }
+        login_pwView.snp.makeConstraints { (make) in
+            make.left.right.equalTo(login_phoneView)
+            make.top.equalTo(login_phoneView.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+        login_submit.snp.makeConstraints { (make) in
+            make.left.right.equalTo(login_phoneView)
+            make.top.equalTo(login_pwView.snp.bottom).offset(ADJUSET(myfloat: 30))
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        let btnsView = addBtns()
+        view.addSubview(btnsView)
+        btnsView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(self.view)
+            make.top.equalTo(login_submit.snp.bottom).offset(ADJUSET(myfloat: 20))
+        }
+    }
+    
+    func addBtns() -> LWBaseView {
+        let btnsView = LWBaseView()
+        let forgetPW = LWDefaultButton.defaultButton(title: "忘记密码", textfont: LWSystem(ADJUSET(myfloat: 13)), textColor: .blue, target: self, sel: #selector(clickForgetPW))
+        btnsView.addSubview(forgetPW)
+        let registerbtn = LWDefaultButton.defaultButton(title: "去注册", textfont: LWSystem(ADJUSET(myfloat: 13)), textColor: .blue, target: self, sel: #selector(clickRegister))
+        btnsView.addSubview(registerbtn)
+        let orlable = LWDefaultLable.defaultLable(text: " or ", textColor: .black, textFont: LWSystem(ADJUSET(myfloat: 12)))
+        btnsView.addSubview(orlable)
+        orlable.snp.makeConstraints { (make) in
+            make.centerX.equalTo(btnsView.snp.centerX)
+            make.height.equalTo(ADJUSET(myfloat: 30))
+            make.top.bottom.equalTo(btnsView)
+        }
+        forgetPW.snp.makeConstraints { (make) in
+            make.right.equalTo(orlable.snp.left).offset(-ADJUSET(myfloat: 10))
+            make.centerY.equalTo(orlable.snp.centerY)
+            make.left.equalTo(btnsView.snp.left).offset(ADJUSET(myfloat: 5))
+        }
+        registerbtn.snp.makeConstraints { (make) in
+            make.left.equalTo(orlable.snp.right).offset(ADJUSET(myfloat: 10))
+            make.centerY.equalTo(orlable.snp.centerY)
+            make.right.equalTo(btnsView.snp.right).offset(-ADJUSET(myfloat: 5))
+        }
+        
+        return btnsView
+    }
+    
+    //    密码
+    func login_pwview() -> LWBaseView{
+        let pwView = LWBaseView()
+        pwTF = LWDefaultTextField.defaultTextField(placeholder: "请输入密码", textFont: LWSytem_Regular(15), textColor: .black)
+        pwTF?.textField?.isSecureTextEntry = true
+        pwTF?.maxLenght = 20
+        let openTextBtn = LWDefaultButton.defaultButtonImage(image: UIImage().createImageWithColor(color: .red, frame: CGRect.init(x: 0, y: 0, width: 30, height: 30))!, setImageType: .Default, target: self, sel: #selector(opentPWTF(openBtn:)))
+        openTextBtn.frame.size = CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30))
+        pwTF?.textField?.rightView = openTextBtn
+        pwTF?.textField?.rightViewMode = .whileEditing
+        
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        pwView.addSubview(lefticon)
+        pwView.addSubview(pwTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(pwView)
+            make.centerY.equalTo(pwView.snp.centerY)
+        }
+        pwTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(pwView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        pwView.addBottomLine()
+        return pwView
+    }
+    
+    //    手机号
+    lazy var login_phoneView:LWBaseView = {
+        let phoneView = LWBaseView()
+        let lefticon = UIImageView()
+        lefticon.backgroundColor = .red
+        phoneTF = LWDefaultTextField.defaultTextField(placeholder: "请输入手机号/用户名", textFont: LWSytem_Regular(15), textColor: .black)
+        phoneTF?.maxLenght = 20
+        phoneView.addSubview(lefticon)
+        phoneView.addSubview(phoneTF!)
+        lefticon.snp.makeConstraints { (make) in
+            make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+            make.left.equalTo(phoneView)
+            make.centerY.equalTo(phoneView.snp.centerY)
+        }
+        phoneTF?.snp.makeConstraints { (make) in
+            make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+            make.top.bottom.right.equalTo(phoneView)
+            make.height.equalTo(ADJUSET(myfloat: 40))
+        }
+        phoneView.addBottomLine()
+        return phoneView
+    }()
+}

@@ -1,0 +1,132 @@
+//
+//  HYBaseTableViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewController.h"
+#import "HYBaseTableViewCell.h"
+@interface HYBaseTableViewController ()
+@property (nonatomic, strong) NSString * noData_Title;
+@property (nonatomic, strong) NSString * noData_ImageName;
+@property (nonatomic, strong) NSString * noData_Des;
+@property (nonatomic, strong) NSString * noData_BtnTitle;
+
+@end
+
+@implementation HYBaseTableViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestListInfor
+{
+    [self.dataMutableArray removeAllObjects];
+}
+#pragma mark - Third.点击事件
+- (void)refreshData
+{
+    [self requestListInfor];
+}
+
+- (void)setNoDataImageName:(NSString *)imageName
+              noData_title:(NSString *)noData_title
+                noData_des:(NSString *)noData_des
+           noData_BtnTitle:(NSString *)noData_BtnTitle
+{
+    _noData_Des = noData_des;
+    _noData_ImageName = imageName;
+    _noData_Title = noData_title;
+    noData_BtnTitle = noData_BtnTitle;
+}
+#pragma mark - Fourth.代理方法
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYBaseTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@""];
+    cell.indexPath = indexPath;
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView {
+    return [UIImage imageNamed:_noData_ImageName ? _noData_ImageName : @"AppIcon"];
+}
+
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView {
+    NSString *title = _noData_Title ? _noData_Title : @"奥欧...没有数据";
+    NSDictionary *attributes = @{
+                                 NSFontAttributeName:[UIFont boldSystemFontOfSize:18.0f],
+                                 NSForegroundColorAttributeName:[UIColor darkGrayColor]
+                                 };
+    return [[NSAttributedString alloc] initWithString:title attributes:attributes];
+}
+
+- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView {
+    NSString *text = _noData_Des ? _noData_Des : @"";
+    
+    NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
+    paragraph.lineBreakMode = NSLineBreakByWordWrapping;
+    paragraph.alignment = NSTextAlignmentCenter;
+    
+    NSDictionary *attributes = @{NSFontAttributeName:[UIFont systemFontOfSize:14.0f],
+                                 NSForegroundColorAttributeName:[UIColor lightGrayColor],
+                                 NSParagraphStyleAttributeName:paragraph
+                                 };
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+- (NSAttributedString *)buttonTitleForEmptyDataSet:(UIScrollView *)scrollView forState:(UIControlState)state {
+    NSString *text = _noData_BtnTitle ? _noData_BtnTitle : @"重新加载";
+    UIFont   *font = [UIFont systemFontOfSize:15.0];
+    // 设置默认状态、点击高亮状态下的按钮字体颜色
+    UIColor  *textColor = [UIColor colorWithHexString:(state == UIControlStateNormal) ? @"007ee5" : @"48a1ea"];
+    
+    NSMutableDictionary *attributes = [NSMutableDictionary new];
+    [attributes setObject:font      forKey:NSFontAttributeName];
+    [attributes setObject:textColor forKey:NSForegroundColorAttributeName];
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+#pragma mark - DZNEmptyDataSetDelegate
+
+- (void)emptyDataSet:(UIScrollView *)scrollView didTapButton:(UIButton *)button {
+    [self refreshData];
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = [UIColor whiteColor];
+
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (HYBaseTableView *)MainTableView {
+    if (!_MainTableView) {
+        _MainTableView = [[HYBaseTableView alloc] initWithFrame:self.view.bounds];
+        _MainTableView.delegate = self;
+        _MainTableView.dataSource = self;
+        _MainTableView.emptyDataSetSource = self;
+        _MainTableView.emptyDataSetDelegate = self;
+        _MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(80);
+        _MainTableView.tableFooterView = [[UIView alloc] init];
+        _MainTableView.backgroundColor = HYCOLOR.color_c1;
+        _MainTableView.separatorStyle = UITableViewCellSelectionStyleNone;
+        _MainTableView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestListInfor)];
+//        _MainTableView.mj_footer = [MJRefreshFooter footerWithRefreshingTarget:self refreshingAction:@selector(requestListInfor_LoadMore)];
+    }
+    return _MainTableView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

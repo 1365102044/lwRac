@@ -1,0 +1,26 @@
+//
+//  HYTouSuJianYiCellView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYAttributedStringLabel.h"
+
+@interface HYTouSuJianYiCellView : HYBaseView
+@property (nonatomic, strong) HYDefaultLabel * titleLable;
+@property (nonatomic, strong) HYDefaultLabel * phoneLable;
+@property (nonatomic, strong) HYAttributedStringLabel * descLable;
+@property (nonatomic, strong) UIView * lineView;
+@property (nonatomic, strong) HYDefaultButton * cancleBtn;
+@property (nonatomic, strong) UIImageView * statusImageView;
+
+@property (nonatomic, strong) UIView * fanKuiInforView;
+@property (nonatomic, strong) HYDefaultLabel * fanKuiTitleLable;
+@property (nonatomic, strong) HYDefaultLabel * fanKuiContentLable;
+
+- (void)hiddenBtn:(BOOL)hidden;
+- (void)hiddenFanKuiView:(BOOL)hidden;
+@end

@@ -1,0 +1,56 @@
+//
+//  HYMapFindHouseViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMapFindHouseViewController.h"
+#import "HYMapView.h"
+
+@interface HYMapFindHouseViewController ()
+@property (nonatomic, strong) HYMapView * myMapView;
+
+@end
+
+@implementation HYMapFindHouseViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidDisappear:(BOOL)animated
+{
+    _myMapView.myMapView.delegate = nil;
+    _myMapView.myMapView = nil;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.navigationItem.title = @"地图找房";
+    
+    [self.view addSubview:self.myMapView];
+    [self.myMapView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.view);
+    }];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (HYMapView*)myMapView
+{
+    if (!_myMapView) {
+        _myMapView = [[HYMapView alloc] init];
+    }
+    return _myMapView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

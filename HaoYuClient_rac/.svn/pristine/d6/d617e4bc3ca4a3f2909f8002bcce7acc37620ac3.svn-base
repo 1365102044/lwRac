@@ -1,0 +1,27 @@
+//
+//  HYYuYueListCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuYueListCellView.h"
+
+@implementation HYYuYueListCellView
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+//        HYFillLongButton *bt =  self.funcBtnArray.lastObject;
+//        bt.hidden = YES;
+////        self.bottomBtn3.hidden = YES;
+        self.zuyueStarTimeLable.hidden = YES;
+        [self.dingweiLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.yudingTimeLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(self.yudingTimeLable.mas_left);
+        }];
+    }
+    return self;
+}
+@end

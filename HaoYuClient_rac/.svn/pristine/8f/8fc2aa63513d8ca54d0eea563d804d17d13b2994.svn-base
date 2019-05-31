@@ -1,0 +1,251 @@
+//
+//  HYMineInformationView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineInformationView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYActionSheet.h"
+#import "HYBaseUrlUtils.h"
+
+@interface HYMineInformationView()
+@property (nonatomic, strong) HYLeftRightArrowView * aboutUsView;
+@property (nonatomic, strong) HYLeftRightArrowView * createPWView;
+@property (nonatomic, strong) HYLeftRightArrowView *switchBaseUrlView;
+
+@end
+
+@implementation HYMineInformationView
+
+/**
+ 获取缓存大小
+ */
+- (double )getCachesSize
+{
+    // 获取Caches目录路径
+    NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *imageCachesPath = [cachesPath stringByAppendingPathComponent:@"default/com.hackemist.SDWebImageCache.default"];
+    long long fileSize = [imageCachesPath fileSize];
+    return ((fileSize ) / (1000.0 * 1000.0) );
+}
+
+/**
+ 处理点击事件
+ */
+- (void)handleClickCellViewWithCellView:(HYLeftRightArrowView *)sender
+{
+    HYLeftRightArrowView *tempview = (HYLeftRightArrowView *)sender;
+    NSString *leftStr = tempview.leftLable.text;
+    if (tempview == self.createPWView) {
+        leftStr = tempview.rightLable.text;
+    }
+    if ([self.delegate respondsToSelector:@selector(handleClickCellView:)]) {
+        [self.delegate handleClickCellView:leftStr];
+    }
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        [self setConfi_UI];
+        
+        NSMutableArray *subviewsArrary = [[NSMutableArray alloc] initWithArray:@[[self createBgViewWithSubviews:@[self.headerIconView,self.userNameView,self.qianMingView]],
+                                                                                 [self createBgViewWithSubviews:@[self.phoneView,self.mailView]],
+                                                                                 [self createBgViewWithSubviews:@[self.createPWView]],
+                                                                                 [self createBgViewWithSubviews:@[self.clearCacheView]],
+                                                                                 [self createBgViewWithSubviews:@[self.aboutUsView]],]];
+        #ifdef DEBUG
+        [subviewsArrary addObject:[self createBgViewWithSubviews:@[self.switchBaseUrlView]]];
+        #else
+        #endif
+        UIStackView *stackView = [[UIStackView alloc] initWithArrangedSubviews:subviewsArrary];
+        
+        
+        //子视图布局方向：水平或垂直
+        stackView.axis = UILayoutConstraintAxisVertical;
+        //子控件之间的最小间距
+        stackView.spacing = 10;
+        //子控件依据何种规矩布局
+//        stackView.distribution = UIStackViewDistributionFillEqually;//子控件均分
+        //子控件的对齐方式
+        stackView.alignment = UIStackViewAlignmentFill;
+        
+        
+        [self addSubview:stackView];
+        [stackView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self);
+            make.width.mas_offset(SCREEN_WIDTH);
+        }];
+        
+       
+        
+        self.clearCacheView.rightLable.text = [NSString stringWithFormat:@"%.2fM",[self getCachesSize]];
+        /**
+         本地有头像则显示
+         */
+        if (USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL)) {
+            [self.headerIconView.rightImageView sd_setImageWithURL:[NSURL URLWithString:HYIMAGEURLSTRING(HYProjectImageURLStringListMid, USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL))] placeholderImage:IMAGENAME(@"mine_headericon_login")];
+        }
+        
+        
+        ADD_NOTI(createPw, CREATE_LOGIN_PASSWORD_SUCCESS_KEY);
+        ADD_NOTI(changePhone:, CHANGE_ACCOUNT_PHONE_SUCCESS_KEY);
+    }
+    return self;
+}
+- (void)changePhone:(NSNotification *)noti
+{
+    NSString *newphone = noti.object[@"phone"];
+    self.phoneView.rightLable.text = [newphone ex_replaceStringWithReplaceString:@"*" startLocation:3 lenght:6];
+}
+- (void)createPw
+{
+    self.createPWView.rightLable.text = @"修改密码";
+}
+
+- (UIView *)createBgViewWithSubviews:(NSArray *)subviews
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = HYCOLOR.color_c0;
+    [backView addSubviews:subviews];
+    for (int i = 0; i < subviews.count; i ++) {
+        UIView *sub = [subviews objectAtIndex:i];
+        [sub mas_makeConstraints:^(MASConstraintMaker *make) {
+            if (i > 0) {
+                UIView *topview = (UIView *)[subviews objectAtIndex:i - 1];
+                make.top.mas_equalTo(topview.mas_bottom).mas_offset(1);
+            }else{
+                make.top.mas_equalTo(backView.mas_top).mas_offset(1);
+            }
+            make.left.right.mas_equalTo(backView);
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(60));
+            if(i == subviews.count - 1) {make.bottom.mas_equalTo(backView.mas_bottom).mas_offset(-1);}
+        }];
+        
+        if ([sub isKindOfClass:[HYLeftRightArrowView class]]) {
+            HYLeftRightArrowView *tem = (HYLeftRightArrowView *)sub;
+            if([@[self.switchBaseUrlView,self.createPWView,self.aboutUsView,self.clearCacheView,self.qianMingView,self.mailView] containsObject:tem]) tem.bottomLine.hidden = YES;
+        }
+    }
+    CGFloat rota = 6;
+    backView.layer.cornerRadius  = rota;
+    backView.layer.masksToBounds = YES;
+    return backView;
+}
+
+
+- (void)setConfi_UI
+{
+    WEAKSELF(self);
+    self.headerIconView = [HYLeftRightArrowView creatLeftRightImageViewArrowViewWithLeftStr:@"头像"
+                                                                                  imageName:@"mine_headericon_n"
+                                                                                  imageSize:CGSizeMake(50, 50)
+                                                                              showArrowIcon:YES
+                                                                              CallBackBlock:^(id sender) {
+                                                                                  [weakself handleClickCellViewWithCellView:sender];
+                                                                              }];
+    self.userNameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"用户名"
+                                                                                 rightStr:@"请填写"
+                                                                            showArrowIcon:NO
+                                                                            CallBackBlock:^(id sender) {
+                                                                        [weakself handleClickCellViewWithCellView:sender];
+                                                                            }];
+    self.qianMingView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"个性签名"
+                                                                                 rightStr:@"请输入"
+                                                                            showArrowIcon:NO
+                                                                            CallBackBlock:^(id sender) {
+                                                                         [weakself handleClickCellViewWithCellView:sender];
+                                                                            }];
+    self.phoneView  = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"手机号"
+                                                                               rightStr:@""
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                          [weakself handleClickCellViewWithCellView:sender];
+                                                                          }];
+    
+    HYLeftRightArrowView *extractedExpr = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"邮箱"
+                                                                                                   rightStr:@"请输入"
+                                                                                              showArrowIcon:NO
+                                                                                              CallBackBlock:^(id sender) {
+                                                                                                  [weakself handleClickCellViewWithCellView:sender];
+                                                                                              }];
+    self.mailView = extractedExpr;
+    self.clearCacheView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"清理缓存"
+                                                                               rightStr:@"0.00"
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                         [weakself handleClickCellViewWithCellView:sender];
+                                                                          }];
+    self.aboutUsView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"关于我们"
+                                                                             rightStr:@""
+                                                                        showArrowIcon:YES
+                                                                        CallBackBlock:^(id sender) {
+                                                                       [weakself handleClickCellViewWithCellView:sender];
+                                                                        }];
+    NSString *pw = USERDEFAULTS_GET(USER_INFOR_PASSWORD_KEY);
+    NSString *rightstr = @"设置密码";
+    if (![pw isEqualToString:@""]) {
+        rightstr = @"修改密码";
+    }
+    self.createPWView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"登录密码"
+                                                                            rightStr:rightstr
+                                                                       showArrowIcon:YES
+                                                                       CallBackBlock:^(id sender) {
+                                                                           [weakself handleClickCellViewWithCellView:sender];
+                                                                       }];
+    
+    NSString *serviceName = [[HYBaseUrlUtils alloc] init].currentServiceName;
+    self.switchBaseUrlView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"切换服务"
+                                                                            rightStr:serviceName
+                                                                       showArrowIcon:YES
+                                                                       CallBackBlock:^(id sender) {
+                                                                           [weakself switchService];
+                                                                       }];
+    
+    self.headerIconView.rightImageView.layer.cornerRadius = 25;
+    self.headerIconView.rightImageView.layer.masksToBounds = YES;
+//    self.phoneView.rightTextField.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+    
+    [self setValueToUserInfor];
+}
+
+//切换服务器
+- (void)switchService
+{
+    NSArray *urlsModel = [[HYBaseUrlUtils alloc] init].baseUrlsArray;
+    NSMutableArray *urlNames = [NSMutableArray array];
+    for (HYBaseUrlModel *model in urlsModel) {
+        [urlNames addObject:model.urlName];
+    }
+    [HYActionSheet showBottomCancelAlert:self.viewController title:@"请选择服务器(需要重新登录生效)" callBack:^(id sender) {
+        NSInteger index = [sender integerValue];
+        if (index == 0) return ;
+        USERDEFAULTS_SET(@(index-1), SAVE_CURRENT_SERVICETYPE_KEY);
+        [SYSTEM_USERDEFAULTS synchronize];
+        [HYPublic_LocalData share].currentBaseURL = nil;
+         if(self.againLogin){
+             self.againLogin(nil);
+         }
+    } buttonArray:urlNames];
+}
+
+/**
+ 初始化信息
+ */
+- (void)setValueToUserInfor
+{
+    self.userNameView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_NAME);
+    self.qianMingView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_QIANMING);
+    NSString *phonestr = USERDEFAULTS_GET(USER_INFOR_PHONE);
+    if (phonestr.length == 11) {
+        self.phoneView.rightLable.text = [phonestr ex_replaceStringWithReplaceString:@"*" startLocation:3 lenght:6];
+    }
+    self.mailView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_MAIL);
+}
+
+@end

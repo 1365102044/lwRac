@@ -1,0 +1,79 @@
+//
+//  HYYouHuiQuanViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYouHuiQuanViewController.h"
+#import "HYYouHuiQuanTableViewCell.h"
+#import "HYRequstGlobalDataTool.h"
+#import "HYDiscountModel.h"
+#define  YOUHUIQUANLISTCELLIDNTIFIER @"YOUHUIQUANLISTCELLIDNTIFIER"
+@interface HYYouHuiQuanViewController ()
+
+@end
+
+@implementation HYYouHuiQuanViewController
+#pragma mark - First.通知
+
+#pragma mark - Second.赋值
+
+#pragma mark - Third.点击事件
+- (void)requestListInfor
+{
+    [super requestListInfor];
+    [[[HYRequstGlobalDataTool alloc] init] requestDiscountInforWithChengzuId:nil
+                                                               CallBackBlock:^(id sender) {
+                                                                   LWLog(@"\n***********优惠券:%@",sender);
+                                                                   NSArray *datas = (NSArray *)sender;
+                                                                   for (NSDictionary *dic in datas) {
+                                                                       [self.dataMutableArray addObject:[HYDiscountModel modelWithJSON:dic]];
+                                                                   }
+                                                                   if (self.dataMutableArray.count == 0) {
+                                                                       [self showTableViewPlaceholder:Empty_Holder];
+                                                                   }
+                                                                   [self.MainTableView reloadData];
+                                                                   [self.MainTableView.mj_header endRefreshing];
+                                                               } failureBlock:^(id sender) {
+                                                                   [self.MainTableView.mj_header endRefreshing];
+                                                                   [self showTableViewPlaceholder:RequestError_Holder];
+                                                               }];
+}
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYYouHuiQuanTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:YOUHUIQUANLISTCELLIDNTIFIER];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.indexPath = indexPath;
+    cell.discountModel = self.dataMutableArray[indexPath.row];
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"我的优惠券";
+    [self setUI];
+    [self requestListInfor];
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.MainTableView registerClass:[HYYouHuiQuanTableViewCell class] forCellReuseIdentifier:YOUHUIQUANLISTCELLIDNTIFIER];
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(130);
+}
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+
+@end

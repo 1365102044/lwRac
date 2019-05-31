@@ -1,0 +1,21 @@
+//
+//  HYPayMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYMoneyTextFiled.h"
+@protocol payMainDelegate <NSObject>
+- (void)clickPayItems:(NSInteger )PayItemsViewTag;
+@end
+@interface HYPayMainView : HYBaseView
+@property (nonatomic, weak) id<payMainDelegate> delegate;
+@property (nonatomic, strong) HYMoneyTextFiled *moneyTextFlied;
+/**
+ 更新约束  是否现在金额试图
+ */
+- (void)updateConstraintsWithPriceViewShow:(BOOL)isShowBool;
+@end

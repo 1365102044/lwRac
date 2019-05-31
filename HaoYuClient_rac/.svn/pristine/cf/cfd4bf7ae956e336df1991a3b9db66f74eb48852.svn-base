@@ -1,0 +1,162 @@
+//
+//  HYPayMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayMainView.h"
+#import "HYDefaultTextField.h"
+#import "HYPayItemView.h"
+
+@interface HYPayMainView ()
+@property (nonatomic, strong) HYBaseView * topView;
+@property (nonatomic, strong) HYBaseView * payItemsView;
+@property (nonatomic, strong) HYDefaultTextField *moneyTextFlied;
+@property (nonatomic, strong) HYDefaultLabel * payTitleLable;
+@property (nonatomic, strong) NSArray * payTypys;
+@property (nonatomic, strong) HYPayItemView * laseSelectItem;
+
+@end
+
+@implementation HYPayMainView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUI];
+         self.backgroundColor = HYCOLOR.color_c1;
+        self.payTypys = @[@{@"icon":@"pay_weixin_b_icon",@"title":@"微信"},
+                          @{@"icon":@"pay_zhifubao_b_icon",@"title":@"支付宝"},
+                      ];
+        self.moneyTextFlied.textFiled.text = @"1000";
+        
+    }
+    return self;
+}
+- (void)setUI{
+    [self addSubview:self.topView];
+    [self addSubview:self.payItemsView];
+    [self.topView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT + MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.height.mas_offset(MARGIN*10);
+    }];
+    [self.payItemsView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self).mas_offset(MARGIN);
+        make.top.mas_equalTo(_topView.mas_bottom).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+    [self.topView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [self.payItemsView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+}
+- (HYBaseView*)topView
+{
+    if (!_topView) {
+        _topView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(20)
+                                                              text:@"支付金额"
+                                                         textColor:HYCOLOR.color_c26];
+        HYDefaultTextField *moneyTextFlied = [HYDefaultTextField creatDefaultTextField:@"请输入金额"
+                                                                                  font:SYSTEM_REGULARFONT(22)
+                                                                             textColor:HYCOLOR.color_c26];
+        moneyTextFlied.textFiled.textAlignment = NSTextAlignmentRight;
+        _moneyTextFlied = moneyTextFlied;
+        _moneyTextFlied.textFiled.keyboardType =  UIKeyboardTypeNumberPad;
+        HYDefaultLabel *danyuanLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(20)
+                                                                text:@"元"
+                                                           textColor:HYCOLOR.color_c26];
+        [_topView addSubview:titleLable];
+        [_topView addSubview:_moneyTextFlied];
+        [_topView addSubview:danyuanLable];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_topView.mas_left).mas_offset(MARGIN*1.5);
+            make.centerY.mas_equalTo(_topView.mas_centerY);
+            make.width.mas_offset(MARGIN*10);
+        }];
+        [danyuanLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_topView.mas_right).mas_offset(-MARGIN*2);
+            make.centerY.mas_equalTo(_topView.mas_centerY);
+            make.width.mas_offset(MARGIN*3);
+        }];
+        [_moneyTextFlied mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(danyuanLable.mas_left).mas_offset(-MARGIN*.5);
+            make.centerY.mas_equalTo(_topView.mas_centerY);
+            make.height.mas_offset(MARGIN*4);
+            make.left.mas_equalTo(titleLable.mas_right).mas_offset(MARGIN*2);
+        }];
+    }
+    return _topView;
+}
+
+- (void)setPayTypys:(NSArray *)payTypys
+{
+    _payTypys = payTypys;
+    if (payTypys.count == 0 ) {
+        _payTitleLable.hidden = YES;
+        return;
+    }
+    NSMutableArray *temp = [NSMutableArray array];
+    for (int i = 0; i<payTypys.count; i++) {
+        HYPayItemView *item = [[HYPayItemView alloc] init];
+        item.leftIcon.image = IMAGENAME(payTypys[i][@"icon"]);
+        item.descLable.text = payTypys[i][@"title"];
+        [_payItemsView addSubview:item];
+        [item mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_payItemsView);
+            make.height.mas_offset(MARGIN*6);
+            if (i == 0) {
+                make.top.mas_equalTo(_payTitleLable.mas_bottom).mas_offset(MARGIN);
+            }else{
+                HYDefaultLabel *lastLable = temp.lastObject;
+                make.top.mas_equalTo(lastLable.mas_bottom);
+            }
+            if(i == payTypys.count - 1){
+                make.bottom.mas_equalTo(_payItemsView.mas_bottom);
+            }
+        }];
+        item.tag = i + 1;
+        [temp addObject:item];
+        WEAKSELF(self);
+        [item bk_whenTapped:^{
+            [weakself clickPayItems:item];
+        }];
+        if (i == 0) {
+            item.rightIcon.selected = YES;
+            self.laseSelectItem = item;
+        }
+    }
+}
+
+- (void)clickPayItems:(HYPayItemView *)payitemView
+{
+    self.laseSelectItem.rightIcon.selected = NO;
+    payitemView.rightIcon.selected = YES;
+    self.laseSelectItem = payitemView;
+    LWLog(@"++++++%ld=====%@",payitemView.tag,payitemView);
+    if ([self.delegate respondsToSelector:@selector(clickPayItems:)]) {
+        [self.delegate clickPayItems:payitemView.tag];
+    }
+}
+- (HYBaseView*)payItemsView
+{
+    if (!_payItemsView) {
+        _payItemsView = [[HYBaseView alloc] init];
+        _payTitleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                  text:@"请选择支付方式"
+                                             textColor:HYCOLOR.color_c4];
+        [_payItemsView addSubview:_payTitleLable];
+        [_payTitleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_payItemsView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_payItemsView.mas_left).mas_offset(MARGIN);
+        }];
+        
+    }
+    return _payItemsView;
+}
+
+@end

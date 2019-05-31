@@ -1,0 +1,33 @@
+//
+//  HYProjectThemeImageFactory.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HYProjectThemeImageFactory : NSObject
+
+///**
+// 项目主题图片工厂方法
+// 
+// @param image           图片
+// @param type            图片样式
+// @return                返回统一配置的图片
+// */
+//+ (UIImage *)projectThemeImageFatoryWithImage:(UIImage *)image
+//                                    imageType:(HYProjectLoadImageType)type;
+
+/**
+ 项目主题网络图片工厂方法
+ 
+ @param URLString           图片URLString
+ @param imageURLStringType  类型
+ @return                    处理后统一的URL
+ */
++ (NSString *)projectThemeImageFatoryWithImageURLString:(NSString *)URLString
+                                     imageURLStringType:(HYProjectImageURLStringType)imageURLStringType;
+
+@end

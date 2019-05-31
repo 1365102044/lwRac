@@ -1,0 +1,59 @@
+//
+//  HYPayItemView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayItemView.h"
+
+@implementation HYPayItemView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _leftIcon = [[UIImageView alloc] init];
+        _descLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                               text:@""
+                                          textColor:HYCOLOR.color_c4];
+        _rightIcon = [HYDefaultButton buttonImageWithImageNamed:@"mine_bill_select_n"
+                                                           type:HYProjectButtonSetImageDefault
+                                                         target:self
+                                                       selector:nil];
+        [_rightIcon setImage:IMAGENAME(@"mine_bill_select_s") forState:UIControlStateSelected];
+        
+        UIView *line = [[UIView alloc] init];
+        line.backgroundColor = HYCOLOR.color_c6;
+        _lineview = line;
+        [self addSubview:line];
+        [self addSubview:_leftIcon];
+        [self addSubview:_descLable];
+        [self addSubview:_rightIcon];
+        
+        [_leftIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*4, MARGIN*4));
+            make.centerY.mas_equalTo(self.mas_centerY);
+            make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN*2);
+        }];
+        [_descLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.mas_equalTo(self.mas_centerY);
+            make.left.mas_equalTo(_leftIcon.mas_right).mas_offset(MARGIN*2);
+        }];
+        [_rightIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*2, MARGIN*2));
+            make.centerY.mas_equalTo(self.mas_centerY);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN*2);
+        }];
+        [line mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(0.5);
+            make.left.right.mas_equalTo(self);
+            make.bottom.mas_equalTo(self.mas_bottom);
+        }];
+        
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,179 @@
+//
+//  ImagePicker.m
+//  DWImagePicker
+//
+//  Created by dwang_sui on 16/6/20.
+//  Copyright © 2016年 dwang_sui. All rights reserved.
+//
+
+#import "ImagePicker.h"
+#import "HYActionSheet.h"
+//如果有Debug这个宏的话,就允许log输出...可变参数
+#ifdef DEBUG
+#define DWLog(...) NSLog(__VA_ARGS__)
+#else
+#define DWLog(...)
+#endif
+
+#import "JXTAlertManagerHeader.h"
+@implementation ImagePicker
+
+static ImagePicker *sharedManager = nil;
+
++ (ImagePicker *)sharedManager {
+    
+    @synchronized (self) {
+        
+        if (!sharedManager) {
+            
+            sharedManager = [[[self class] alloc] init];
+          }
+    }
+    
+    return sharedManager;
+}
+
+#pragma mark ---设置根控制器 弹框添加视图位置 所需图片样式 默认为UIImagePickerControllerEditedImage
+- (void)dwSetPresentDelegateVC:(id)vc SheetShowInView:(UIView *)view InfoDictionaryKeys:(NSInteger)integer allowsEditing:(BOOL)allowsEditing {
+    
+    picker = [[UIImagePickerController alloc]init];
+    
+    picker.delegate = self;
+    
+    self.integer = integer;
+    UIAlertController *temp = [UIAlertController alertControllerWithTitle:@"" message:@"提示" preferredStyle:(UIAlertControllerStyleActionSheet)];
+    UIAlertAction *sure = [UIAlertAction actionWithTitle:@"拍照" style:(UIAlertActionStyleDefault) handler:^(UIAlertAction * _Nonnull action) {
+        [self clickedButtonAtIndex:1];
+    }];
+    UIAlertAction *sure0 = [UIAlertAction actionWithTitle:@"从相册选择" style:(UIAlertActionStyleDefault) handler:^(UIAlertAction * _Nonnull action) {
+        [self clickedButtonAtIndex:2];
+    }];
+    UIAlertAction *cancle = [UIAlertAction actionWithTitle:@"取消" style:(UIAlertActionStyleCancel) handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    [temp addAction:sure];
+    [temp addAction:sure0];
+    [temp addAction:cancle];
+    [vc presentViewController:temp animated:YES completion:nil];
+    
+//    [HYActionSheet showAlert:vc title:@"提示" buttonArr:@[@"拍照",@"从相册选择"] callBack:^(id sender) {
+//        [self clickedButtonAtIndex:[sender integerValue]];
+//    }];
+
+//    [HYActionSheet showAlert:vc destructiveTitle:@"提示" callBack:^(id sender) {
+//        [self clickedButtonAtIndex:[sender integerValue]];
+//    } buttonTitle:@"拍照",@"从相册选择", nil];
+    
+    picker.allowsEditing = allowsEditing;
+    
+    self.allowsEditing = picker.allowsEditing;
+    self.vc = vc;
+    
+    if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+    {
+        
+        self.typeStr = @"支持相机";
+        
+    }
+    if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
+    {
+        
+        self.typeStr = @"支持图库";
+        
+    }
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeSavedPhotosAlbum])
+    {
+        
+        self.typeStr = @"支持相片库";
+        
+    }
+    
+}
+
+#pragma mark ---获取设备支持的类型与选中之后的图片
+- (void)dwGetpickerTypeStr:(pickerTypeStr)pickerTypeStr pickerImagePic:(pickerImagePic)pickerImagePic {
+    
+    if (pickerTypeStr) {
+        
+        pickerTypeStr(self.typeStr);
+        
+    }
+    
+    self.pickerImagePic = ^(UIImage *image) {
+        
+        pickerImagePic(image);
+        
+    };
+    
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
+    
+        UIImage *image = [[UIImage alloc] init];
+        
+        NSArray *array = @[@"UIImagePickerControllerMediaType",
+                           @"UIImagePickerControllerOriginalImage",
+                           @"UIImagePickerControllerEditedImage",
+                           @"UIImagePickerControllerCropRect",
+                           @"UIImagePickerControllerMediaURL",
+                           @"UIImagePickerControllerReferenceURL",
+                           @"UIImagePickerControllerMediaMetadata",
+                           @"UIImagePickerControllerLivePhoto"];
+        
+        if (self.integer) {
+            
+            image = [info objectForKey:array[self.integer]];
+            
+        }else {
+            
+            image = [info objectForKey:array[2]];
+            
+        }
+        
+        if (self.pickerImagePic) {
+            
+            self.pickerImagePic(image);
+            
+        }
+        
+        [self.vc dismissViewControllerAnimated:YES completion:nil];
+    
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    
+    [self.vc dismissViewControllerAnimated:YES completion:nil];
+    
+}
+
+- (void)clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if (buttonIndex == 1) {
+        
+        picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunicode-whitespace"
+        
+        [self.vc presentViewController:picker animated:YES completion:nil];
+        
+#pragma clang diagnostic pop
+        
+        
+    }else if (buttonIndex == 2) {
+        
+        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunicode-whitespace"
+        
+        [self.vc presentViewController:picker animated:YES completion:nil];
+        
+#pragma clang diagnostic pop
+        
+    }
+    
+}
+
+
+@end

@@ -1,0 +1,72 @@
+//
+//  HYContractModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/6.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineModel.h"
+
+@interface HYContractModel : HYMineModel
+/**
+ 房型图
+ */
+@property (nonatomic, copy) NSString * roomTypePic;
+
+/**
+ 房间号
+ */
+@property (nonatomic, copy) NSString * houseNo;
+
+/**
+ 是否集中：0不是,1是
+ */
+@property (nonatomic, copy) NSString * isJiZhong;
+
+/**
+ 租金
+ */
+@property (nonatomic, copy) NSString * rent;
+/**
+ 是否合租：0不是,1是
+ */
+@property (nonatomic, copy) NSString * isShared;
+/**
+ 合同id
+ */
+@property (nonatomic, copy) NSString * chengzuId;
+
+@property (nonatomic, copy) NSString * shi;
+
+@property (nonatomic, copy) NSString * ting;
+/**
+ 租客姓名
+ */
+@property (nonatomic, copy) NSString * zukeName;
+
+@property (nonatomic, copy) NSString * zukePhone;
+
+@property (nonatomic, copy) NSString * statusStr;
+
+/**
+ 电表id
+ */
+@property (nonatomic, copy) NSString * electricityId;
+/**
+ 水表 id
+ */
+@property (nonatomic, copy) NSString * waterId;
+
+//同住人
+@property (nonatomic, strong) NSArray * chengZuZuKeList;
+
+/**
+合同详情:
+ status true number
+ 状态 0:签署合同、1:交首期款、2:在租中、3:到期退房、4:退回押金
+ 合同列表：
+ status true number
+ 0:待签字、1:待生效、2:在租中、3:已到期、4:已退租、5:已作废
+ */
+@end

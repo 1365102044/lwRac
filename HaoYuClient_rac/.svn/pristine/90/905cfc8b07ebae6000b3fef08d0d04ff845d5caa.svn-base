@@ -1,0 +1,96 @@
+//
+//  AppDelegate.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "ViewController.h"
+#import "HYBaseTabBarController.h"
+#import "HYThirdManager.h"
+#import "YBNewVersionFeaturesViewController.h"
+#import "HYADLaunchImageManager.h"
+#import "WXApi.h"
+#import "HYPayMentManager.h"
+
+@interface AppDelegate ()
+
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    if (@available(iOS 11.0, *)){
+        UITableView.appearance.estimatedRowHeight = 0;
+        UITableView.appearance.estimatedSectionFooterHeight = 0;
+        UITableView.appearance.estimatedSectionHeaderHeight = 0;
+    }
+    [HYThirdManager registerThird:launchOptions];
+    [self loadRootViewController];
+    [self handleGlonalDatas];
+    return YES;
+}
+
+/**
+ *  加载根控制器
+ */
+- (void)loadRootViewController {
+    _window                                     = [[UIWindow alloc] initWithFrame:SCREEN_RECT];
+    HYBaseTabBarController *tabBarController    = [[HYBaseTabBarController alloc] init];
+    if ([[HYPublic_LocalData share] isFristInstall]) {
+        [_window setRootViewController:[[YBNewVersionFeaturesViewController alloc]init]];
+    }else{
+        [_window setRootViewController:tabBarController];
+    }
+    [_window makeKeyAndVisible];
+    //    [[HYADLaunchImageManager share] loadURLADLaunchImage];
+}
+
+
+#pragma mark -----------微信支付回调--------------
+
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation {
+    
+    if ([url.host isEqualToString:@"safepay"]) {
+        //跳转支付宝钱包进行支付，处理支付结果
+        //        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+        //            NSLog(@"result = %@",resultDic);
+        //        }];
+    }else if ([url.host isEqualToString:@"pay"]) {
+        // 处理微信的支付结果
+        [WXApi handleOpenURL:url delegate:[HYPayMentManager shareManager]];
+    }
+    return YES;
+}
+
+// NOTE: 9.0以后使用新API接口
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString*, id> *)options
+{
+    if ([url.host isEqualToString:@"safepay"]) {
+        //跳转支付宝钱包进行支付，处理支付结果
+        //        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+        //            NSLog(@"result = %@",resultDic);
+        //        }];
+    }else if ([url.host isEqualToString:@"pay"]) {
+        // 处理微信的支付结果
+        [WXApi handleOpenURL:url delegate:[HYPayMentManager shareManager]];
+    }
+    return YES;
+}
+
+
+/**
+ 删除全局数据
+ */
+- (void)handleGlonalDatas
+{
+    [[HYPublic_LocalData share] deleGlobalDatas];
+}
+
+@end

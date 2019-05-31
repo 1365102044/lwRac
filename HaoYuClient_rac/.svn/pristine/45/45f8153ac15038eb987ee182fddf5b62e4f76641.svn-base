@@ -1,0 +1,69 @@
+//
+//  HYThirdManager.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYThirdManager.h"
+#import "WXApi.h"
+#import <Bugtags/Bugtags.h>
+
+@interface HYThirdManager()
+@property (nonatomic, strong) NSDictionary * launchOptions;
+
+@end
+@implementation HYThirdManager
+#pragma mark - 注册第三方工具
+
+/**
+ *  注册第三方工具
+ *
+ *  @param launchOptions 启动参数
+ */
++ (void)registerThird:(NSDictionary *)launchOptions
+{
+    HYThirdManager *manager                             = [HYThirdManager new];
+    manager.launchOptions                               = launchOptions;
+//    [manager registerBaiDu];
+//    [manager registerJPush];
+    [manager reginsterWX];
+//    [manager setKeyBoardManger];
+//    [manager registerShareSdk];
+//    [manager registerCustomerService];
+//    [manager shareRegister];
+    [manager registerBugtags];
+//    [manager checkAppVersion];
+    [manager initLocationManger];
+}
+
+- (void)initLocationManger
+{
+    BMKMapManager *mapManager = [[BMKMapManager alloc]init];
+    // 如果要关注网络及授权验证事件，请设定     generalDelegate参数
+    BOOL ret = [mapManager start:APP_KEY_BAIDUMAP_LOCATION_KEY  generalDelegate:nil];
+    if (!ret) {
+        NSLog(@"baidu_map_manager start failed!");
+    }else{
+        //        [self initLocation];
+    }
+}
+- (void)registerBugtags
+{
+    BugtagsOptions *options = [[BugtagsOptions alloc] init];
+    [Bugtags startWithAppKey:@"41f0722b42c7684cf00ac868f8b22ec3" invocationEvent:BTGInvocationEventBubble options:options];
+    options.trackingCrashes = YES;        // 是否收集闪退，联机 Debug 状态下默认 NO，其它情况默认 YES
+    options.trackingUserSteps = YES;      // 是否跟踪用户操作步骤，默认 YES
+    options.trackingConsoleLog = YES;     // 是否收集控制台日志，默认 YES
+    [Bugtags setInvocationEvent:(BTGInvocationEventShake)];
+}
+
+- (void)reginsterWX
+{
+    //向微信注册,发起支付必须注册
+    [WXApi registerApp:@"wx5fb54e141709c1c3" enableMTA:YES];
+}
+
+
+@end

@@ -1,0 +1,154 @@
+//
+//  HYHouseRescourcesViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/21.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHouseRescourcesViewController.h"
+#import "HYHouseRescourcesListTableViewCell.h"
+#import "HYHouseRescourceDeatilViewController.h"
+#import "HYHouseTopView.h"
+#import "HYHourseChooseListView.h"
+#import "HYHouseRescourcesModel.h"
+#define  HOUSERESCOURCESLISTCELLIDNTIFIER @"HOUSERESCOURCESLISTCELLIDNTIFIER"
+@interface HYHouseRescourcesViewController ()
+@property (nonatomic, strong) HYHouseTopView * topView;
+@end
+
+@implementation HYHouseRescourcesViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+- (void)requestListInfor
+{
+    PARA_CREART;
+    PARA_SET(@"", @"preStayTime");
+    PARA_SET(@"", @"maxPrice");
+    PARA_SET(@"", @"minPrice");
+    PARA_SET(@"d94bba14-dec1-11e5-bcc3-00163e1c066c", @"cityId");
+    [[HYServiceManager share] postRequestAnWithurl:HOUSE_LIST_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSArray *datas = objc[@"result"][@"list"];
+                                          [self handleListDatas:datas];
+                                          [self.MainTableView.mj_header  endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainTableView.mj_header  endRefreshing];
+                                      }];
+}
+
+- (void)handleListDatas:(NSArray *)datas
+{
+    if (!datas) {
+        return;
+    }
+    NSMutableArray *temp_data = [[NSMutableArray alloc] init];
+    for (NSDictionary *dict in datas) {
+        HYHouseRescourcesModel *houseRescourcesModel = [HYHouseRescourcesModel modelWithJSON:dict];
+        [temp_data addObject:houseRescourcesModel];
+    }
+    self.dataMutableArray = temp_data;
+    [self.MainTableView reloadData];
+}
+
+#pragma mark - Third.点击事件
+- (void)chooseList:(NSInteger)tag
+{
+    if (tag == 10) {
+        NSArray *items = @[@"朝阳区",@"大兴区",@"海淀区",@"通州区"];
+        HYHourseChooseListView *listview = [HYHourseChooseListView showChooseListView:items
+                                                                          referenceView:_topView.regionbtn
+                                                              callBackBlock:^(id sender) {
+                                                                  [_topView.regionbtn setTitle:items[[sender integerValue]] forState:UIControlStateNormal];
+                                                                  _topView.regionbtn.selected = NO;
+                                                              }];
+        listview.clickDismissBlock = ^(id sender) {
+            _topView.regionbtn.selected = NO;
+        };
+    }else if (tag == 11){
+        NSArray *items = @[@"1000以下",@"1000-3000",@"3000-5000",@"5000以上"];
+        HYHourseChooseListView *listview = [HYHourseChooseListView showChooseListView:items
+                                                                          referenceView:_topView.pricebtn
+                                                                          callBackBlock:^(id sender) {
+                                                                              [_topView.pricebtn setTitle:items[[sender integerValue]] forState:UIControlStateNormal];
+                                                                              _topView.pricebtn.selected = NO;
+                                                                          }];
+        listview.clickDismissBlock = ^(id sender) {
+            _topView.pricebtn.selected = NO;
+        };
+    }
+    
+}
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYHouseRescourcesListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:HOUSERESCOURCESLISTCELLIDNTIFIER];
+    if(!cell){
+        cell = [[HYHouseRescourcesListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:HOUSERESCOURCESLISTCELLIDNTIFIER];
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.indexPath = indexPath;
+    cell.houseRescourcesModel = self.dataMutableArray[indexPath.row];
+    cell.clickBlock = ^(id sender) {
+        
+        
+    };
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYHouseRescourcesModel *model = self.dataMutableArray[indexPath.row];
+    HYHouseRescourceDeatilViewController *deatilVC = [[HYHouseRescourceDeatilViewController alloc] init];
+    deatilVC.hidesBottomBarWhenPushed = YES;
+    deatilVC.houseItemId = model.customId;
+    [self.navigationController pushViewController:deatilVC animated:YES];
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.navigationItem.title = @"房源";
+    [self setUI];
+    [self requestListInfor];
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.view addSubview:self.topView];
+    [self.view addSubview:self.MainTableView];
+    [self.topView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.view.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+        make.left.right.mas_equalTo(self.view);
+        make.height.mas_offset(MARGIN*4);
+    }];
+    [self.MainTableView  mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.mas_equalTo(self.view);
+        make.top.mas_equalTo(self.topView.mas_bottom);
+    }];
+    self.MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(220);
+//    self.MainTableView.mj_header = nil;
+}
+
+- (HYHouseTopView*)topView
+{
+    if (!_topView) {
+        _topView = [[HYHouseTopView alloc] init];
+        WEAKSELF(self);
+        _topView.clickBtnBlock = ^(id sender) {
+            UIButton *btn = sender;
+            [weakself chooseList:btn.tag];
+        };
+    }
+    return _topView;
+}
+@end

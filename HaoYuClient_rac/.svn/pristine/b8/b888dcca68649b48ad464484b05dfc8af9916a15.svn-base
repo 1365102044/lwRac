@@ -1,0 +1,18 @@
+//
+//  HYTitleAndImageItemVerView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+typedef void(^clickBlock)(NSString *title);
+
+@interface HYTitleAndImageItemVerView : HYBaseView
+@property (nonatomic, strong) HYBaseLabel * tileLable;
+@property (nonatomic, strong) UIImageView * imageView;
+- (void)setTitle:(NSString *)titleStr ImageName:(NSString *)imageName callBack:(clickBlock)callback;
+@property (nonatomic, assign) CGFloat imageW;
+@end

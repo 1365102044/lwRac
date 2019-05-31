@@ -1,0 +1,75 @@
+//
+//  HYYouHuiQuanCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYouHuiQuanCellView.h"
+
+@implementation HYYouHuiQuanCellView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setSubUI];
+           self.backgroundColor = HYCOLOR.color_c32;
+    }
+    return self;
+}
+
+- (void)setSubUI
+{
+    _titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(20)
+                                           text:@""
+                                      textColor:HYCOLOR.color_c0];
+    _youxiaoTimeLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(14)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c0];
+    _priceLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(36)
+                                                    text:@""
+                                               textColor:HYCOLOR.color_c0];
+    _descLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                   text:@""
+                                              textColor:HYCOLOR.color_c0];
+    _priceLable.textAlignment = NSTextAlignmentRight;
+    _youxiaoTimeLable.textAlignment = NSTextAlignmentRight;
+    _priceLable.backgroundColor = [UIColor clearColor];
+    _youxiaoTimeLable.backgroundColor = [UIColor clearColor];
+    _descLable.backgroundColor = [UIColor clearColor];
+    _titleLable.backgroundColor = [UIColor clearColor];
+    
+    [self addSubview:_titleLable];
+    [self addSubview:_youxiaoTimeLable];
+    [self addSubview:_descLable];
+    [self addSubview:_priceLable];
+  
+    [_titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.equalTo(_priceLable.mas_left).offset(-5);
+    }];
+    [_priceLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(MARGIN*1.5);
+//        make.width.lessThanOrEqualTo(@200);
+//        make.width.greaterThanOrEqualTo(@50);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.left.equalTo(_titleLable.mas_right).offset(5);
+    }];
+    [_titleLable setContentCompressionResistancePriority:(UILayoutPriorityDefaultLow) forAxis:(UILayoutConstraintAxisHorizontal)];
+    [_priceLable setContentCompressionResistancePriority:(UILayoutPriorityDefaultHigh) forAxis:(UILayoutConstraintAxisHorizontal)];
+    
+    [_youxiaoTimeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_priceLable.mas_bottom).mas_offset(MARGIN*2);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+    }];
+    [_descLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_titleLable.mas_bottom).mas_offset(MARGIN*1.5);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+    }];
+    
+}
+
+@end

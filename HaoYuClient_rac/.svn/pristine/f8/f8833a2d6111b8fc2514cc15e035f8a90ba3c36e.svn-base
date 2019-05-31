@@ -1,0 +1,69 @@
+//
+//  HYNoPayBillTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/26.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYNoPayBillTableViewCell.h"
+#import "HYBillModel.h"
+@interface HYNoPayBillTableViewCell()
+{
+    BOOL isShow;
+}
+@end
+@implementation HYNoPayBillTableViewCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        isShow =  ([reuseIdentifier isEqualToString:@"NOPAYCELLIDENTIFIER"] || [reuseIdentifier isEqualToString:@"PAYDEATILCELLIDENTIFITER"]) ? YES : NO;
+        
+        [self.contentView addSubview:self.billView];
+        [self.billView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self.contentView.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.right.mas_equalTo(self.contentView.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(10));
+            make.top.mas_equalTo(self.contentView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(5));
+            make.bottom.mas_equalTo(self.contentView.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+        }];
+
+        self.contentView.backgroundColor = HYCOLOR.color_c1;
+        self.bottomSpacingLineView.hidden = YES;
+        [self.billView bk_whenTapped:^{
+            LWLog(@"8888888");
+            self.billView.leftSelectBtn.selected = !self.billView.leftSelectBtn.selected;
+            
+        }];
+    }
+    return self;
+}
+
+- (HYBillListCellView*)billView
+{
+    if (!_billView) {
+        _billView = [HYBillListCellView creatBillListCellViewWithIsShowBtn:isShow];
+    }
+    return _billView;
+}
+
+- (void)setDataArr:(NSArray *)dataArr
+{
+    HYBillModel *billModel = dataArr.firstObject;
+    self.billView.timeLable.text = billModel.beginTime;
+    self.billView.storeLable.text = [NSString stringWithFormat:@"%@ %@栋%@号",billModel.houseItemModel.hiItemName,billModel.houseModel.louNo,billModel.houseModel.fangNo];
+    self.billView.itemsDataArr = dataArr;
+}
+
+- (void)drawRect:(CGRect)rect
+{
+    [self layoutIfNeeded];
+    
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:self.billView.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:CGSizeMake(10, 10)];
+    CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+    shapeLayer.frame = self.billView.bounds;
+    shapeLayer.path = path.CGPath;
+    self.billView.layer.mask = shapeLayer;
+}
+
+@end

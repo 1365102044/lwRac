@@ -1,0 +1,50 @@
+//
+//  HYSureBtnView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYSureBtnView.h"
+#import "HYAttributedStringLabel.h"
+@implementation HYSureBtnView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        HYAttributedStringLabel *desLable =  [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(14) text:@"" textColor:HYCOLOR.color_c4];
+        [self addSubview:desLable];
+        _icon = [HYDefaultButton buttonImageWithImageNamed:@"mine_bill_select"
+                                                      type:HYProjectButtonSetImage
+                                                    target:self
+                                                  selector:nil];
+        [_icon setImage:IMAGENAME(@"mine_bill_select_s") forState:UIControlStateSelected];
+        [self addSubview:_icon];
+        
+        [desLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.mas_centerX).mas_offset(MARGIN*3);
+            make.centerY.mas_equalTo(self.mas_centerY);
+        }];
+        [_icon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*2.5, MARGIN*2.5));
+            make.right.mas_equalTo(desLable.mas_left).mas_offset(-MARGIN);
+            make.centerY.mas_equalTo(self.mas_centerY);
+        }];
+        
+        [desLable setAttributedStringWithContentArray:@[
+                                                        @{@"color" : HYCOLOR.color_c4,
+                                                          @"content" : @"勾选此项表示认同",
+                                                          @"size" : SYSTEM_REGULARFONT(13),
+                                                          @"lineSpacing": @1},
+                                                        @{@"color" : [UIColor blueColor],
+                                                          @"content" : @"《好寓公寓预订协议》",
+                                                          @"size" : SYSTEM_REGULARFONT(13),
+                                                          @"lineSpacing": @1},
+                                                        ]];
+    }
+    return self;
+}
+
+@end

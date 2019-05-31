@@ -1,0 +1,35 @@
+//
+//  HYMessageMainListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/28.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMessageMainListTableViewCell.h"
+
+@interface HYMessageMainListTableViewCell()
+@property (weak, nonatomic) IBOutlet UIImageView *icon;
+@property (weak, nonatomic) IBOutlet UILabel *titleLable;
+@property (weak, nonatomic) IBOutlet UILabel *descLable;
+
+@end
+@implementation HYMessageMainListTableViewCell
+- (void)setData:(NSDictionary *)dict
+{
+    self.icon.image = IMAGENAME(@"11");
+    self.titleLable.text = dict[@"title"];
+    self.descLable.text = dict[@"desc"];
+    [self.descLable setBoundWidth:2 cornerRadius:2];
+    
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self = [[NSBundle mainBundle] loadNibNamed:@"HYMessageMainListTableViewCell" owner:self options:nil].firstObject;
+        
+    }
+    return self;
+}
+
+@end

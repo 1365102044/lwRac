@@ -1,0 +1,43 @@
+//
+//  HYBillModel.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/6.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBillModel.h"
+
+
+@implementation houseItemModel
+@end
+@implementation houseModel
+@end
+@implementation typeModel
+@end
+
+@implementation HYBillModel
+//
+//- (void)setHouse:(houseModel *)house
+//{
+//    if (house) {
+//        house = [houseModel modelWithJSON:house];
+//    }
+//}
+
+-(houseModel *)houseModel
+{
+    return [houseModel modelWithJSON:_house];
+}
+
+- (typeModel *)typeMdodel
+{
+    return [typeModel modelWithJSON:_type];
+}
+
+- (houseItemModel *)houseItemModel
+{
+    return [houseItemModel modelWithJSON:_houseItem];
+}
+
+@end

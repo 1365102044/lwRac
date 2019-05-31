@@ -1,0 +1,43 @@
+
+#import "HYNotificationConst.h"
+
+//** =========================================================================================== */
+//** ============================================Timer========================================== */
+//** =========================================================================================== */
+
+/**
+ *  定时器调用方法通知
+ */
+NSString * const TIMER_NOTIFICATION                                                                 = @"TIMER_NOTIFICATION";
+
+/**
+ 监听改变tabbarindex
+ */
+NSString *const CHANGETABBAR_INDEX_KEY                              = @"CHANGETABBAR_INDEX_KEY";
+
+/**
+ 签约 填写信息 选择合同起止日期后，获取优惠活动请求
+ */
+NSString *const GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY                              = @"GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY";
+
+/**
+ 获取个人信息后，更新界面信息
+ */
+NSString *const GET_USERINFOR_TOUPDATE_MINEMAININFOR                                  = @"GET_USERINFOR_TOUPDATE_MINEMAININFOR";
+
+
+/**
+ 没有网络的情况下， 列表显示无网空白页
+ */
+NSString *const   NONETWORK_FOR_BASETABLEVIEWCONTROLL_SHOWBLANKPAGE_NOTI                                  = @"NONETWORK_FOR_BASETABLEVIEWCONTROLL_SHOWBLANKPAGE_NOTI";
+
+/**
+ 首页 修改城市后，同时修改 房源列表的 城市筛选
+ */
+NSString *const   HOUSERESOURCE_CITYID_FORCHANGECITY_INHOUMEPAGE_NOTI                                  = @"HOUSERESOURCE_CITYID_FORCHANGECITY_INHOUMEPAGE_NOTI";
+
+/**
+ 切换账号后，重新请求个人信息，刷新我的界面数据
+ */
+NSString *const   CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI                                  = @"CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI";
+

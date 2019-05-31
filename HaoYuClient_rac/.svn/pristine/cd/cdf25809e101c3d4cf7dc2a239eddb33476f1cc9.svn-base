@@ -1,0 +1,86 @@
+//
+//  HYHuXingListViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHuXingListViewController.h"
+#import "HYHuXingListTableViewCell.h"
+#import "HYHuXingDeatilViewController.h"
+#import "HYHuXingInforModel.h"
+#define  HUXINGLISTCELLIDNTIFIER @"HUXINGLISTCELLIDNTIFIER"
+@interface HYHuXingListViewController ()
+
+@end
+
+@implementation HYHuXingListViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestListInfor
+{
+    [super requestListInfor];
+    PARA_CREART;
+    PARA_SET(_houseItemId, @"houseItemId");
+    [[HYServiceManager share] postRequestAnWithurl:HUXING_LIST_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSArray *data_arr  = objc[@"result"][@"list"];
+                                          for (NSDictionary *dict  in data_arr) {
+                                              HYHuXingInforModel *model = [HYHuXingInforModel modelWithJSON:dict];
+                                              [self.dataMutableArray addObject:model];
+                                          }
+                                          [self.MainTableView reloadData];
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                         [self.MainTableView.mj_header endRefreshing];
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYHuXingListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:HUXINGLISTCELLIDNTIFIER];
+    if(!cell){
+        cell = [[HYHuXingListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:HUXINGLISTCELLIDNTIFIER];
+    }
+    cell.indexPath = indexPath;
+    cell.huxingModel = self.dataMutableArray[indexPath.row];
+    return cell;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYHuXingDeatilViewController *huxingDeatilVC = [[HYHuXingDeatilViewController alloc] init];
+    HYHuXingInforModel *huxingModel = self.dataMutableArray[indexPath.row];
+    huxingDeatilVC.HuXingId = huxingModel.customId;
+    [self.navigationController pushViewController:huxingDeatilVC animated:YES];
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"户型";
+    [self setUI];
+    [self requestListInfor];
+    
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.view addSubview:self.MainTableView];
+    [self.MainTableView  mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.view);
+    }];
+    self.MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(130);
+//    self.MainTableView.mj_header = nil;
+}
+
+@end

@@ -1,0 +1,74 @@
+//
+//  HYTestIdCardCheckTool.m
+//  HaoYuClientTests
+//
+//  Created by 刘文强 on 2018/11/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <XCTest/XCTest.h>
+#import "LWIdCardCheckTool.h"
+@interface HYTestIdCardCheckTool : XCTestCase
+
+@end
+
+@implementation HYTestIdCardCheckTool
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testExample {
+    // This is an example of a functional test case.
+    // Use XCTAssert and related functions to verify your tests produce the correct results.
+    
+    //大陆
+    NSArray *dl_data = @[@"41270219880506231x",
+                         @"45032619840627183x",
+                         @"533527198909210238",
+                         @"432503197505028819",
+                         @"43312319791130094X",
+                         @"130825199105138665",
+                         @"210224199007216341",
+                         @"210204197008045252",
+                         @"511623197507201881"];
+    //台湾
+    NSArray *tw_data = @[@"T277922518",
+                         @"Q154031555",
+                         @"R194559131",
+                         @"D193734148",
+                         @"E106146368"];
+    //香港
+    NSArray *xg_data = @[@"W8309399",
+                         @"N5670584",
+                         @"A1399724",
+                         @"N8494787",
+                         @"N3065020",
+                         @"O7324473"];
+    
+    for(NSString *ids in xg_data){
+        BOOL re = NO;
+        re = [LWIdCardCheckTool validateCard:ids];
+        if (re) {
+            NSLog(@"******************%@***校验成功",ids);
+        }else
+        {
+            NSLog(@"******************%@***校验失败",ids);
+        }
+    }
+}
+
+- (void)testPerformanceExample {
+    // This is an example of a performance test case.
+    [self measureBlock:^{
+        // Put the code you want to measure the time of here.
+    }];
+}
+
+@end

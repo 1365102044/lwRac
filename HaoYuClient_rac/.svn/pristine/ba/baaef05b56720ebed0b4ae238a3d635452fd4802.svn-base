@@ -1,0 +1,97 @@
+//
+//  HYLoginMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYLoginMainView.h"
+#import "UIControl+LWdelay.h"
+@interface HYLoginMainView ()<UITextFieldDelegate>
+@property (nonatomic, assign) NSInteger timeCount;
+@property (weak, nonatomic) IBOutlet UIButton *login_btn;
+
+@end
+
+@implementation HYLoginMainView
+
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+    self.PhoneTextField.delegate = self;
+    self.CodeTextField.delegate = self;
+    
+    self.login_btn.layer.cornerRadius = 4;
+    self.login_btn.layer.masksToBounds = YES;
+    self.login_btn.layer.borderWidth = 1;
+    self.login_btn.layer.borderColor = HYCOLOR.color_c0.CGColor;
+    [self.PhoneTextField setValue:HYCOLOR.color_c1 forKeyPath:@"_placeholderLabel.textColor"];
+    [self.CodeTextField setValue:HYCOLOR.color_c1 forKeyPath:@"_placeholderLabel.textColor"];
+    [self.PhoneTextField becomeFirstResponder];
+    self.CodeBtn.lw_acceptEventInterval = 1;
+    
+    UIImageView *bg = [[UIImageView alloc] initWithFrame:SCREEN_RECT];
+    bg.image = IMAGENAME(@"login_bg");
+    [self addSubview:bg];
+    bg.contentMode = UIViewContentModeScaleAspectFit;
+    [self sendSubviewToBack:bg];
+    self.timeCount = 60;
+}
++ (instancetype)lgoinMainView{
+    return [[NSBundle mainBundle] loadNibNamed:@"HYLoginMainView" owner:self options:nil].firstObject;
+}
+
+- (IBAction)ClickCodeBtn:(id)sender {
+    if (![_PhoneTextField.text ex_isMobileNumber]) {
+        ALERT(@"手机号格式不正确！");
+        return;
+    }
+    if (self.getCodeBlock) {
+        self.getCodeBlock(nil);
+    }
+}
+
+- (void)startTimer
+{
+    [self.CodeTextField becomeFirstResponder];
+    [self.CodeBtn setTitle:[NSString stringWithFormat:@"%lds",(long)self.timeCount] forState:UIControlStateNormal];
+    self.CodeBtn.enabled = NO;
+    
+    [[HYTimerManager shareTimer] startTimerWithTimeInterVal:1.0];
+    [[HYTimerManager shareTimer] callBackBlock:^(id sender) {
+        if (self.timeCount > 0) {
+            self.timeCount --;
+            [self.CodeBtn setTitle:[NSString stringWithFormat:@"%lds",(long)self.timeCount] forState:UIControlStateNormal];
+            self.CodeBtn.enabled = NO;
+        }else{
+            self.timeCount = 60;
+            [self.CodeBtn setTitle:[NSString stringWithFormat:@"获取验证码"] forState:UIControlStateNormal];
+            self.CodeBtn.enabled = YES;
+            [[HYTimerManager shareTimer] stopTimer];
+        }
+    }];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSString *totalString;
+    NSInteger maxCount = (textField == self.PhoneTextField) ? 11 : 6;
+    if (string.length <= 0) {
+        @try {
+            totalString = [textField.text substringToIndex:textField.text.length-1];
+        } @catch (NSException *exception) {
+            
+        } @finally {
+            
+        }
+    }
+    else {
+        totalString = [NSString stringWithFormat:@"%@%@",textField.text,string];
+    }
+    if (totalString.length == maxCount + 1) {
+        return NO;
+    }
+    return YES;
+}
+@end

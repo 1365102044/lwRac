@@ -1,0 +1,38 @@
+//
+//  HYMapView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMapView.h"
+#import "HYLocationTool.h"
+@interface HYMapView ()<BMKMapViewDelegate>
+
+@end
+@implementation HYMapView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        _myMapView=[[BMKMapView alloc] init];
+        [_myMapView setMapType:BMKMapTypeStandard];
+        _myMapView.delegate = self;
+        _myMapView.zoomLevel=12;//地图级别
+        _myMapView.showsUserLocation = YES;//可以显示用户位置
+        [self addSubview:_myMapView];
+        
+        [_myMapView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self);
+        }];
+        HYLocationTool *locationTool =  [HYLocationTool new];
+        locationTool.myMapView = _myMapView;
+        [locationTool initLocation];
+    }
+    return self;
+}
+
+@end

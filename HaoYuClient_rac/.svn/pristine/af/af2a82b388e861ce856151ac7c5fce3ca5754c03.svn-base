@@ -1,0 +1,203 @@
+//
+//  HYPayDeatilHeaderView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayDeatilHeaderView.h"
+#import "HYAttributedStringLabel.h"
+#import "HYPaymentViewController.h"
+@interface HYPayDeatilHeaderView()
+{
+    CGFloat MARGIN;
+}
+@property (nonatomic, strong) UIImageView * houseImageView;
+@property (nonatomic, strong) HYBaseView * topView;
+@property (nonatomic, strong) HYDefaultLabel * houseNameLable;
+@property (nonatomic, strong) HYDefaultLabel * houseDescLable;
+@property (nonatomic, strong) HYAttributedStringLabel * priceLable;
+@property (nonatomic, strong) HYBaseView * bottomView;
+
+@end
+
+@implementation HYPayDeatilHeaderView
+- (void)setBillModel:(HYBillModel *)billModel
+{
+    _billModel = billModel;
+    if (billModel.roomTypePic) {
+        [self.houseImageView sd_setImageWithURL:[NSURL URLWithString:HYIMAGEURLSTRING(HYProjectImageURLStringList, billModel.roomTypePic)] placeholderImage:IMAGENAME(@"list_default_icon")];
+    }
+    _houseNameLable.text = billModel.houseItemModel.hiItemName;
+    _houseDescLable.text = [NSString stringWithFormat:@"%@栋 %@室",billModel.houseModel.louNo,billModel.houseModel.fangNo];
+    [_priceLable setAttributedStringWithContentArray:@[@{@"color" : [UIColor redColor],
+                                                         @"content" : billModel.money ? billModel.money : @"",
+                                                         @"size" : SYSTEM_MEDIUMFONT(22),
+                                                         @"lineSpacing": @1},
+                                                       @{@"color" : HYCOLOR.color_c4,
+                                                         @"content" : @"元/月",
+                                                         @"size" : SYSTEM_MEDIUMFONT(13),
+                                                         @"lineSpacing": @1}]];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        MARGIN = ADJUST_PERCENT_FLOAT(10);
+        [self setUI];
+//        self.houseNameLable.text = @"好寓北京-牡丹园店";
+//        self.houseDescLable.text = @"1栋 110室";
+//        [_priceLable setAttributedStringWithContentArray:@[@{@"color" : [UIColor redColor],
+//                                                             @"content" : @"5000",
+//                                                             @"size" : SYSTEM_MEDIUMFONT(22),
+//                                                             @"lineSpacing": @1},
+//                                                           @{@"color" : HYCOLOR.color_c4,
+//                                                             @"content" : @"元/月",
+//                                                             @"size" : SYSTEM_MEDIUMFONT(13),
+//                                                             @"lineSpacing": @1}]];
+//
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    self.houseImageView = [[UIImageView alloc] init];
+    self.houseImageView.image = IMAGENAME(@"11");
+    [self addSubview:self.houseImageView];
+    [self addSubview:self.topView];
+    [self addSubview:self.bottomView];
+    
+    [self.houseImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.left.right.mas_equalTo(self);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(200));
+    }];
+    [self.topView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.top.mas_equalTo(self.houseImageView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.top.mas_equalTo(self.topView.mas_bottom).mas_offset(MARGIN);
+    }];
+    
+    HYDefaultLabel *bottom_title = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                            text:@"当前未缴账单："
+                                                       textColor:HYCOLOR.color_c4];
+    HYDefaultLabel *bottom_func = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                            text:@"缴费"
+                                                       textColor:HYCOLOR.color_c0];
+    bottom_func.backgroundColor = [UIColor redColor];
+    [bottom_func setBoundWidth:0 cornerRadius:4];
+    bottom_func.textAlignment = NSTextAlignmentCenter;
+    bottom_title.backgroundColor = [UIColor clearColor];
+    _bottom_func = bottom_func;
+    
+    [self addSubview:bottom_title];
+    [self addSubview:bottom_func];
+    
+    [bottom_title mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_bottomView.mas_bottom).mas_offset(MARGIN*2);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN*2);
+    }];
+    [bottom_func mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN*2);
+        make.centerY.mas_equalTo(bottom_title.mas_centerY);
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(60), ADJUST_PERCENT_FLOAT(30)));
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN*2);
+    }];
+    UIView *line = [[UIView alloc] init];
+    line.backgroundColor = HYCOLOR.color_c4;
+    [self addSubview:line];
+    [line mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(0.5);
+        make.left.right.mas_equalTo(_topView);
+        make.top.mas_equalTo(bottom_func.mas_bottom).mas_offset(MARGIN);
+    }];
+    bottom_func.userInteractionEnabled = YES;
+
+}
+
+- (HYBaseView*)topView
+{
+    if (!_topView) {
+        _topView = [[HYBaseView alloc] init];
+        
+        _houseNameLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                   text:@""
+                                              textColor:HYCOLOR.color_c4];
+        _houseDescLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                   text:@""
+                                              textColor:HYCOLOR.color_c4];
+        _priceLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                   text:@""
+                                              textColor:HYCOLOR.color_c4];
+        [_topView addSubview:_houseNameLable];
+        [_topView addSubview:_houseDescLable];
+        [_topView addSubview:_priceLable];
+        [_houseNameLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_topView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_topView.mas_left).mas_offset(MARGIN);
+        }];
+        [_houseDescLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_houseNameLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_houseNameLable.mas_left);
+            make.bottom.mas_equalTo(_topView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        [_priceLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.mas_equalTo(_topView.mas_centerY);
+            make.right.mas_equalTo(_topView.mas_right).mas_offset(-MARGIN);
+        }];
+    }
+    return _topView;
+}
+
+- (HYBaseView*)bottomView
+{
+    if (!_bottomView) {
+        _bottomView = [[HYBaseView alloc] init];
+        
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                              text:@"充值"
+                                                         textColor:HYCOLOR.color_c4];
+        UIImageView *shui = [[UIImageView alloc] init];
+        UIImageView *dian = [[UIImageView alloc] init];
+        dian.image = IMAGENAME(@"jiaofei_dian_icon");
+        shui.image = IMAGENAME(@"jiaofei_shui_icon");
+        [_bottomView addSubview:titleLable];
+        [_bottomView addSubview:shui];
+        [_bottomView addSubview:dian];
+        shui.backgroundColor = [UIColor greenColor];
+        dian.backgroundColor = [UIColor greenColor];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_bottomView.mas_top).mas_offset(MARGIN*2);
+            make.bottom.mas_equalTo(_bottomView.mas_bottom).mas_offset(-MARGIN*2);
+            make.left.mas_equalTo(_bottomView.mas_left).mas_offset(MARGIN);
+            make.centerY.mas_equalTo(_bottomView.mas_centerY);
+        }];
+        [shui mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(30), ADJUST_PERCENT_FLOAT(30)));
+            make.right.mas_equalTo(_bottomView.mas_right).mas_offset(-MARGIN*2);
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+        }];
+        [dian mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(30), ADJUST_PERCENT_FLOAT(30)));
+            make.right.mas_equalTo(shui.mas_left).mas_offset(-MARGIN*2);
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+        }];
+        
+        [shui setBoundWidth:0 cornerRadius:ADJUST_PERCENT_FLOAT(15)];
+        [dian setBoundWidth:0 cornerRadius:ADJUST_PERCENT_FLOAT(15)];
+        shui.userInteractionEnabled = YES;
+        dian.userInteractionEnabled = YES;
+        _dianIcon = dian;
+        _shiuIcon = shui;
+  
+    }
+    return _bottomView;
+}
+@end

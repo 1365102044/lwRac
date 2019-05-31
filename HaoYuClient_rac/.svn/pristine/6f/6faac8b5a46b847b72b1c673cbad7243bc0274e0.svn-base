@@ -1,0 +1,102 @@
+//
+//  LWValidatePhoneViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/3/19.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+#import "LWValidatePhoneViewController.h"
+#import "WLUnitField.h"
+#import "LWUpdatePassWordViewController.h"
+#import "HYTimerManager.h"
+
+@interface LWValidatePhoneViewController ()<WLUnitFieldDelegate>
+@property (weak, nonatomic) IBOutlet UILabel *phoneL;
+@property (weak, nonatomic) IBOutlet WLUnitField *codeTF;
+@property (weak, nonatomic) IBOutlet UILabel *alertL;
+@property (nonatomic, assign) NSInteger downCount;
+
+@end
+
+@implementation LWValidatePhoneViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+/**
+ 请求验证码
+ */
+- (void)rquestCode {
+    PARA_CREART;
+    NSString *phoneStr =  USERDEFAULTS_GET(USER_INFOR_PHONE);
+    if(!phoneStr){
+        ALERT(@"获取手机号失败");
+        return;
+    }
+    PARA_SET(phoneStr, @"phone");
+    [[HYServiceManager share] postRequestAnWithurl:GETLOGINCODE_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n-----------\n\nrequestcode:%@",objc);
+                                          self.alertL.text = @"收不到验证码？请等待60s后重新获取";
+                                          [[HYTimerManager shareTimer] startTimerWithTimeInterVal:1 target:self selector:@selector(cutDown)];
+                                      }];
+}
+- (void)cutDown
+{
+    if (_downCount <= 0) {
+        self.alertL.userInteractionEnabled = YES;
+        [[HYTimerManager shareTimer] stopTimer];
+        self.alertL.text = @"重新获取验证码";
+    }else{
+        self.alertL.userInteractionEnabled = NO;
+        _downCount --;
+    }
+    NSLog(@"**************_downCount:%ld",(long)_downCount);
+}
+#pragma mark - Third.点击事件
+- (void)clickReGetCode
+{
+    if ([self.alertL.text isEqualToString:@"重新获取验证码"]) {
+        [self rquestCode];
+    }
+}
+#pragma mark - Fourth.代理方法
+- (BOOL)unitField:(WLUnitField *)uniField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    NSString *text = nil;
+    if (range.location >= uniField.text.length) {
+        text = [uniField.text stringByAppendingString:string];
+    } else {
+        text = [uniField.text stringByReplacingCharactersInRange:range withString:string];
+    }
+    NSLog(@"******>%@", text);
+    if (text.length == 6) {
+        
+        [self.navigationController pushViewController:[LWUpdatePassWordViewController updatePassWordVCWithExtend:@"2"] animated:YES];
+    }
+    return YES;
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    _downCount = 5;
+    _codeTF.delegate = self;
+    [_codeTF becomeFirstResponder];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickReGetCode)];
+    [self.alertL addGestureRecognizer:tap];
+    
+    [self rquestCode];
+}
+
+
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+@end

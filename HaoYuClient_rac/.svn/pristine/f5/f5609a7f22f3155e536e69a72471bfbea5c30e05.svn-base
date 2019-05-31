@@ -1,0 +1,131 @@
+//
+//  HYTouSuJIanYiListViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYTouSuJIanYiListViewController.h"
+#import "HYTouSuJianYiListTableViewCell.h"
+#import "HYTouSuJianYiModel.h"
+#import "HYContractModel.h"
+#define  TOUSUJIANYILISTCELLIDNTIFIER @"TOUSUJIANYILISTCELLIDNTIFIER"
+@interface HYTouSuJIanYiListViewController ()
+
+@end
+
+@implementation HYTouSuJIanYiListViewController
+
+#pragma mark - First.通知
+/**
+ 取消投诉
+ */
+- (void)cancleTouSu:(NSIndexPath *)indexPath
+{
+    HYTouSuJianYiModel *model = self.dataMutableArray[indexPath.row];
+    NSArray *hetong =  [HYUserInfor_LocalData share].getHeTongInfor;
+    HYContractModel *hetongmodel = hetong.firstObject;
+    PARA_CREART;
+    PARA_SET([HYStringTool checkString:model.customId], @"id");
+    PARA_SET([HYStringTool checkString:model.customer], @"customer");
+    PARA_SET([HYStringTool checkString:model.customerCalls], @"customerCalls");
+    PARA_SET([HYStringTool checkString:hetongmodel.chengzuId], @"contractNumber");
+    PARA_SET(@"", @"houseId");
+    PARA_SET(@"", @"deleteWhy");
+    NSString *nowstr =  [[HYStringTool ex_getCurrentDate] stringWithFormat:@"YYYY-MM-dd"];
+    PARA_SET([HYStringTool checkString:nowstr], @"deleteDate");
+    
+    [[HYServiceManager share] postRequestWithurl:TOUSUJIANYI_CANCLE_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        ALERT(@"取消成功！");
+                                        [self requestListInfor];
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+#pragma mark - Second.赋值
+- (void)requestListInfor
+{
+    [self.dataMutableArray removeAllObjects];
+    PARA_CREART;
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"phone");
+    [[HYServiceManager share] postRequestAnWithurl:TOUSUJIANYI_LIST_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSArray *renterInfoArr = objc[@"result"][@"list"];
+                                          for (NSDictionary *dict  in renterInfoArr) {
+                                              HYTouSuJianYiModel *model = [HYTouSuJianYiModel modelWithJSON:dict];
+                                              [self.dataMutableArray addObject:model];
+                                          }
+                                          [self.MainTableView reloadData];
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYTouSuJianYiListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:TOUSUJIANYILISTCELLIDNTIFIER];
+    if(!cell){
+        cell = [[HYTouSuJianYiListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:TOUSUJIANYILISTCELLIDNTIFIER];
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.indexPath = indexPath;
+    cell.dataModel = self.dataMutableArray[indexPath.row];
+    WEAKSELF(self);
+    cell.clickBlock = ^(id sender) {
+      //取消
+        [HYWraingAlert showAlert:self
+                           title:@"确定删除？"
+                         message:@""
+              defaultButtonTitle:@"确定"
+               cancelButtonTitle:@"取消"
+      defaultButtonCallBackBlock:^(id sender) {
+          [weakself cancleTouSu:sender];
+      } cancelButtonCallBackBlock:^(id sender) {
+          
+      }];
+    };
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"投诉建议记录";
+    [self setUI];
+    
+    ADD_NOTI(refreTableCell, @"refreTableCell");
+    [self requestListInfor];
+}
+- (void)refreTableCell
+{
+    [self.MainTableView reloadData];
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.rowHeight = UITableViewAutomaticDimension;
+    self.MainTableView.estimatedRowHeight = ADJUST_PERCENT_FLOAT(150);
+    self.MainTableView.mj_header = nil;
+}
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+
+
+@end

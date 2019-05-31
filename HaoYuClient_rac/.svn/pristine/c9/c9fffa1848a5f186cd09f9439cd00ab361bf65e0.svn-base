@@ -1,0 +1,251 @@
+//
+//  HYRequstGlobalDataTool.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYRequstGlobalDataTool.h"
+#import "HYServiceManager.h"
+#import "HYCityModel.h"
+#import "HYHomePageModel.h"
+#import "HYStringTool.h"
+#import "HYLocationTool.h"
+
+@interface HYRequstGlobalDataTool ()
+
+
+@end
+
+@implementation HYRequstGlobalDataTool
+/**
+ 请求消息 是否有新未读消息
+ */
+- (void)requestMessageInfor
+{
+    if (!USERDEFAULTS_GET(USER_INFOR_PHONE) ||
+        [HYPublic_LocalData share].isHaveNewMsg) {
+        return;
+    }
+    PARA_CREART;
+    PARA_SET([HYStringTool checkString:USERDEFAULTS_GET(USER_INFOR_PHONE)], @"userPhone");
+    PARA_SET(@"ct", @"sortFields");
+    PARA_SET(@"desc", @"sortType");
+    PARA_SET(@(1), @"type");
+    PARA_SET(@"1", @"pageNo");
+    PARA_SET(@(1), @"pageSize");
+    [[HYServiceManager share] postRequestWithurl:MESSAGE_LIST_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSArray *arr =  objc[@"result"][@"list"];
+                                        NSDictionary *dic = arr.firstObject;
+                                        NSString *lastid = dic[@"id"];
+                                        //上次保存的id
+                                        NSString *lastMsgid = USERDEFAULTS_GET(MESSAGELASTNEWID);
+                                        if(lastid){
+                                            if ([lastid isEqualToString:lastMsgid]) {
+                                                [SYSTEM_USERDEFAULTS setBool:NO forKey:ISHAVENOTLOOKMESSAGE];
+                                            }else{
+                                                [SYSTEM_USERDEFAULTS setBool:YES forKey:ISHAVENOTLOOKMESSAGE];
+//                                                USERDEFAULTS_SET(lastid, MESSAGELASTNEWID);
+                                            }
+                                        }else{
+                                            [SYSTEM_USERDEFAULTS setBool:NO forKey:ISHAVENOTLOOKMESSAGE];
+                                        }
+                                        POST_NOTI(GETMESSAGEINFORKNOEISORNOTNOLOOKMESSAGE, nil);
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+  获取合同信息
+ */
+- (void)requestUserHeTongInfor
+{
+    if ([HYUserInfor_LocalData share].isReHT_SuccessBooL) {
+        return;
+    }
+    PARA_CREART;
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"phone");
+    [[HYServiceManager share] postRequestWithurl:GET_MINEHETONGLISTINFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n\n\nhetonglist:%@",objc);
+                                        NSArray *dataArr = objc[@"result"][@"list"];
+                                        [[HYUserInfor_LocalData share] saveHeTongInfor:dataArr];
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 获取城市列表数据
+ */
+- (void)requestCityData
+{
+    NSArray *city_ar = [HYPublic_LocalData share].cityGroupDatas;
+    if (city_ar && city_ar.count > 0) {
+        return;
+    }
+    [[HYServiceManager share] postRequestWithurl:HAVEHOUSE_CITY_LIST_INFOR_URL
+                                       paramters:nil
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSArray *dataArray = objc[@"result"][@"list"];
+                                        [self handleCityDatas:dataArray];
+                                        [self handleCitySeaction];
+                                        
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+- (void)handleCityDatas:(NSArray *)cityArrary
+{
+    if (!cityArrary) {
+        return;
+    }
+    NSMutableArray *temp_cityGroup = [[NSMutableArray alloc] init];
+    for (NSDictionary *dict in cityArrary) {
+        HYCityGroupModel *cityGroupModel = [HYCityGroupModel modelWithJSON:dict];
+        [temp_cityGroup addObject:cityGroupModel];
+    }
+    [HYPublic_LocalData share].cityGroupDatas = temp_cityGroup;
+//    if(self.callBackBlock){
+//        self.callBackBlock(temp_cityGroup);
+//    }
+    LWLog(@"*******temp_cityGroup:%@",temp_cityGroup);
+
+    POST_NOTI(@"alearlyGetCitData", nil);
+}
+
+/**
+ 处理 组头
+ */
+- (void)handleCitySeaction
+{
+    NSMutableArray *temp_City = [[NSMutableArray alloc] init];
+    NSArray *cityGroupArrary = HYPublic_LocalData.share.cityGroupDatas;
+    if (!cityGroupArrary) {
+        return;
+    }
+    for (HYCityGroupModel *cityGroupModel  in cityGroupArrary) {
+        NSString *firstChara =  [[HYStringTool share] firstCharactorWithString:cityGroupModel.name];
+        
+        
+        BOOL tempBool = NO;
+        NSMutableArray *groupArrary = [[NSMutableArray alloc] init];
+        for (HYCityModel *cityModle in temp_City) {
+            if (cityModle.fristChara && [cityModle.fristChara isEqualToString:firstChara]) {
+                [groupArrary addObjectsFromArray:cityModle.cityGroup];
+                [groupArrary addObject:cityGroupModel];
+                tempBool = YES;
+                cityModle.cityGroup = groupArrary;
+                LWLog(@"----%@",cityModle.cityGroup);
+                break;
+            }
+        }
+        if (!tempBool) {
+            HYCityModel *cityModle = [[HYCityModel alloc] init];
+            cityModle.fristChara = firstChara;
+            [groupArrary addObject:cityGroupModel];
+            cityModle.cityGroup = groupArrary;
+            [temp_City addObject:cityModle];
+        }
+    }
+    //根据房间号对数组内的对象进行排序
+    NSArray *tem_paixu =  [temp_City sortedArrayUsingComparator:^NSComparisonResult(HYCityModel * obj1, HYCityModel * obj2) {
+        if ([obj1.fristChara compare:obj2.fristChara options:(NSCaseInsensitiveSearch)] == NSOrderedDescending) {
+            return NSOrderedDescending;
+        }else{
+            return NSOrderedAscending;
+        }
+    }];
+    [HYPublic_LocalData share].cityDatas = tem_paixu;
+}
+
+/**
+ 获取个人信息
+ */
+- (void)requestUserInforCallBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    [[HYServiceManager share] postRequestWithurl:GETMINEMAININFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSDictionary *result = objc[@"result"];
+                                        [[HYUserInfor_LocalData share] saveUser_InforOfUserInfo:result];
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(objc);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 首页的数据
+ */
+- (void)requestHomePageInforCallBackBlock:(HYEventCallBackBlock)callBackBlock failureBlock:(HYEventCallBackBlock)failureBlock
+{
+    _callBackBlock = callBackBlock;
+    _failureBlock = failureBlock;
+    PARA_CREART;
+    NSString *city_id = [HYPublic_LocalData share].last_location_City_M.cityID;
+    LWLog(@"%@",city_id);
+    para[@"cityId"] = city_id;
+    para[@"isDelete"] = @"1";
+    [[HYServiceManager share] postRequestAnWithurl:GET_HOMEPAGE_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n\n+++++++++++首页数据:%@",objc);
+                                          NSArray *huxing_Array = objc[@"result"][@"popuroom"];
+                                          NSArray *project_Array = objc[@"result"][@"popuitem"];
+                                          NSArray *banner_Array = objc[@"result"][@"bannner"];
+                                          NSMutableArray *HX_Muta = [[NSMutableArray alloc]init];
+                                          NSMutableArray *PJ_Muta = [[NSMutableArray alloc]init];
+                                          NSMutableArray *BN_Muta = [[NSMutableArray alloc]init];
+                                          for (NSDictionary *dic in huxing_Array) {
+                                              HYHomeHuXingModel *model = [HYHomeHuXingModel modelWithJSON:dic];
+                                              [HX_Muta addObject:model];
+                                          }
+                                          for (NSDictionary *dic in project_Array) {
+                                              HYHomePageModel *model = [HYHomePageModel modelWithJSON:dic];
+                                              [PJ_Muta addObject:model];
+                                          }
+                                          for (NSDictionary *dic in banner_Array) {
+                                              HYHomeBannnerModel *model = [HYHomeBannnerModel modelWithJSON:dic];
+                                              [BN_Muta addObject:model];
+                                          }
+                                          if (HX_Muta.count == 1) {
+                                              HYHomeHuXingModel *hx_model = [[HYHomeHuXingModel alloc] init];
+                                              hx_model.popuPic = @"home_placeHoler_poppic";
+                                              hx_model.tag = 100;
+                                              [HX_Muta addObject:hx_model];
+                                          }
+                                          if (PJ_Muta.count == 1) {
+                                              HYHomePageModel *pj_model = [[HYHomePageModel alloc] init];
+                                              pj_model.tag = 100;
+                                              pj_model.popuPic = @"home_placeHoler_poppic";
+                                              [PJ_Muta addObject:pj_model];
+                                          }
+                                          PARA_CREART;
+                                          para[@"PJ"] = PJ_Muta;
+                                          para[@"HX"] = HX_Muta;
+                                          para[@"BN"] = BN_Muta;
+                                          if (self.callBackBlock) {
+                                              self.callBackBlock(para);
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                          if (self.failureBlock) {
+                                              self.failureBlock(error);
+                                          }
+                                      }];
+}
+
+
+
+@end

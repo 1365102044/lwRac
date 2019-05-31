@@ -1,0 +1,101 @@
+//
+//  HYYuDingZuYueInforView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/14.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuDingZuYueInforView.h"
+#import "HYZuYue_FangJianInforView.h"
+#import "HYZuYue_PersonInforView.h"
+#import "HYZuYue_HetongFeiXiangView.h"
+#import "HYSureBtnView.h"
+#import "HYLeftRightArrowView.h"
+@interface HYYuDingZuYueInforView ()
+@property (nonatomic, strong) UIScrollView * mainScrollView;
+@property (nonatomic, strong) HYZuYue_FangJianInforView * fangjianInforView;
+@property (nonatomic, strong) HYZuYue_PersonInforView * personInfor;
+@property (nonatomic, strong) HYZuYue_HetongFeiXiangView * hetongInforView;
+@property (nonatomic, strong) HYSureBtnView * sureBtnView;
+@property (nonatomic, assign) BOOL isTongYiBooL;
+
+@end
+@implementation HYYuDingZuYueInforView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        [self setUI];
+        [_sureBtnView bk_whenTapped:^{
+            _sureBtnView.icon.selected = !_isTongYiBooL;
+            _isTongYiBooL = _sureBtnView.icon.selected;
+        }];
+    }
+    return self;
+}
+- (void)setUI
+{
+    [self addSubview:self.mainScrollView];
+    [self.mainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+    [self setTestData];
+    
+    _fangjianInforView.baseView.callBackBlock = ^(id sender) {
+        HYLeftRightArrowView *temp = sender;
+        LWLog(@"++++++%@",temp.leftLable.text);
+    };
+}
+
+- (void)setTestData
+{
+//    _shitingLable.text = @"一室一厅";
+//    _mianJiLable.text = @"面积：15㎡";
+//    _chaoXiangLable.text = @"朝向：朝南";
+//    _zuJinLable.text = @"实时租金：1600元/月";
+    
+    _fangjianInforView.baseView.dataArray = @[@{@"left":@"月租",@"right":@"1500元"},
+                            @{@"left":@"定金",@"right":@"700元"},
+                            @{@"left":@"入住日期",@"right":@"2018-6-30"},];
+}
+
+- (UIScrollView*)mainScrollView
+{
+    if (!_mainScrollView) {
+        _mainScrollView = [[UIScrollView alloc] init];
+
+        _fangjianInforView = [[HYZuYue_FangJianInforView alloc] init];
+        _personInfor = [[HYZuYue_PersonInforView alloc] init];
+        _sureBtnView = [[HYSureBtnView alloc] init];
+        [_mainScrollView addSubview:_fangjianInforView];
+        [_mainScrollView addSubview:_personInfor];
+        [_mainScrollView addSubview:_sureBtnView];
+        [_fangjianInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_mainScrollView.mas_top).mas_offset(MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH -MARGIN*2);
+            make.left.mas_equalTo(_mainScrollView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_mainScrollView.mas_right).mas_offset(-MARGIN);
+        }];
+        [_personInfor mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangjianInforView.mas_bottom).mas_offset(MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH -MARGIN*2);
+            make.left.mas_equalTo(_mainScrollView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_mainScrollView.mas_right).mas_offset(-MARGIN);
+        }];
+        [_sureBtnView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_personInfor.mas_bottom).mas_offset(MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH -MARGIN*2);
+            make.height.mas_offset(MARGIN*6);
+            make.left.mas_equalTo(_mainScrollView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_mainScrollView.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(_mainScrollView.mas_bottom).mas_offset(-MARGIN*5);
+        }];
+        _sureBtnView.userInteractionEnabled = YES;
+        [_sureBtnView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    }
+    return _mainScrollView;
+}
+@end

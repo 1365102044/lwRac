@@ -1,0 +1,229 @@
+//
+//  HYYuYueMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuYueMainView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYStringTool.h"
+#import "HYChooseListView.h"
+#import "HYCityModel.h"
+#import "HYDatePickerManager.h"
+#import "HYHouseRescourcesModel.h"
+#import "HYHuXingInforModel.h"
+@interface HYYuYueMainView ()
+
+@property (nonatomic, strong) HYLeftRightArrowView * nameView;
+@property (nonatomic, strong) HYLeftRightArrowView * phoneView;
+@property (nonatomic, strong) HYLeftRightArrowView * chooseMenDianView;
+@property (nonatomic, strong) HYLeftRightArrowView * huxingView;
+@property (nonatomic, strong) HYLeftRightArrowView * timeView;
+
+@property (nonatomic, strong) HYProjectLevelListModel * selectPro_Model;
+@property (nonatomic, strong) HYHuXingLevelListModel * selectHuxing_Model;
+
+@end
+
+@implementation HYYuYueMainView
+/**
+ 来之房源详情 固定项目不能选择
+ */
+- (void)setProjectWhenFromProjectDeatil:(id)projectModel
+{
+    if ([projectModel isKindOfClass:[HYHouseRescourcesModel class]]) {
+        HYHouseRescourcesModel *project_M = projectModel;
+        _selectPro_Model = [[HYProjectLevelListModel alloc] init];
+        _selectPro_Model.customId = project_M.customId;
+        _selectPro_Model.houseItemName = project_M.hiItemName;
+        _chooseMenDianView.rightLable.text = _selectPro_Model.houseItemName;
+        _chooseMenDianView.userInteractionEnabled = NO;
+    }else if ([projectModel isKindOfClass:[HYHuXingInforModel class]]){
+        HYHuXingInforModel *huxing_M = projectModel;
+        _selectPro_Model = [[HYProjectLevelListModel alloc] init];
+        _selectPro_Model.customId = huxing_M.itemId;
+        _selectPro_Model.houseItemName = huxing_M.itemName;
+        _chooseMenDianView.rightLable.text = _selectPro_Model.houseItemName;
+        _chooseMenDianView.userInteractionEnabled = NO;
+        
+        _selectHuxing_Model = [[HYHuXingLevelListModel alloc] init];
+        _selectHuxing_Model.roomTypeName = huxing_M.roomTypeName;
+        _selectHuxing_Model.roomTypeId = huxing_M.customId;
+        
+        _huxingView.rightLable.text = _selectHuxing_Model.roomTypeName;
+        self.param[@"roomTypeId"] = _selectHuxing_Model.roomTypeId;
+        _huxingView.userInteractionEnabled = NO;
+        
+    }
+    
+}
+
+- (void)setProjectDatas:(NSArray *)projectDatas
+{
+    _projectDatas = projectDatas;
+    [HYChooseListView showChooseListView:projectDatas callBackBlock:^(id sender) {
+        NSInteger index = [sender integerValue];
+        _selectPro_Model = projectDatas[index];
+        _chooseMenDianView.rightLable.text = _selectPro_Model.houseItemName;
+//        self.param[@"houseId"] = _selectPro_Model.customId;
+        self.huxingView.rightLable.text = @"选择户型";
+        [self.param removeObjectForKey:@"roomTypeId"];
+        self.selectHuxing_Model = nil;
+    }];
+}
+
+- (void)setHuxingDatas:(NSArray *)huxingDatas
+{
+    _huxingDatas = huxingDatas;
+    [HYChooseListView showChooseListView:huxingDatas callBackBlock:^(id sender) {
+        NSInteger index = [sender integerValue];
+        _selectHuxing_Model = huxingDatas[index];
+        _huxingView.rightLable.text = _selectHuxing_Model.roomTypeName;
+        self.param[@"roomTypeId"] = _selectHuxing_Model.roomTypeId;
+    }];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.param = [[NSMutableDictionary alloc] init];
+        
+        self.backgroundColor = HYCOLOR.color_c1;
+        _nameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"姓名"
+                                                                             rightStr:@"请输入姓名"
+                                                                        showArrowIcon:NO CallBackBlock:^(id sender) {
+                                                                            HYLeftRightArrowView *temp = sender;
+                                                                            self.param[@"name"] = [HYStringTool checkString:temp.rightTextField.textFiled.text];
+                                                                            
+                                                                        }];
+        _phoneView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"手机号"
+                                                                             rightStr:@"请输入手机号"
+                                                                        showArrowIcon:NO CallBackBlock:^(id sender) {
+                                                          HYLeftRightArrowView *temp = sender;                                                                            self.param[@"phone"] = [HYStringTool checkString:temp.rightTextField.textFiled.text];
+                                                                        }];
+        _chooseMenDianView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"选择门店"
+                                                                             rightStr:@"选择门店"
+                                                                        showArrowIcon:YES
+                                                                                 CallBackBlock:^(id sender) {
+                                                                                     if (self.clickMenDianBlock) {
+                                                                                         self.clickMenDianBlock(nil);
+                                                                                     }
+                                                                        }];
+        _huxingView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"意向户型"
+                                                                             rightStr:@"选择户型"
+                                                                        showArrowIcon:YES CallBackBlock:^(id sender) {
+                                                                            if (self.clickHuXingBlock) {
+                                                                                self.clickHuXingBlock(_selectPro_Model.customId);
+                                                                            }
+                                                                            
+                                                                        }];
+        _timeView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"期望入住时间"
+                                                                             rightStr:@"选择时间"
+                                                                        showArrowIcon:YES CallBackBlock:^(id sender) {
+                                                                            [self chooseDate];
+                                                                        }];
+       
+        UIImageView *houstImage = [[UIImageView alloc] init];
+        houstImage.image = IMAGENAME(@"yuYuebanner");
+        HYDefaultLabel *titleLable  = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                               text:@"请填写个人真实信息，以便管家尽快与你取得联系哦"
+                                                          textColor:HYCOLOR.color_c2];
+        titleLable.backgroundColor = [UIColor clearColor];
+        titleLable.textAlignment = NSTextAlignmentCenter;
+        
+        NSString *phoneStr = USERDEFAULTS_GET(USER_INFOR_PHONE);
+        if (phoneStr) {
+            _phoneView.rightTextField.text = phoneStr;
+            self.param[@"phone"] = phoneStr;
+        }
+        [self addSubview:titleLable];
+        [self addSubview:houstImage];
+        [self addSubview:_nameView];
+        [self addSubview:_phoneView];
+        [self addSubview:_chooseMenDianView];
+        [self addSubview:_timeView];
+        [self addSubview:_huxingView];
+        
+        [houstImage mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+            make.left.right.mas_equalTo(self);
+            make.height.mas_offset(MARGIN*22);
+        }];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3);
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(houstImage.mas_bottom).mas_offset(MARGIN*0.5);
+        }];
+        [_nameView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN*.5);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_phoneView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_nameView.mas_bottom).mas_offset(0);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_chooseMenDianView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_phoneView.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_huxingView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_chooseMenDianView.mas_bottom);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_timeView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(self);
+            make.top.mas_equalTo(_huxingView.mas_bottom);
+            make.height.mas_offset(MARGIN*5);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-(SCREEN_HEIGHT - ADJUST_PERCENT_FLOAT(580)));
+        }];
+    }
+    return self;
+}
+
+- (void)chooseDate
+{
+    [self endEditing:YES];
+    
+    [HYDatePickerManager showDatePicker:^(id sender) {
+        NSArray *firstArr = [sender componentsSeparatedByString:@" "];
+        self.timeView.rightLable.text = firstArr.firstObject;
+        self.param[@"seeTime"] = self.timeView.rightLable.text;
+    } DateStyle:DateStyleShowYearMonthDay];
+}
+
+/**
+ 检查参数
+ */
+- (BOOL)checkPara
+{
+    if ([HYStringTool isNull:self.param[@"name"]]) {
+        ALERT(@"请输入姓名");
+        return NO;
+    }
+    if([HYStringTool isNull:self.param[@"phone"]]){
+        ALERT(@"请输入手机号");
+        return NO;
+    }
+    if([_chooseMenDianView.rightLable.text isEqualToString:@"选择门店"]){
+        ALERT(@"请选择门店");
+        return NO;
+    }
+    if([HYStringTool isNull:self.param[@"roomTypeId"]]){
+        ALERT(@"请选择意向户型");
+        return NO;
+    }
+    if([HYStringTool isNull:self.param[@"seeTime"]]){
+        ALERT(@"请选择期望入住时间");
+        return NO;
+    }
+    return  YES;
+}
+
+@end

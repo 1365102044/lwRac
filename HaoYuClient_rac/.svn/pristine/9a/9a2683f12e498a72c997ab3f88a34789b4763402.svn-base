@@ -1,0 +1,90 @@
+//
+//  HYRequstGlobalDataTool.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HYRequstGlobalDataTool : NSObject
+
+/**
+ 获取合同信息
+ */
+- (void)requestUserHeTongInfor;
+
+/**
+ 获取个人信息
+ */
+- (void)requestUserInforCallBackBlock:(HYEventCallBackBlock)callBackBlock fail:(HYEventCallBackBlock)failBlock;
+
+/**
+ 首页的数据
+ */
+- (void)requestHomePageInforCallBackBlock:(HYEventCallBackBlock)callBackBlock failureBlock:(HYEventCallBackBlock)failureBlock;
+/**
+ 获取首页banner
+ 
+ @param callBackBlock   成功回调
+ @param failureBlock    失败回调
+ */
+- (void)requestHomePageBannerWithCallBackBlock:(HYEventCallBackBlock)callBackBlock
+                                  failureBlock:(HYEventCallBackBlock)failureBlock;
+/**
+ 获取城市列表数据
+ */
+- (void)requestCityData;
+/**
+ 开始定位
+ */
+//- (void)startLocation;
+
+/**
+ 请求消息 是否有新未读消息
+ */
+- (void)requestMessageInfor;
+/**
+ 获取优惠券的信息
+ chengzuId = nil 时 获取到账号下的所有优惠券
+ */
+- (void)requestDiscountInforWithChengzuId:(NSString *)chengzuId CallBackBlock:(HYEventCallBackBlock)callBackBlock
+                             failureBlock:(HYEventCallBackBlock)failureBlock;
+
+/**
+ 计算优惠金额
+ */
+- (void)requestMoneyWhenUseDiscountDikouWithjson:(NSDictionary *)json
+                                   CallBackBlock:(HYEventCallBackBlock)callBackBlock
+                                    failureBlock:(HYEventCallBackBlock)failureBlock;
+
+/**
+ 获取支付水电费优惠券
+ houseId    房间id
+ money      充值金额
+ userId     登录人账号
+ */
+- (void)requestDiscountInforForRechargeWithHouseId:(NSString *)houseId
+                                             money:(NSString *)money
+                                     CallBackBlock:(HYEventCallBackBlock)callBackBlock
+                                      failureBlock:(HYEventCallBackBlock)failureBlock;
+/**
+ 账单中的列表信息 （待付款账单，缴费详情中的账单）
+ callBackBlock  排序好的模型数组
+ */
+- (void)requestBillOfNoPayWithindentChengzuId:(NSString *)indentChengzuId
+                                CallBackBlock:(HYEventCallBackBlock)callBackBlock
+                                 failureBlock:(HYEventCallBackBlock)failureBlock;
+
+/**
+ 获取充值记录列表
+ param : NSString   @{@"id":@""}   电
+ NSArray     @{@"ids":@[]} 冷水/热水
+ surfaceType:   1 水； 2 电
+ */
+- (void)getRechargreRecordInforListWithParam:(id)param
+                                 surfaceType:(NSInteger)surfaceType
+                               CallBackBlock:(HYEventCallBackBlock)callBackBlock
+                                failureBlock:(HYEventCallBackBlock)failureBlock;
+@end

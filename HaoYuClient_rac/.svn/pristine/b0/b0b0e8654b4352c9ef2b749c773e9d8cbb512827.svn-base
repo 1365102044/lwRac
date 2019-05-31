@@ -1,0 +1,38 @@
+//
+//  HYHuXingListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHuXingListTableViewCell.h"
+#import "HYHuXingListCellView.h"
+@interface HYHuXingListTableViewCell ()
+@property (nonatomic, strong) HYHuXingListCellView * cellView;
+@end
+@implementation HYHuXingListTableViewCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if(self == [super initWithStyle:style reuseIdentifier:reuseIdentifier])
+    {
+        self.cellView = [[HYHuXingListCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.bottom.mas_equalTo(self.contentView);
+            make.top.mas_equalTo(self.contentView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        
+        self.cellView.houseImage.image = IMAGENAME(@"11");
+        self.cellView.priceLable.text = @"2000元/月起";
+        self.cellView.houseNameLable.text = @"北京市海淀区牡丹园店";
+        self.cellView.houseWhereLable.text = @"一室一厅 开间";
+        self.cellView.houseLayoutLable.text = @"面积：25～55㎡";
+        self.cellView.funcLabel.text = @"整租";
+    }
+    return self;
+}
+
+@end

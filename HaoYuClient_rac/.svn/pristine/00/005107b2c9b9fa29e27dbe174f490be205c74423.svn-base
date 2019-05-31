@@ -1,0 +1,86 @@
+//
+//  LWFmdb.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/11/28.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <FMDB.h>
+
+/**
+ 表类型
+
+ - LWDBTableTypeCitys: 城市表
+ - LWDBTableTypeMessge: 消息信息表
+ */
+typedef NS_ENUM(NSInteger, LWBDTableType) {
+    LWDBTableTypeCitys,
+    LWDBTableTypeMessge,
+};
+@interface LWFmdb : NSObject
+
++ (instancetype)share;
+
+/**
+ 插入数据
+ 
+ @param data 数据模型（模型NSArray,数据模型）
+ @param tableType 表类型
+ @return 返回成功
+ */
+- (BOOL)insertDataToDBWithData:(id)data tableType:(LWBDTableType)tableType;
+
+
+# pragma mark ---删除
+/**
+ 根据条件删除表中的某一条记录 删除条件：keys,values：NSArray(字符串数组，个数必须相同)/NSString,
+ 
+ @param keys 数据库对应的keys
+ @param values key对应的值
+ @param tableType 表类型
+ @return 返回是否成功(YES/NO)
+ */
+- (BOOL)deleteDataWithPropertyNames:(id)keys
+                      propertyValue:(id)values
+                          tableType:(LWBDTableType)tableType;
+/**
+ 根据表名删除表中所有数据
+ 
+ @param tableType 表类型
+ */
+- (BOOL)deleteAllDataWithtableType:(LWBDTableType)tableType;
+
+#pragma mark ---查询
+/**
+ 查询表中的所有数据
+ 
+ @param className 数据模型类名
+ @param tableType 表类型
+ @return 返回查询到的数据模型对象数组NSArray/nil
+ */
+- (id)getDataWithObjcClassName:(NSString *)className
+                 tableType:(LWBDTableType)tableType;
+
+/**
+ 查询指定行数的数据
+
+ @param className 数据模型类名
+ @param range 要查询的数据在表中的位置 (当NSMakeRange(0, 0)，查所有数据)
+ @param tableType 表类型
+ @return 返回数据模型对象数组/nil
+ */
+- (id)getDataWithObjcClassName:(NSString *)className
+                         range:(NSRange)range
+                     tableType:(LWBDTableType)tableType;
+
+/**
+ 查询表中的数据条数
+ 
+ @param tableType 列类型
+ @return 数据条数
+ */
+- (NSInteger)getDatasCountWithTableType:(LWBDTableType)tableType;
+
+@end

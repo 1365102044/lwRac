@@ -1,0 +1,224 @@
+//
+//  HYWaterElectricSurfaceDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYWaterElectricSurfaceDeatilViewController.h"
+#import "HYSurfaceDeatilView.h"
+#import "HYShuiDianBiaoModel.h"
+#import "HYPaymentViewController.h"
+#import "HYWaterElectricSurfacePayRecordListViewController.h"
+#import "HYSurfaceInforView.h"
+#import "HYRechargeRecordTableViewCell.h"
+#import "HYRequstGlobalDataTool.h"
+#define RECHARGERECORDCELLINDIFITER @"RECHARGERECORDCELLINDIFITER"
+@interface HYWaterElectricSurfaceDeatilViewController ()<UITableViewDataSource,SurfaceInforDelegate>
+@property (nonatomic, strong) HYSurfaceDeatilView * MainView;
+/**
+ 跳转水电表
+ titleStr  水表、电表
+ */
+@property (nonatomic, strong) NSString * titleStr;
+@property (nonatomic, strong) HYContractModel *heTongModel;
+@property (nonatomic, assign) NSInteger segIndex;
+@property (nonatomic, strong) HYSurfaceInforView * surfaceInforHeaderView;
+/**
+ 水电表的信息{10:model,20:model,40:model,}
+ */
+@property (nonatomic, strong) NSMutableDictionary * surfaceInforDictionary;
+
+//请求充值记录的参数
+@property (nonatomic, strong) NSDictionary * param;
+
+// 水表：1 ； 电表：2
+@property (nonatomic, assign) NSInteger surfaceType;
+
+@end
+
+@implementation HYWaterElectricSurfaceDeatilViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestListInfor
+{
+    [self requestInfor];
+}
+
+- (void)requestInfor
+{
+    [self requestRechargeRecordList];
+    
+    PARA_CREART;
+    PARA_SET([_heTongModel.houseId isNullToString], @"houseId");
+    NSString *URLSTR = GET_MINEDIANBAO_INFOR_URL;
+    if (_surfaceType == 1) {
+        URLSTR = GET_MINESHUIBAO_INFOR_URL;
+    }
+    PARA_SET(@"APP", @"loginType");
+    [[HYServiceManager share] postRequestAnWithurl:URLSTR
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"infor_objc:%@",objc);
+                                          _surfaceInforDictionary = [NSMutableDictionary dictionary];
+                                          NSDictionary *dict = objc[@"result"];
+                                          if (_surfaceType == 1) {
+                                              if ([dict[@"isHash"] isEqualToString:@"No"]) {
+                                                  ALERT(@"尚未绑定水表");
+                                              }
+                                              NSArray *list = dict[@"list"];
+                                              if ([list isKindOfClass:[NSArray class]]) {
+                                                  for (NSDictionary *dic in list) {
+                                                      HYShuiDianBiaoModel *waterModel = [HYShuiDianBiaoModel modelWithJSON:dic];
+                                                      [_surfaceInforDictionary setObject:waterModel forKey:waterModel.type];
+                                                  }
+                                              }
+                                          }else if ([_titleStr isEqualToString:@"电表"]){
+                                              if ([dict[@"isHash"] isEqualToString:@"No"]) {
+                                                  ALERT(@"尚未绑定电表");
+                                              }
+                                              HYShuiDianBiaoModel *DataModel = [HYShuiDianBiaoModel modelWithJSON:dict];
+                                              [_surfaceInforDictionary setObject:DataModel forKey:@"40"];
+                                          }
+                                          [_surfaceInforHeaderView setSurfaceInforModel:_surfaceInforDictionary];
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      }];
+}
+
+/**
+ 请求充值记录
+ */
+- (void)requestRechargeRecordList
+{
+    id param = nil;
+    NSInteger surfaceType = 1;
+    if (_surfaceType == 1) {
+        NSMutableArray *surfaceIdArrary = [NSMutableArray arrayWithCapacity:2];
+        if (_heTongModel.waterId) [surfaceIdArrary addObject:_heTongModel.waterId];
+        if (_heTongModel.hotWaterId) [surfaceIdArrary addObject:_heTongModel.hotWaterId];
+        param = surfaceIdArrary;
+    }else{
+        if (_heTongModel.electricityId) param =  _heTongModel.electricityId;
+        surfaceType = 2;
+    }
+    _param = param;
+    [[HYRequstGlobalDataTool new] getRechargreRecordInforListWithParam:param
+                                                           surfaceType:surfaceType
+                                                         CallBackBlock:^(id sender) {
+                                                             [self.dataMutableArray removeAllObjects];
+                                                             NSArray *infor = (NSArray *)sender;
+                                                             [self.dataMutableArray addObjectsFromArray:infor];
+                                                             [self.MainTableView reloadData];
+                                                             [self.MainScrollView.mj_header endRefreshing];
+                                                         } failureBlock:^(id sender) {
+                                                             LWLog(@"error:%@",sender);
+                                                             [self.MainScrollView.mj_header endRefreshing];
+                                                         }];
+  }
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+
+- (void)submitRechargeRequest
+{
+    PARA_CREART;
+    NSString *num = @"1";
+    if (_surfaceType == 1) {
+        num = [_surfaceInforHeaderView.selTag isEqualToString:@"10"] ? @"2" : @"4";
+    }
+    HYShuiDianBiaoModel *dataModel = [self.surfaceInforDictionary objectForKey:_surfaceInforHeaderView.selTag];
+    PARA_SET(num, @"num");
+    PARA_SET([HYStringTool checkString:_heTongModel.houseId], @"houseId");
+    PARA_SET([HYStringTool checkString:dataModel.customId], @"meterId");
+    PARA_SET([HYStringTool checkString:dataModel.deptId], @"deptId");
+    [HYPaymentViewController pushPayViewController:self PayMentType:PAYMENTTYPE_RECHARGE extend:para];
+}
+
+- (void)moreRechargeRecordListInfor
+{
+    if (self.dataMutableArray.count == 0) {
+        ALERT(@"没有更多数据了");
+        return;
+    }
+    HYWaterElectricSurfacePayRecordListViewController *temp =  [HYWaterElectricSurfacePayRecordListViewController creatRechargePayRecordListViewControllerWithSurfaceType:_surfaceType dataModelArray:self.dataMutableArray extend:_param];
+    [self.navigationController pushViewController:temp animated:YES];
+}
+
+#pragma mark ---UITableViewSourceDelegate
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count >= 5 ? 5 : self.dataMutableArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYRechargeRecordTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:RECHARGERECORDCELLINDIFITER];
+    cell.rechargeRecordModel = self.dataMutableArray[indexPath.row];
+    return cell;
+}
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatSurfaceDeatilViewController:(NSString *)titleStr heTongModel:(HYContractModel *)heTongModel
+{
+    HYWaterElectricSurfaceDeatilViewController *instance = [[HYWaterElectricSurfaceDeatilViewController alloc] init];
+    instance.titleStr = titleStr;
+    instance.heTongModel = heTongModel;
+    return instance;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.title                       = _titleStr;
+    _surfaceType =  [_titleStr isEqualToString:@"水表"] ? 1 : 2;
+    
+    [self configurerUI];
+    [self requestListInfor];
+}
+
+#pragma mark - Sixth.界面配置
+- (void)configurerUI
+{
+    [self.MainScrollView addSubviews:@[self.surfaceInforHeaderView,
+                                       self.MainTableView]];
+    [self.MainTableView registerClass:[HYRechargeRecordTableViewCell class] forCellReuseIdentifier:RECHARGERECORDCELLINDIFITER];
+    self.MainTableView.rowHeight = MARGIN*4;
+    [self.view addSubview:self.MainScrollView];
+    [self.surfaceInforHeaderView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.mas_equalTo(self.MainScrollView);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.bottom.right.mas_equalTo(self.MainScrollView);
+        make.top.mas_equalTo(self.surfaceInforHeaderView.mas_bottom);
+        make.height.mas_offset(SCREEN_HEIGHT/2);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.mas_equalTo(self.view);
+        make.top.mas_equalTo(self.view.mas_top);
+    }];
+    self.MainTableView.mj_header = nil;
+    self.MainScrollView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestListInfor)];
+}
+
+#pragma mark - Seventh.懒加载
+
+- (HYSurfaceInforView*)surfaceInforHeaderView
+{
+    if (!_surfaceInforHeaderView) {
+        _surfaceInforHeaderView = [[HYSurfaceInforView alloc] init];
+        _surfaceInforHeaderView.delegate = self;
+        [_surfaceInforHeaderView surfaceType:_surfaceType];
+    }
+    return _surfaceInforHeaderView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

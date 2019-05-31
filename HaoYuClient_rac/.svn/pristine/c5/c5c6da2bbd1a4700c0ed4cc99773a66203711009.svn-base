@@ -1,0 +1,191 @@
+//
+//  HYAlertCentersView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYAlertCentersView.h"
+#import "HYAttributedStringLabel.h"
+@interface HYAlertCentersView ()
+@property (nonatomic, strong) UIWindow * myWindow;
+@property (nonatomic, strong) HYBaseView * bigView;
+@property (nonatomic, strong) HYBaseView * bgView;
+@property (nonatomic, strong) NSArray * funcArray;
+@property (nonatomic, strong) UIImageView *colseIcon;
+@property (nonatomic, strong) UIImageView * msgIcon;
+
+@property (nonatomic, strong)  HYAttributedStringLabel * contentLable;
+@property (nonatomic, strong) NSMutableArray * funcsMutableArray;
+@property (nonatomic, copy) HYEventCallBackBlock  callBackBlock;
+@property (nonatomic, strong) NSString * msg;
+
+@end
+@implementation HYAlertCentersView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    _myWindow = [UIApplication sharedApplication].keyWindow;
+    _bigView = [[HYBaseView alloc] init];
+    _bgView.backgroundColor = [UIColor blackColor];
+    _bigView.alpha = 0.3;
+    [_myWindow addSubview:_bigView];
+    _bigView.frame = SCREEN_RECT;
+    
+    [self showAlerView];
+    
+}
+
++ (instancetype)showAlerCentersViewMsg:(NSString *)msg
+                             funcArray:(NSArray *)funcArray
+                         callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    HYAlertCentersView *instance = [[HYAlertCentersView alloc] init];
+    instance.funcArray = funcArray;
+    instance.msg = msg;
+    instance.callBackBlock = callBackBlock;
+    [instance setUI];
+    [instance setDefaultTopView];
+    return instance;
+}
+
++ (instancetype)showAlerCentersViewMsgIconStr:(NSString *)MsgIconStr
+                                          Msg:(NSString *)msg
+                                    funcArray:(NSArray *)funcArray
+                                callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    HYAlertCentersView *instance = [[HYAlertCentersView alloc] init];
+    instance.funcArray = funcArray;
+    instance.msg = msg;
+    instance.callBackBlock = callBackBlock;
+    [instance setUI];
+    [instance setIconTopView];
+    instance.msgIcon.image = IMAGENAME(MsgIconStr);
+    return instance;
+}
+
+- (void)showAlerView
+{
+    [self.myWindow addSubview:self.bgView];
+    
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.myWindow.mas_centerX);
+            make.centerY.mas_equalTo(self.myWindow.mas_centerY);
+            make.left.mas_equalTo(_myWindow.mas_left).mas_offset(MARGIN*2);
+            make.right.mas_equalTo(_myWindow.mas_right).mas_offset(-MARGIN*2);
+        }];
+    }];
+}
+
+- (void)dismiss
+{
+    [self.bgView removeAllSubviews];
+}
+
+- (void)setFuncsView{
+    if (_funcArray != nil &&
+        _funcArray.count > 0 ) {
+        UIView *line = [[UIView alloc] init];
+        line.backgroundColor = HYCOLOR.color_c2;
+        [self.bgView addSubview:line];
+        
+        _funcsMutableArray = [NSMutableArray array];
+        for (int i = 0; i < _funcArray.count; i++) {
+            HYDefaultLabel *able = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                            text:_funcArray[i]
+                                                       textColor:HYCOLOR.color_c4];
+            able.textAlignment = NSTextAlignmentCenter;
+            [_funcsMutableArray addObject:able];
+            [self.bgView addSubview:able];
+            [able bk_whenTapped:^{
+                if(self.callBackBlock){self.callBackBlock(able.text);}
+            }];
+        }
+        if (_funcsMutableArray.count == 1) {
+            HYDefaultLabel *tem = self.funcsMutableArray.firstObject;
+            [tem mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.top.mas_equalTo(_contentLable.mas_bottom).mas_offset(MARGIN);
+                make.left.right.mas_equalTo(_bgView);
+                make.height.mas_offset(MARGIN*4);
+                make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+            }];
+        }else{
+            [_funcsMutableArray mas_distributeViewsAlongAxis:MASAxisTypeVertical
+                                         withFixedItemLength:SCREEN_WIDTH - MARGIN*4
+                                                 leadSpacing:0
+                                                 tailSpacing:0];
+            [_funcsMutableArray mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.top.mas_equalTo(_contentLable.mas_bottom).mas_offset(MARGIN);
+                make.left.right.mas_equalTo(_bgView);
+                make.height.mas_offset(MARGIN*4);
+                make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+            }];
+        }
+    }
+}
+
+- (void)setIconTopView
+{
+    _msgIcon.hidden = NO;
+    [_msgIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(MARGIN*3, MARGIN*3));
+        make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN*2);
+        make.centerX.mas_equalTo(_bgView.mas_centerX);
+    }];
+    [_contentLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_msgIcon.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_bgView.mas_left).mas_offset(MARGIN*2);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN*2);
+        if (_funcArray.count == 0) {
+            make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN*2);
+        }
+    }];
+    [self setFuncsView];
+}
+- (void)setDefaultTopView
+{
+    _msgIcon.hidden = YES;
+    [_contentLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN*2);
+        make.left.mas_equalTo(_bgView.mas_left).mas_offset(MARGIN*2);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN*2);
+        if (_funcArray.count == 0) {
+            make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN*2);
+        }
+    }];
+    [self setFuncsView];
+}
+- (HYBaseView*)bgView
+{
+    if (!_bgView) {
+        _bgView = [[HYBaseView alloc] init];
+        _colseIcon = [[UIImageView alloc] init];
+        _colseIcon.image = IMAGENAME(@"public_offwhite_h");
+        [_bgView addSubview:_colseIcon];
+        [_colseIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*2, MARGIN*2));
+            make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN);
+            make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN);
+        }];
+        _contentLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(14)
+                                                          text:@""
+                                                     textColor:HYCOLOR.color_c4];
+        [self.bgView addSubview:_contentLable];
+        _msgIcon = [[UIImageView alloc] init];
+        [_bgView addSubview:_msgIcon];
+        
+    }
+    return _bgView;
+}
+@end

@@ -1,0 +1,17 @@
+//
+//  HYQianYueFillInforMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYQianYueFillInforFirstView.h"
+#import "HYQianYueFillInforSecondView.h"
+@interface HYQianYueFillInforMainView : HYBaseView
+@property (nonatomic, strong) HYQianYueFillInforFirstView * firstView;
+@property (nonatomic, strong) HYQianYueFillInforSecondView * secondView;
+@property (nonatomic, assign) NSInteger scrollViewIndex;
+- (void)scrollToIndex:(NSInteger)index;
+@end

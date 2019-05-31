@@ -1,0 +1,48 @@
+//
+//  HYPayMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYMoneyTextFiled.h"
+
+@protocol payMainViewDelegate <NSObject>
+
+- (void)pushChooseDiscountViewController;
+
+@end
+typedef NS_ENUM(NSInteger, HYPayMainHeaderType){
+    HeaderTypeNone,                 //没有视图  （账单）
+    HeaderTypeCanInputMoney,        //有输入框 (水电表)
+    HeaderTypeShowDiscount,         //显示价格的视图 （优惠券）
+    HeaderTypeDeposit,              //定金
+    
+};
+
+@interface HYPayMainView : HYBaseView
+@property (nonatomic, strong) HYMoneyTextFiled *moneyTextFlied;
+@property (nonatomic, weak) id<payMainViewDelegate>  delegate;
+@property (nonatomic, strong) HYDefaultLabel * totalMoneyLable;//总价
+/**
+ 更新约束
+ */
+- (void)updateConstraintsHeaderViewWithHeaderType:(HYPayMainHeaderType )HeaderType;
+/**
+ 选择支付方式  默认:1
+    微信 ：1
+    支付宝：2
+ */
+@property (nonatomic, assign) NSInteger selPayTypeTag;
+/**
+ 为顶部视图赋值
+ */
+- (void)setHeaderViewDatas:(NSDictionary *)data;
+/**
+ 显示选择的优惠券
+ */
+- (void)setDiscountDatas:(NSArray *)datas;
+
+@end

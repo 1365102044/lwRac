@@ -1,0 +1,23 @@
+//
+//  HYMineModuleService.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/21.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineModuleService.h"
+
+@implementation HYMineModuleService
+
++(instancetype)share
+{
+    static HYMineModuleService *instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYMineModuleService alloc] init];
+    });
+    return instance;
+}
+
+@end

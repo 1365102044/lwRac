@@ -1,0 +1,157 @@
+//
+//  HYWaterElectricSurfaceDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYWaterElectricSurfaceDeatilViewController.h"
+#import "HYSurfaceDeatilView.h"
+#import "HYShuiDianBiaoModel.h"
+#import "HYPaymentViewController.h"
+#import "HYWaterElectricSurfacePayRecordListViewController.h"
+
+@interface HYWaterElectricSurfaceDeatilViewController ()<SurfaceDeatilDelegate>
+@property (nonatomic, strong) HYSurfaceDeatilView * MainView;
+/**
+ 跳转水电表
+ titleStr  水表、电表
+ */
+@property (nonatomic, strong) NSString * titleStr;
+@property (nonatomic, strong) HYContractModel *heTongModel;
+@property (nonatomic, assign) NSInteger segIndex;
+
+@end
+
+@implementation HYWaterElectricSurfaceDeatilViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestInfor
+{
+    [super requestListInfor];
+    
+    PARA_CREART;
+    PARA_SET([_heTongModel.houseId isNullToString], @"houseId");
+    NSString *URLSTR = GET_MINEDIANBAO_INFOR_URL;
+    if ([_titleStr isEqualToString:@"水表"]) {
+        URLSTR = GET_MINESHUIBAO_INFOR_URL;
+    }
+    PARA_SET(@"APP", @"loginType");
+    [[HYServiceManager share] postRequestAnWithurl:URLSTR
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSDictionary *dict = objc[@"result"];
+                                          if ([_titleStr isEqualToString:@"水表"]) {
+                                              if ([dict[@"isHash"] isEqualToString:@"No"]) {
+                                                  ALERT(@"尚未绑定水表");
+                                              }
+                                              NSArray *list = dict[@"list"];
+                                              if ([list isKindOfClass:[NSArray class]]) {
+                                                  for (NSDictionary *dic in list) {
+                                                      HYShuiDianBiaoModel *waterModel = [HYShuiDianBiaoModel modelWithJSON:dic];
+                                                      [self.dataMutableArray addObject:waterModel];
+                                                  }
+                                              }
+                                          }else if ([_titleStr isEqualToString:@"电表"]){
+                                              if ([dict[@"isHash"] isEqualToString:@"No"]) {
+                                                  ALERT(@"尚未绑定电表");
+                                              }
+                                              HYShuiDianBiaoModel *DataModel = [HYShuiDianBiaoModel modelWithJSON:dict];
+                                              [self.dataMutableArray addObject:DataModel];
+                                          }
+                                          
+                                          [_MainView setSurfaceDataArray:self.dataMutableArray];
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+/**
+ 查看充值记录
+ */
+- (void)gotoRechargeHistoryList
+{
+    HYWaterElectricSurfacePayRecordListViewController *temp =  [HYWaterElectricSurfacePayRecordListViewController creatRechargePayRecordListViewControllerWithTitleStr:self.titleStr extend: ([self.titleStr isEqualToString:@"电表"]) ? self.heTongModel.electricityId : self.heTongModel.waterId];
+    [self.navigationController pushViewController:temp animated:YES];
+}
+
+/**
+ 切换水表/热水表
+ */
+- (void)switchWaterSufaceWithSegIndex:(NSInteger)segIndex
+{
+    _segIndex = segIndex;
+}
+
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatSurfaceDeatilViewController:(NSString *)titleStr heTongModel:(HYContractModel *)heTongModel
+{
+    HYWaterElectricSurfaceDeatilViewController *instance = [[HYWaterElectricSurfaceDeatilViewController alloc] init];
+    instance.titleStr = titleStr;
+    instance.heTongModel = heTongModel;
+    return instance;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setConfiUI];
+    [self requestInfor];
+}
+
+#pragma mark - Sixth.界面配置
+- (void)setConfiUI{
+    
+    self.title                       = _titleStr;
+    self.view.backgroundColor        = HYCOLOR.color_c1;
+    [self.view addSubview:self.MainScrollView];
+    [self.MainScrollView addSubview:self.MainView];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.view.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+        make.left.right.bottom.mas_equalTo(self.view);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.MainScrollView);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainView.payLable bk_whenTapped:^{
+        PARA_CREART;
+        NSString *num = @"1";
+        if ([_titleStr isEqualToString:@"水表"]) {
+           num = (_segIndex == 1) ? @"4" : @"2";
+        }
+        HYShuiDianBiaoModel *dataModel = self.dataMutableArray[_segIndex];
+        PARA_SET(num, @"num");
+        PARA_SET([HYStringTool checkString:_heTongModel.houseId], @"houseId");
+        PARA_SET([HYStringTool checkString:dataModel.customId], @"meterId");
+        PARA_SET([HYStringTool checkString:dataModel.deptId], @"deptId");
+        [HYPaymentViewController pushPayViewController:self PayMentType:rechargePayMentType extend:para];
+    }];
+
+    self.MainScrollView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestInfor)];
+}
+#pragma mark - Seventh.懒加载
+
+- (HYSurfaceDeatilView*)MainView
+{
+    if (!_MainView) {
+        _MainView                    = [[HYSurfaceDeatilView alloc] init];
+        _MainView.backgroundColor    = HYCOLOR.color_c1;
+        _MainView.typeStr            = _titleStr;
+        _MainView.delegate           = self;
+    }
+    return _MainView;
+}
+
+#pragma mark - Eigth.Other
+
+
+@end

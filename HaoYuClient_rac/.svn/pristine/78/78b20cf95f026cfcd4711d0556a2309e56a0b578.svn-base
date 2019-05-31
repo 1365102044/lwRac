@@ -1,0 +1,144 @@
+//
+//  HYNetWorkConst.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYNetWorkConst.h"
+
+@implementation HYNetWorkConst
+
+/**
+ *  网络请求异常key
+ */
+NSString * const NETREQUEST_ERRORINFO_KEY                                           = @"errorInfo";
+
+
+
+//** =========================================================================================== */
+//** ============================================个人中心========================================== */
+//** =========================================================================================== */
+
+/**
+ 使用验证码登录
+ */
+NSString * const LOGINWITHCODE_URL                      = @"/v2/clientAPP/app/login";
+/**
+ 获取登录的验证码
+ */
+NSString * const GETLOGINCODE_URL                      = @"/v2/clientAPP/app/get_code";
+
+/**
+ 请求我的主页面
+ */
+NSString * const GETMINEMAININFOR_URL                      = @"";
+
+/**
+ 切换头像
+ */
+NSString * const CHANGE_HEADERICON_URL                  = @"";
+/**
+ 上传被修改过的信息
+ */
+NSString *const UPLOAD_USERINFOR_URL                    = @"v2/clientAPP/app/modify_personal_information";
+
+/**
+ 获取账单列表
+ */
+NSString *const GET_MINEBILLLISTINFOR_URL                    = @"v2/clientAPP/app/get_renter_list";
+
+/**
+ 获取合同信息
+ */
+NSString *const GET_MINEHETONGLISTINFOR_URL                    = @"v2/clientAPP/app/get_contract_list";
+/**
+ 获取合同详情
+ */
+NSString *const GET_MINEHETONGDEATILINFOR_URL                    = @"v2/clientAPP/app/get_contract_by_id";
+/**
+ 预览合同
+ */
+NSString *const GET_MINEHETONGPDFINFOR_URL                    = @"v2/clientAPP/app/selcontract";
+/**
+ 维修列表
+ */
+NSString *const GET_MINEWEIXIULISTINFOR_URL                    = @"v2/clientAPP/app/get_maintain_list";
+/**
+ 申请维修
+ */
+NSString *const GET_MINEAPPLYWEIXIUINFOR_URL                    = @"v2/clientAPP/app/apply_maintain";
+/**
+ 保洁列表
+ */
+NSString *const GET_MINEBAOJIELISTINFOR_URL                    = @"v2/clientAPP/app/get_cleaning_list";
+/**
+ 申请保洁
+ */
+NSString *const GET_MINEAPPLYBAOJIEINFOR_URL                    = @"v2/clientAPP/app/apply_cleaning";
+/**
+ 维修区域
+ */
+NSString *const GET_MINEWEIXIUQUYUINFOR_URL                    = @"v2/sys/zi_dian/get_list_by_mark";
+
+/**
+ 维修 上传图片
+ */
+NSString *const UPLOAD_MINEWEIXIU_IMAGE_URL                    = @"/UploadAllObjectServlet?server=upload&";
+
+/**
+ 电表信息
+ */
+NSString *const GET_MINEDIANBAO_INFOR_URL                    = @"/v2/clientAPP/app/mineDianBiao";
+/**
+ 水表信息
+ */
+NSString *const GET_MINESHUIBAO_INFOR_URL                    = @"v2/clientAPP/app/mineShuiBiao";
+
+/**
+ 只能门锁信息
+ */
+NSString *const GET_MINELOCKMESSAGE_INFOR_URL                    = @"v2/clientAPP/app/getMyLockMsg";
+/**
+ 远程开锁
+ */
+NSString *const GET_REMOTERUNLOCK_URL                    = @"v2/clientAPP/app/weChatRemoteUnlocking";
+/**
+ 修改门锁密码
+ */
+NSString *const CHANGE_MYLOCKPW_URL                    = @"v2/clientAPP/app/updatePwd";
+/**
+ 修改门锁密码 发生验证码
+ */
+NSString *const CHANGE_MYLOCKPW_SENDCODE_URL                    = @"v2/sciencelock/send_verification_code";
+/**
+ 预约列表
+ */
+NSString *const GET_YUYUELIST_INFOR_URL                    = @"v2/clientAPP/app/get_reservation_list";
+/**
+ 预订列表
+ */
+NSString *const GET_YUDINGLIST_INFOR_URL                    = @"v2/clientAPP/app/get_preordain_list";
+/**
+ 收藏列表
+ */
+NSString *const GET_COLLECTLIST_INFOR_URL                    = @"v2/clientAPP/app/get_favorites_list";
+/**
+ 投诉建议
+ */
+NSString *const TOUSUJIANYI_INFOR_URL                    = @"v2/clientAPP/app/suggestions";
+/**
+ 投诉建议 列表
+ */
+NSString *const TOUSUJIANYI_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_complaint_letter_list";
+/**
+服务评价
+ */
+NSString *const FUPINGJIA_INFOR_URL                    = @"v2/clientAPP/app/serviceRating";
+/**
+ 户型详情信息
+ */
+NSString *const HUXINGDEATIL_INFOR_URL                    = @"v2/clientAPP/app/get_roomType_details";
+
+@end

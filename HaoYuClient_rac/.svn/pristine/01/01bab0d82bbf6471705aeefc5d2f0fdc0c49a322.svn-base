@@ -1,0 +1,380 @@
+//
+//  HYMineMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineMainView.h"
+#import "HYJiuGongGeView.h"
+#import "HYPictureCarouselView.h"
+#import "HYMessageViewController.h"
+#import "UIButton+SD.h"
+#import "HYMineInformationViewController.h"
+@interface HYMineMainView()
+@property (nonatomic, strong) UIImageView * bgImageView;
+
+@property (nonatomic, strong) HYBaseView * inforView;
+@property (nonatomic, strong) HYBaseView * funcView;
+@property (nonatomic, strong) HYBaseView * adView;
+@property (nonatomic, strong) HYBaseView * oterfuncView;
+@property (nonatomic, strong) HYBaseView * cellBigView1;
+@property (nonatomic, strong) HYBaseView * cellBigView2;
+@property (nonatomic, strong) UIImageView * headericon;
+@property (nonatomic, strong) HYDefaultLabel * nicklabe;
+@property (nonatomic, strong) HYDefaultLabel * qianminglabe;
+@property (nonatomic, strong) HYDefaultButton * msgBtn;
+
+@end
+
+@implementation HYMineMainView
+
+- (void)setValueUserInfor
+{
+    if ([HYUserInfor_LocalData share].User_HeaderImageData_Local) {
+        _headericon.image = [HYUserInfor_LocalData share].User_HeaderImageData_Local;
+    }else if(USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL)){
+        [_headericon sd_setImageWithURL:[NSURL URLWithString:USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL)] placeholderImage:IMAGENAME(@"mine_headericon_login")];
+        
+        [[HYUserInfor_LocalData share] saveUser_Headericon_Local:_headericon.image];
+    }
+    NSString *nickStr = USERDEFAULTS_GET(USER_INFOR_NAME);
+    _nicklabe.text = !([nickStr isEqualToString:@""] || nickStr == nil) ? nickStr : [USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString];
+    NSString *qianmingStr = USERDEFAULTS_GET(USER_INFOR_QIANMING);
+    _qianminglabe.text = !([qianmingStr isEqualToString:@""] || qianmingStr == nil) ? qianmingStr : @"";
+}
+
+- (void)toMineInforVC
+{
+    HYMineInformationViewController *inforVC = [[HYMineInformationViewController alloc]init];
+    inforVC.hidesBottomBarWhenPushed = YES;
+    [self.viewController.navigationController pushViewController:inforVC animated:YES];
+    inforVC.callBackBlock = ^(id sender) {
+        if (sender) {
+            self.headericon.image = (UIImage *)sender;
+        }
+    };
+}
+
+- (void)toFunctionModuleVCwithTitleKey:(NSString *)TitleKey
+{
+    if (self.callBackBlock) {
+        self.callBackBlock(TitleKey);
+    }
+}
+
+- (void)changeInfor:(NSNotification *)noti
+{
+    LWLog(@"*****%@",noti);
+    NSDictionary *dic = noti.object;
+    if (dic[@"sign"]) {
+        NSString *qianmingStr = USERDEFAULTS_GET(USER_INFOR_QIANMING);
+        _qianminglabe.text = !([qianmingStr isEqualToString:@""] || qianmingStr == nil) ? qianmingStr : @"";
+    }
+    if (dic[@"petName"]) {
+        NSString *nickStr = USERDEFAULTS_GET(USER_INFOR_NAME);
+        _nicklabe.text = !([nickStr isEqualToString:@""] || nickStr == nil) ? nickStr : [USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString];
+    }
+
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        
+        [self setUI];
+        
+        ADD_NOTI(changeInfor:, @"CHANGEINFOR_NOTI");
+        ADD_NOTI(setValueUserInfor, GET_USERINFOR_TOUPDATE_MINEMAININFOR);
+        //获取消息信息后，更新消息图标
+        ADD_NOTI(updateMsgIcon, GETMESSAGEINFORKNOEISORNOTNOLOOKMESSAGE);
+        [self updateMsgIcon];
+    }
+    return self;
+}
+
+- (void)updateMsgIcon
+{
+    if ([HYPublic_LocalData share].isHaveNewMsg) {
+        [_msgBtn setImage:IMAGENAME(@"message_icon_s") forState:UIControlStateNormal];
+    }else{
+        [_msgBtn setImage:IMAGENAME(@"message_icon") forState:UIControlStateNormal];
+    }
+}
+
+- (void)setUI
+{
+    [self addSubview:self.inforView];
+    [self addSubview:self.funcView];
+    [self addSubview:self.adView];
+    [self addSubview:self.oterfuncView];
+    [self addSubview:self.cellBigView1];
+    [self addSubview:self.cellBigView2];
+    
+    [self.inforView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(0);
+        make.left.right.mas_equalTo(self);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(135));
+    }];
+    [self.funcView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.inforView.mas_bottom).mas_equalTo(ADJUST_PERCENT_FLOAT(10));
+        make.left.mas_equalTo(self.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.right.mas_equalTo(self.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+    }];
+    [self.adView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self);
+        make.top.mas_equalTo(self.funcView.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(120));
+    }];
+    [self.oterfuncView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.adView.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(0));
+        make.left.mas_equalTo(self.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.right.mas_equalTo(self.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+    }];
+    [self.cellBigView1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self);
+        make.top.mas_equalTo(self.oterfuncView.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+    }];
+    [self.cellBigView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self);
+        make.top.mas_equalTo(self.cellBigView1.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(0.5));
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(20));
+    }];
+}
+
+/**
+ 头像信息
+ */
+- (HYBaseView*)inforView
+{
+    if (!_inforView) {
+        _inforView = [[HYBaseView alloc] init];
+        
+        _bgImageView = [[UIImageView alloc] init];
+        _bgImageView.image = IMAGENAME(@"mine_first_head_background");
+        [_inforView addSubview:_bgImageView];
+        _inforView.backgroundColor = [UIColor whiteColor];
+        HYDefaultButton *megsbtn = [HYDefaultButton buttonImageWithImageNamed:@"mine_message_n" type:(HYProjectButtonSetImage) target:self selector:nil];
+        UIImageView *headericon = [[UIImageView alloc] init];
+        headericon.image = IMAGENAME(@"mine_headericon_n");
+        HYDefaultLabel *nicklabe = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(22) text:@"" textColor:HYCOLOR.color_c4];
+        nicklabe.backgroundColor = [UIColor clearColor];
+        HYDefaultLabel *qianminglabe = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(13) text:@"" textColor:HYCOLOR.color_c4];
+        qianminglabe.backgroundColor = [UIColor clearColor];
+        [headericon setBoundWidth:0 cornerRadius:ADJUST_PERCENT_FLOAT(35)];
+        _msgBtn = megsbtn;
+        [_inforView addSubview:megsbtn];
+        [_inforView addSubview:headericon];
+        [_inforView addSubview:nicklabe];
+        [_inforView addSubview:qianminglabe];
+        self.headericon = headericon;
+        [_bgImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(_inforView);
+        }];
+        [megsbtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(25, 25));
+            make.top.mas_equalTo(_inforView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(30));
+            make.right.mas_equalTo(_inforView.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(20));
+        }];
+        [headericon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(70), ADJUST_PERCENT_FLOAT(70)));
+            make.left.mas_equalTo(_inforView.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.top.mas_equalTo(_inforView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(40));
+        }];
+        [nicklabe mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(200, 30));
+            make.centerY.mas_equalTo(headericon.mas_centerY).mas_offset(-MARGIN);
+            make.left.mas_equalTo(headericon.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        [qianminglabe mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(200, 30));
+            make.centerY.mas_equalTo(headericon.mas_centerY).mas_offset(MARGIN);
+            make.left.mas_equalTo(headericon.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        headericon.contentMode = UIViewContentModeScaleToFill;
+        [megsbtn bk_whenTapped:^{
+            [HYMessageViewController pushMessageViewControllerWithSourceVC:self.viewController];
+        }];
+        headericon.userInteractionEnabled = YES;
+        [headericon bk_whenTapped:^{
+          [self toMineInforVC];
+        }];
+        nicklabe.userInteractionEnabled = YES;
+        [nicklabe bk_whenTapped:^{
+            [self toMineInforVC];
+        }];
+        _qianminglabe = qianminglabe;
+        _nicklabe = nicklabe;
+        
+        [self setValueUserInfor];
+    }
+    return _inforView;
+}
+
+/**
+ 常用功能
+ */
+- (HYBaseView*)funcView
+{
+    if (!_funcView) {
+        _funcView = [[HYBaseView alloc] init];
+        _funcView.backgroundColor = [UIColor whiteColor];
+        HYDefaultLabel *titlelable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13) text:@"常用功能" textColor:HYCOLOR.color_c4];
+        UIView *line = [[UIView alloc]init];
+        line.backgroundColor = HYCOLOR.color_c6;
+        
+        HYJiuGongGeView *jiugonggeView = [[HYJiuGongGeView alloc]init];
+        jiugonggeView.items_image_W = MARGIN*2.5;
+        [_funcView addSubview:titlelable];
+        [_funcView addSubview:line];
+        [_funcView addSubview:jiugonggeView];
+        
+        NSArray * dataArr = @[@{@"title":@"账单",@"image":@"mine_bill_n"},
+                              @{@"title":@"合同",@"image":@"mine_hetong_n"},
+                              @{@"title":@"报修",@"image":@"mine_baoxiu_n"},
+                              @{@"title":@"保洁",@"image":@"mine_baojie_n"},
+                              @{@"title":@"水表",@"image":@"mine_shuibiao_n"},
+                              @{@"title":@"电表",@"image":@"mine_dianbiao_n"},
+                              @{@"title":@"智能门锁",@"image":@"mine_mensuo_n"},
+                              @{@"title":@"缴费",@"image":@"mine_pay_n"},];
+        jiugonggeView.dataArr = dataArr;
+        
+        [titlelable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.mas_equalTo(_funcView).mas_offset(10);
+            make.size.mas_offset(CGSizeMake(100, 40));
+        }];
+        [line mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.mas_equalTo(_funcView).mas_offset(1);
+            make.top.mas_equalTo(titlelable.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(1));
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(1));
+        }];
+        [jiugonggeView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(line.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.left.right.mas_equalTo(_funcView);
+            make.bottom.mas_equalTo(_funcView.mas_bottom);
+        }];
+        jiugonggeView.callBlock = ^(id sender) {
+            LWLog(@"你点击了%@",sender);
+            [self toFunctionModuleVCwithTitleKey:sender];
+        };
+        _funcView.layer.cornerRadius = 4;
+        _funcView.layer.masksToBounds = YES;
+    }
+    return _funcView;
+}
+
+/**
+ 广告图
+ */
+- (HYBaseView*)adView
+{
+    if (!_adView) {
+        _adView = [[HYBaseView alloc] init];
+        NSArray *ads = @[@"mine_ad"];
+        HYPictureCarouselView *adImageView = [HYPictureCarouselView cycleScrollViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, ADJUST_PERCENT_FLOAT(120)) shouldInfiniteLoop:YES imageNamesGroup:ads];
+        [_adView addSubview:adImageView];
+        [adImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(_adView);
+        }];
+    }
+    return _adView;
+}
+
+/**
+ 下部按钮区
+ */
+- (HYBaseView*)oterfuncView
+{
+    if (!_oterfuncView) {
+        _oterfuncView = [[HYBaseView alloc] init];
+        _oterfuncView.layer.cornerRadius = 4;
+        _oterfuncView.layer.masksToBounds = YES;
+        HYJiuGongGeView *jiugonggeOtherView = [[HYJiuGongGeView alloc]init];
+        jiugonggeOtherView.items_image_W = MARGIN*2.5;
+        [_oterfuncView addSubview:jiugonggeOtherView];
+        NSArray * dataArr = @[@{@"title":@"我的预约",@"image":@"mine_yuyue_n"},
+                              @{@"title":@"我的预定",@"image":@"mine_yuding_n"},
+                              @{@"title":@"我的优惠券",@"image":@"mine_youhuiquan_n"},
+//                              @{@"title":@"我的活动",@"image":@"mine_huodong_n"},
+                              @{@"title":@"我的收藏",@"image":@"mine_collection_n"},
+//                              @{@"title":@"我的积分",@"image":@"mine_jifen_n"},
+                              ];
+        jiugonggeOtherView.dataArr = dataArr;
+        [jiugonggeOtherView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_oterfuncView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.left.right.mas_equalTo(_oterfuncView);
+            make.bottom.mas_equalTo(_oterfuncView.mas_bottom);
+        }];
+        jiugonggeOtherView.callBlock = ^(id sender) {
+            [self toFunctionModuleVCwithTitleKey:sender];
+        };
+    }
+    return _oterfuncView;
+}
+
+/**
+ 下部cellview
+ */
+- (HYBaseView*)cellBigView1
+{
+    if (!_cellBigView1) {
+        _cellBigView1 = [[HYBaseView alloc] init];
+        _cellBigView1.backgroundColor = [UIColor whiteColor];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13) text:@"服务评价" textColor:HYCOLOR.color_c4];
+        UIImageView *arrow = [[UIImageView alloc]init];
+        arrow.image = IMAGENAME(@"arrow_right_nor");
+        
+        [_cellBigView1 addSubview:titleLable];
+        [_cellBigView1 addSubview:arrow];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.bottom.mas_equalTo(_cellBigView1);
+            make.left.mas_equalTo(_cellBigView1.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.height.mas_equalTo(_cellBigView1.mas_height);
+            make.centerY.mas_equalTo(_cellBigView1.mas_centerY);
+        }];
+        [arrow mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(9), ADJUST_PERCENT_FLOAT(15)));
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+            make.right.mas_equalTo(_cellBigView1.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(20));
+        }];
+        [_cellBigView1 bk_whenTapped:^{
+            [self toFunctionModuleVCwithTitleKey:@"服务评价"];
+        }];
+    }
+    return _cellBigView1;
+}
+- (HYBaseView*)cellBigView2
+{
+    if (!_cellBigView2) {
+        _cellBigView2 = [[HYBaseView alloc] init];
+        _cellBigView2.backgroundColor = [UIColor whiteColor];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13) text:@"投诉建议" textColor:HYCOLOR.color_c4];
+        UIImageView *arrow = [[UIImageView alloc]init];
+        arrow.image = IMAGENAME(@"arrow_right_nor");
+        
+        [_cellBigView2 addSubview:titleLable];
+        [_cellBigView2 addSubview:arrow];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.bottom.mas_equalTo(_cellBigView2);
+            make.left.mas_equalTo(_cellBigView2.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.height.mas_equalTo(_cellBigView2.mas_height);
+            make.centerY.mas_equalTo(_cellBigView2.mas_centerY);
+        }];
+        [arrow mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(9), ADJUST_PERCENT_FLOAT(15)));
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+            make.right.mas_equalTo(_cellBigView2.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(20));
+        }];
+        [_cellBigView2 bk_whenTapped:^{
+            [self toFunctionModuleVCwithTitleKey:@"投诉建议"];
+        }];
+    }
+    return _cellBigView2;
+}
+
+@end

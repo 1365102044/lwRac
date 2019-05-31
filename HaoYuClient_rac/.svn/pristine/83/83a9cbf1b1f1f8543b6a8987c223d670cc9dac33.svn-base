@@ -1,0 +1,238 @@
+//
+//  HYUserInfor_LocalData.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYUserInfor_LocalData.h"
+#import "HYLoginViewController.h"
+#import "HYBaseNavigationController.h"
+#import "NSString+Extension.h"
+#import "HYBaseTabBarController.h"
+#import "HYContractModel.h"
+@implementation HYUserInfor_LocalData
+
++ (instancetype)share
+{
+    static HYUserInfor_LocalData * instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYUserInfor_LocalData alloc] init];
+    });
+    return instance;
+}
+
+/**
+ 如果未登录状态下，跳转登录界面
+ 如果已经登录，不做操作
+ */
++ (void)LoginWithVC:(UIViewController *)VC
+{
+    if (!VC) {
+        HYBaseTabBarController *tabBarController                = (HYBaseTabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+        VC  = tabBarController;
+    }
+    if (![[HYUserInfor_LocalData share] isLogin]) {
+        HYLoginViewController *loginVC = [[HYLoginViewController alloc] init];
+        HYBaseNavigationController *navi = [[HYBaseNavigationController alloc] initWithRootViewController:loginVC];
+        [VC presentViewController:navi animated:YES completion:nil];
+    }
+}
+
+/**
+ 为登录时，添加收藏
+ */
+- (void)addCollectWithID:(NSString *)ID
+{
+    NSArray * currentIDs = USERDEFAULTS_GET(@"USER_NOLGOIN_COLLECTIDS");
+    NSMutableArray *tempArr = [[NSMutableArray alloc] initWithArray:currentIDs];
+    [tempArr addObject:ID];
+    USERDEFAULTS_SET(tempArr, @"USER_NOLGOIN_COLLECTIDS");
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+/**
+ 获取收藏数组
+ */
+- (NSArray *)getCollectIDs
+{
+    NSArray * currentIDs = USERDEFAULTS_GET(@"USER_NOLGOIN_COLLECTIDS");
+    return currentIDs;
+}
+
+/**
+ 返回是否登录
+ */
+- (BOOL)isLogin {
+    NSString *TOKEN = USERDEFAULTS_GET(USER_TOKEN_KEY);
+    if (TOKEN && ![TOKEN isEqualToString:@""]) {
+        return YES;
+    }
+    return NO;
+}
+
+/**
+  退出登录
+  */
+- (void)LoginOut
+{
+    /**
+     切换tabbarindex
+     */
+    POST_NOTI(CHANGETABBAR_INDEX_KEY, @"0");
+    /**
+     清除本地用户数据
+     */
+    USERDEFAULTS_RE(USER_TOKEN_KEY);
+    USERDEFAULTS_RE(USER_HEADER_ICON);
+    USERDEFAULTS_RE(USER_INFOR_MAIL);
+    USERDEFAULTS_RE(USER_INFOR_PHONE);
+    USERDEFAULTS_RE(USER_INFOR_NAME);
+    USERDEFAULTS_RE(USER_INFOR_QIANMING);
+    USERDEFAULTS_RE(USER_INFOR_USERID);
+    USERDEFAULTS_RE(USER_INFOR_HEADERICON_URL);
+    USERDEFAULTS_RE(USER_HETONGMODEL_INFOR);
+    LWLog(@"******清除本地信息");
+}
+
+/**
+ 保存登录信息
+ */
+- (void)saveLoginInfor:(id)info
+{
+    [self saveUser_Info:info];
+    /**
+     登录成功移除本地收藏数据
+     */
+    USERDEFAULTS_RE(USER_NOLGOIN_COLLECTIDS);
+    [SYSTEM_USERDEFAULTS synchronize];
+    
+    //重新登录后，刷新我的界面数据
+    POST_NOTI(CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI, nil);
+    
+    //登录后，刷新合同（我的界面）
+    self.isReHT_SuccessBooL = NO;
+    //刷新界面
+    POST_NOTI(CHANGER_ACCOUNT_UPDATE_MAIN_REREQUESTDATA_TOUPDATEMAINPAGEUI_NOTI, nil);
+    
+}
+
+/**
+ 保存 个人信息
+ */
+- (void)saveUser_Info:(id)info
+{
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"token"]], USER_TOKEN_KEY);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userId"]], USER_INFOR_USERID);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"headpicUrl"]], USER_INFOR_HEADERICON_URL);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userName"]], USER_INFOR_NAME);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userSign"]], USER_INFOR_QIANMING);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userPhoneNumber"]], USER_INFOR_PHONE);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"userMail"]], USER_INFOR_MAIL);
+    }
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+
+/**
+ 根据获取信息接口
+ */
+- (void)saveUser_InforOfUserInfo:(id)info
+{
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"token"]], USER_TOKEN_KEY);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"id"]], USER_INFOR_USERID);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"picWeixin"]], USER_INFOR_HEADERICON_URL);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"nickname"]], USER_INFOR_NAME);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"sign_"]], USER_INFOR_QIANMING);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"phone"]], USER_INFOR_PHONE);
+        USERDEFAULTS_SET([HYStringTool checkString:info[@"email"]], USER_INFOR_MAIL);
+    }
+    [SYSTEM_USERDEFAULTS synchronize];
+    
+    POST_NOTI(GET_USERINFOR_TOUPDATE_MINEMAININFOR, nil);
+}
+
+/**
+ 异步保存头像
+ */
+- (void)saveUser_Headericon_Local:(UIImage *)icon
+{
+    if (!icon) {
+        return;
+    }
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *icon_data = UIImagePNGRepresentation(icon);
+        [SYSTEM_USERDEFAULTS setObject:icon_data forKey:USER_HEADER_ICON];
+    });
+}
+/**
+ 获取本地头像
+ */
+- (UIImage *)User_HeaderImageData_Local
+{
+    NSData *icon_data =  [SYSTEM_USERDEFAULTS objectForKey:USER_HEADER_ICON];
+    if (icon_data) {
+        UIImage *header_icon = [UIImage imageWithData:icon_data];
+        if (header_icon) {
+            return header_icon;
+        }
+    }
+    return nil;
+}
+
+/**
+ 保存合同
+ */
+- (void)saveHeTongInfor:(NSArray *)hetongInfor
+{
+//    _getHeTong234Infor = nil;
+    _getHeTong2Infor = nil;
+    self.isReHT_SuccessBooL = YES;
+    NSArray * array = [NSArray arrayWithArray:hetongInfor];
+    [SYSTEM_USERDEFAULTS setObject:array forKey:USER_HETONGMODEL_INFOR];
+    [SYSTEM_USERDEFAULTS synchronize];
+}
+
+- (NSArray *)getHeTongInfor
+{
+    NSArray *hetong_infor = USERDEFAULTS_GET(USER_HETONGMODEL_INFOR);
+    NSMutableArray *hetongArr = [NSMutableArray array];
+    for (NSDictionary *dict in hetong_infor) {
+        HYContractModel *hetongmodel = [HYContractModel modelWithJSON:dict];
+        [hetongArr addObject:hetongmodel];
+    }
+    return (NSArray *)hetongArr;
+}
+
+- (NSArray *)getHeTong2Infor
+{
+    if (_getHeTong2Infor) {
+        return _getHeTong2Infor;
+    }
+    NSMutableArray *temp = [[NSMutableArray alloc] init];
+    for (HYContractModel *model in [self getHeTongInfor]) {
+        if ([model.status integerValue]== 2) {
+            [temp addObject:model];
+        }
+    }
+    return _getHeTong2Infor = temp;
+}
+
+//- (NSArray *)getHeTong234Infor
+//{
+//    if (_getHeTong234Infor) {
+//        return _getHeTong234Infor;
+//    }
+//    NSMutableArray *temp = [[NSMutableArray alloc] init];
+//    for (HYContractModel *model in [self getHeTongInfor]) {
+//        if ([model.status integerValue] == 2 ||
+//            [model.status integerValue] == 3 ||
+//            [model.status integerValue] == 4) {
+//            [temp addObject:model];
+//        }
+//    }
+//    return _getHeTong234Infor = temp;
+//}
+@end

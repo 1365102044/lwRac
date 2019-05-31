@@ -1,0 +1,175 @@
+//
+//  HYTouSuJianYiCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYTouSuJianYiCellView.h"
+@interface HYTouSuJianYiCellView ()
+@property (nonatomic, strong) HYBaseView * bgView;
+@property (nonatomic, assign) BOOL isShow;
+
+@end
+
+@implementation HYTouSuJianYiCellView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setSubUI];
+        self.backgroundColor = HYCOLOR.color_c1;
+        _isShow = NO;
+    }
+    return self;
+}
+
+- (void)setSubUI
+{
+    _bgView = [[HYBaseView alloc] init];
+    
+    _titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                           text:@""
+                                      textColor:HYCOLOR.color_c4];
+    _phoneLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c4];
+    _descLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                    text:@""
+                                               textColor:HYCOLOR.color_c4];
+    
+//    _kefuTitle = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+//                                                 text:@"客服回复:"
+//                                            textColor:HYCOLOR.color_c3];
+//    _huifuContentLable = [HYAttributedStringLabel labelWithFont:SYSTEM_REGULARFONT(13)
+//                                          text:@""
+//                                     textColor:HYCOLOR.color_c4];
+//    _completionTimeLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+//                                                    text:@""
+//                                               textColor:HYCOLOR.color_c3];
+//    _completionTimeLable.textAlignment = NSTextAlignmentRight;
+//    _huifuContentLable.numberOfLines = 0;
+//    _showIcon = [[UIImageView alloc] init];
+//    _showIcon.userInteractionEnabled = YES;
+//    _showIcon.image = IMAGENAME(@"shopping_point_n");
+    _lineView = [[UIView alloc] init];
+    _lineView.backgroundColor = HYCOLOR.color_c6;
+    
+    [self addSubview:_bgView];
+    [_bgView addSubview:_titleLable];
+    [_bgView addSubview:_phoneLable];
+    [_bgView addSubview:_descLable];
+//    [_bgView addSubview:_kefuTitle];
+    [_bgView addSubview:_lineView];
+//    [_bgView addSubview:_huifuContentLable];
+//    [_bgView addSubview:_showIcon];
+//    [_bgView addSubview:_completionTimeLable];
+    
+    [_bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(self).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom);
+    }];
+    [_titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN);
+        make.left.mas_equalTo(_bgView.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN*2);
+    }];
+    [_phoneLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_titleLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_titleLable.mas_left);
+    }];
+    [_descLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_phoneLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_titleLable.mas_left);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN);
+    }];
+    [_lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_descLable.mas_bottom).mas_offset(MARGIN);
+        make.height.mas_offset(0.5);
+        make.left.right.mas_equalTo(_descLable);
+    }];
+//    [_showIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(25), ADJUST_PERCENT_FLOAT(25)));
+//        make.centerY.mas_equalTo(_kefuTitle.mas_centerY);
+//        make.right.mas_equalTo(_descLable.mas_right);
+//    }];
+    
+    [self updateContrans:NO];
+    [_bgView setBoundWidth:0 cornerRadius:6];
+    
+//    [_showIcon bk_whenTapped:^{
+//        _isShow = !_isShow;
+//        [self updateContrans:_isShow];
+//        POST_NOTI(@"refreTableCell", nil);
+//    }];
+    
+    _statusImageView = [[UIImageView alloc] init];
+    [_bgView addSubview:_statusImageView];
+    [_statusImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(MARGIN*4, MARGIN*4));
+        make.top.right.mas_equalTo(_bgView);
+    }];
+    _cancleBtn = [HYDefaultButton buttonWithTitleStringKey:@"删除"
+                                                titleColor:HYCOLOR.color_c3
+                                                 titleFont:SYSTEM_REGULARFONT(14)
+                                                    target:self
+                                                  selector:nil];
+    [_bgView addSubview:_cancleBtn];
+    [_cancleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(MARGIN*5, MARGIN*2));
+        make.top.mas_equalTo(_lineView.mas_bottom).mas_offset(MARGIN/2);
+        make.right.mas_equalTo(_lineView.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+    }];
+    
+}
+
+
+
+/**
+ 是否展开 默认不展开
+ */
+- (void)updateContrans:(BOOL)isShowContent
+{
+//    if (!isShowContent) {
+//        self.huifuContentLable.hidden = YES;
+//        self.completionTimeLable.hidden = YES;
+//        [_kefuTitle mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_lineView.mas_bottom).mas_offset(MARGIN*1.5);
+//            make.left.mas_equalTo(_titleLable.mas_left);
+//            make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+//        }];
+//        [_huifuContentLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_kefuTitle.mas_bottom).mas_offset(MARGIN);
+//            make.left.right.mas_equalTo(_descLable);
+//            make.height.mas_offset(0);
+//        }];
+//        [_completionTimeLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_kefuTitle.mas_bottom).mas_offset(MARGIN);
+//            make.left.right.mas_equalTo(_descLable);
+//            make.height.mas_offset(0);
+//        }];
+//    }else{
+//        self.huifuContentLable.hidden = NO;
+//        self.completionTimeLable.hidden = NO;
+//        [_kefuTitle mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_lineView.mas_bottom).mas_offset(MARGIN*1.5);
+//            make.left.mas_equalTo(_titleLable.mas_left);
+//        }];
+//        [_huifuContentLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_kefuTitle.mas_bottom).mas_offset(MARGIN);
+//            make.left.right.mas_equalTo(_descLable);
+//        }];
+//        [_completionTimeLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(_huifuContentLable.mas_bottom).mas_offset(MARGIN);
+//            make.left.right.mas_equalTo(_descLable);
+//            make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+//        }];
+//    }
+}
+
+@end
+

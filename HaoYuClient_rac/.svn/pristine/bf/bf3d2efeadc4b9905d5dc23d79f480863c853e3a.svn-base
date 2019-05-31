@@ -1,0 +1,57 @@
+//
+//  HYBaseTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewCell.h"
+
+@implementation HYBaseTableViewCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self == [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+//        [self.contentView addSubview:self.bottomSpacingLineView];
+//        self.selectionStyle = UITableViewCellSelectionStyleNone;
+//
+//        [self.bottomSpacingLineView mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.left.mas_equalTo(self.contentView).mas_offset(ADJUST_PERCENT_FLOAT(12.f));
+//            make.bottom.right.mas_equalTo(self.contentView);
+//            make.height.mas_equalTo(0.5f);
+//        }];
+        self.selectionStyle =  UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    
+    [self.contentView addSubview:self.bottomSpacingLineView];
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+}
+
+- (HYBaseView *)bottomSpacingLineView
+{
+    if (!_bottomSpacingLineView) {
+        _bottomSpacingLineView                  = [[HYBaseView alloc] init];
+        _bottomSpacingLineView.backgroundColor  = HYCOLOR.color_c6;
+    }
+    return _bottomSpacingLineView;
+}
+
+@end

@@ -1,0 +1,51 @@
+//
+//  LWPayInforTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/2/18.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+#import "LWPayInforTableViewCell.h"
+
+@implementation LWPayInforTableViewCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if(self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]){
+        _left_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15) text:@"" textColor:HYCOLOR.color_c4];
+        _right_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15) text:@"" textColor:HYCOLOR.color_c4];
+        
+        [self.contentView addSubviews:@[_left_L,_right_L]];
+        
+        if ([reuseIdentifier isEqualToString:@"cell_payinfor"]) {
+            [_left_L mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerY.equalTo(self.contentView.mas_centerY);
+                make.left.equalTo(self.contentView.mas_left);
+                make.width.offset(ADJUST_PERCENT_FLOAT(90));
+                make.top.bottom.equalTo(self.contentView);
+            }];
+            [_right_L mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerY.equalTo(self.contentView.mas_centerY);
+                make.left.equalTo(self.left_L.mas_right).offset(5);
+            }];
+            _left_L.textAlignment = NSTextAlignmentRight;
+        }else if ([reuseIdentifier isEqualToString:@"cell_discount"]){
+            [_left_L mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerY.equalTo(self.contentView.mas_centerY);
+                make.left.equalTo(self.contentView.mas_left);
+                make.top.bottom.equalTo(self.contentView);
+            }];
+            [_right_L mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerY.equalTo(self.contentView.mas_centerY);
+                make.right.equalTo(self.contentView.mas_right);
+            }];
+            _right_L.textAlignment = NSTextAlignmentRight;
+        }
+        
+        self.backgroundColor = self.contentView.backgroundColor = _left_L.backgroundColor = _right_L.backgroundColor = [UIColor clearColor];
+    }
+    return self;
+}
+
+@end

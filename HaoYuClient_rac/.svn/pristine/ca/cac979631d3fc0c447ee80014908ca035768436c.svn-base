@@ -1,0 +1,331 @@
+//
+//  HYBaseAddBaoXiuMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYAddBaoXiuMainView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYPlaceHolderTextView.h"
+#import "HYContractModel.h"
+#import "HYChooseListView.h"
+#import "HYWeiXiuQuYuModel.h"
+#import "HYDatePickerManager.h"
+#import "HYDatePickerManager.h"
+@interface HYAddBaoXiuMainView()
+@property (nonatomic, strong) HYBaseView * bgView;
+@property (nonatomic, strong) HYLeftRightArrowView * roomNumberView;
+@property (nonatomic, strong) HYLeftRightArrowView * baoxiuWhereView;
+@property (nonatomic, strong) HYLeftRightArrowView * titleView;
+@property (nonatomic, strong) HYDefaultLabel *des_titleLabe;
+@property (nonatomic, strong) HYPlaceHolderTextView * descTextView;
+@property (nonatomic, strong) HYBaseView * NoPersonView;
+@property (nonatomic, strong) HYLeftRightArrowView * weixiuTimeView;
+@property (nonatomic, strong) HYFillLongButton * commitBtn;
+@property (nonatomic, strong) UISwitch * switchView;
+
+/**
+ 控制器标示
+ */
+@property (nonatomic, strong) NSString * titleStr;
+@property (nonatomic, strong) HYContractModel * currentContractModel;
+@property (nonatomic, strong) NSArray * hetongInfo;
+@property (nonatomic, strong) HYWeiXiuQuYuModel * selectQuyuModel;
+@property (nonatomic, strong) NSString * selectDateStr;
+
+@end
+
+@implementation HYAddBaoXiuMainView
+
+/**
+ 提交信息
+ */
+- (void)clickCommitBtn
+{
+    [self endEditing:YES];
+    
+    PARA_CREART;
+    PARA_SET(_currentContractModel.houseId, @"houseId");
+    PARA_SET([_currentContractModel.zukeName isNullToString], @"customer");
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"customerCalls");
+    PARA_SET([_titleView.rightTextField.text isNullToString], @"repairServiceContent");
+    PARA_SET([_descTextView.TextView.text isNullToString], @"description");
+    PARA_SET([_weixiuTimeView.rightLable.text isNullToString], @"expectCompletionTime");
+    if ([self.titleStr isEqualToString:@"申请保修"]) {
+        PARA_SET([_selectQuyuModel.customId isNullToString], @"typeId");
+        PARA_SET(_switchView.isOn ? @"1" : @"0", @"noOneCanRepair");
+    }
+    LWLog(@"\n\n\n\npara:%@",para);
+    
+    if (![self checkPara:para]) {
+        return ;
+    }
+    if ([self.delegate respondsToSelector:@selector(uploadImages:para:)]) {
+        [self.delegate uploadImages:self.addPhotoView.ImagesDataArr para:para];
+    }
+}
+
+/**
+ 检测参数
+ */
+- (BOOL)checkPara:(NSDictionary *)dict
+{
+    if ([dict[@"houseId"] isEqualToString:@""] ||
+        !dict[@"houseId"]) {
+        ALERT_MSG(@"请选择房间号");
+        return NO;
+    }
+    if ([self.titleStr isEqualToString:@"申请保修"]) {
+        if (!dict[@"typeId"] ||
+            [dict[@"typeId"] isEqualToString:@""]) {
+            ALERT_MSG(@"请选择保修区域");
+            return NO;
+        }
+    }
+    if ([dict[@"repairServiceContent"] isEqualToString:@""] ||
+        !dict[@"repairServiceContent"]) {
+        ALERT_MSG(@"请输入标题");
+        return NO;
+    }
+    if ([dict[@"description"] isEqualToString:@""] ||
+        !dict[@"description"]) {
+        ALERT_MSG(@"请输入描述");
+        return NO;
+    }
+  
+    return  YES;
+}
+
+/**
+ 多房间 选择
+ */
+- (void)showFangJianNumberView
+{
+    [HYChooseListView showChooseListView:_hetongInfo callBackBlock:^(id sender) {
+        _currentContractModel = _hetongInfo[[sender integerValue]];
+        self.roomNumberView.rightLable.text = _currentContractModel.houseNo;
+    }];
+}
+/**
+ 选择 维修区域
+ */
+- (void)showQuYuView
+{
+    [HYChooseListView showChooseListView:_QuYuInfor callBackBlock:^(id sender) {
+        _selectQuyuModel  = _QuYuInfor[[sender integerValue]];
+        self.baoxiuWhereView.rightLable.text = _selectQuyuModel.key;
+    }];
+}
+
+/**
+ 选择时间
+ */
+- (void)showDatePickerView
+{
+    [self endEditing:YES];
+    [HYDatePickerManager showDatePicker:^(id sender) {
+        self.selectDateStr = sender;
+        self.weixiuTimeView.rightLable.text = _selectDateStr;
+    } DateStyle:DateStyleShowYearMonthDayHourMinute];
+}
+
++ (instancetype)creatAddBaoXiuMainView:(NSString *)titleStr
+{
+    HYAddBaoXiuMainView *tem = [[HYAddBaoXiuMainView alloc] init];
+    tem.titleStr             = titleStr;
+    [tem setUI];
+    return tem;
+}
+
+- (void)setUI
+{
+    [self initSubViews];
+    [self setSubViewsContrans];
+    _hetongInfo = [[HYUserInfor_LocalData share] getHeTongInfor];
+    if (_hetongInfo.count == 1) {
+        HYContractModel *model = _hetongInfo.firstObject;
+        _currentContractModel = model;
+        self.roomNumberView.rightTextField.text = model.houseNo;
+    }
+}
+
+- (void)setSubViewsContrans
+{
+    [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.top.mas_equalTo(self.mas_top).mas_offset(MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+    [self.roomNumberView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(_bgView);
+        make.top.mas_equalTo(_bgView.mas_top).mas_offset(MARGIN);
+    }];
+    [self.baoxiuWhereView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(_bgView);
+        make.top.mas_equalTo(_roomNumberView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.titleView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(_bgView);
+        make.top.mas_equalTo(_baoxiuWhereView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.des_titleLabe mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.titleView.leftLable.mas_left);
+        make.top.mas_equalTo(_titleView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.descTextView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(150));
+        make.left.mas_equalTo(_bgView.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN);
+        make.top.mas_equalTo(_des_titleLabe.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.addPhotoView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(_descTextView);
+        make.right.mas_equalTo(_bgView.mas_right).mas_offset(-MARGIN);
+        make.top.mas_equalTo(_descTextView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [self.NoPersonView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(_bgView);
+        make.height.mas_offset(MARGIN*4);
+        make.top.mas_equalTo(_addPhotoView.mas_bottom).mas_offset(MARGIN/2);
+    }];
+    [self.weixiuTimeView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(_bgView);
+        make.top.mas_equalTo(_NoPersonView.mas_bottom).mas_offset(MARGIN);
+    }];
+    [_commitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+        make.left.right.mas_equalTo(_descTextView);
+        make.top.mas_equalTo(_weixiuTimeView.mas_bottom).mas_offset(MARGIN*2);
+        make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+    }];
+    
+    if ([_titleStr isEqualToString:@"申请保洁"]) {
+        self.baoxiuWhereView.hidden = YES;
+        self.addPhotoView.hidden = YES;
+        self.NoPersonView.hidden = YES;
+        [self.titleView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+            make.left.right.mas_equalTo(_bgView);
+            make.top.mas_equalTo(_roomNumberView.mas_bottom).mas_offset(MARGIN);
+        }];
+        [self.weixiuTimeView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+            make.left.right.mas_equalTo(_bgView);
+            make.top.mas_equalTo(_descTextView.mas_bottom).mas_offset(MARGIN);
+        }];
+        [_commitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+            make.left.right.mas_equalTo(_descTextView);
+            make.top.mas_equalTo(_weixiuTimeView.mas_bottom).mas_offset(MARGIN*2);
+            make.bottom.mas_equalTo(_bgView.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+}
+
+- (void)initSubViews
+{
+    self.bgView = [[HYBaseView alloc] init];
+    [self.bgView setBoundWidth:0 cornerRadius:6];
+    
+    self.roomNumberView = [HYLeftRightArrowView  creatLeftRightLableArrowViewWithLeftStr:@"房间号"
+                                                                               rightStr:[NSString stringWithFormat:@"请选择%@房号",[self.titleStr isEqualToString:@"申请保洁"] ? @"保洁" : @"保修"]
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                              if (_hetongInfo.count > 1) {
+                                                                                  [self showFangJianNumberView];
+                                                                              }
+                                                                          }];
+    self.baoxiuWhereView = [HYLeftRightArrowView  creatLeftRightLableArrowViewWithLeftStr:@"保修区域"
+                                                                               rightStr:@"请选择保修区域"
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                              [self showQuYuView];
+                                                                          }];
+    self.titleView = [HYLeftRightArrowView  creatLeftRightTextFieldArrowViewWithLeftStr:@"标题"
+                                                                               rightStr:[NSString stringWithFormat:@"请输入%@标题",[self.titleStr isEqualToString:@"申请保洁"] ? @"保洁" : @"保修"]
+                                                                          showArrowIcon:NO
+                                                                          CallBackBlock:^(id sender) {
+                                                                              LWLog(@"%%%%%%%%%%%%");
+                                                                          }];
+    self.roomNumberView.rightTextField.textFiled.enabled = NO;
+    self.baoxiuWhereView.rightTextField.textFiled.enabled = NO;
+    [self addSubview:self.bgView];
+    [self.bgView addSubview:self.roomNumberView];
+    [self.bgView addSubview:self.baoxiuWhereView];
+    [self.bgView addSubview:self.titleView];
+    
+    
+    _des_titleLabe = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(16)
+                                                             text:[self.titleStr isEqualToString:@"申请保洁"] ? @"备注：" : @"文字描述："
+                                                        textColor:HYCOLOR.color_c4];
+    _descTextView = [HYPlaceHolderTextView creatPlaceHolderTextViewWithPlaceHolder:@"请输入"];
+    [_bgView addSubview:_des_titleLabe];
+    [_bgView addSubview:_descTextView];
+    [_descTextView setBoundWidth:1 cornerRadius:2 boardColor:HYCOLOR.color_c3];
+    _descTextView.maxCount = 200;
+    _addPhotoView = [[HYAddPhotoView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH - MARGIN *2, 1)];
+    [_bgView addSubview:_addPhotoView];
+    _addPhotoView.titleLable.text = @"添加照片：(最大数量3张)";
+    
+    [_bgView addSubview:self.NoPersonView];
+    
+    self.weixiuTimeView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:[NSString stringWithFormat:@"可上门%@时间",[self.titleStr isEqualToString:@"申请保洁"] ? @"保洁" : @"保修"]
+                                                                               rightStr:@"请选择上门时间"
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                              [self showDatePickerView];
+                                                                          }];
+    self.weixiuTimeView.rightLable.textColor  = HYCOLOR.color_c6;
+    [_bgView addSubview:self.weixiuTimeView];
+    
+    _commitBtn = [HYFillLongButton buttonCorWithTitleStringKey:@"提交保修单"
+                                                        target:self
+                                                      selector:@selector(clickCommitBtn)];
+    [_bgView addSubview:_commitBtn];
+    
+}
+
+
+- (HYBaseView*)NoPersonView
+{
+    if (!_NoPersonView) {
+        _NoPersonView = [[HYBaseView alloc] init];
+        
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                              text:@"家中无人时可进行维修"
+                                                         textColor:HYCOLOR.color_c4];
+        UISwitch *swibtn = [[UISwitch alloc] init];
+        _switchView = swibtn;
+        [swibtn setOn:YES];
+        [_NoPersonView addSubview:titleLable];
+        [_NoPersonView addSubview:swibtn];
+        UIView *line = [[UIView alloc] init];
+        line.backgroundColor = HYCOLOR.color_c6;
+        [_NoPersonView addSubview:line];
+        swibtn.transform = CGAffineTransformMakeScale( 0.9, 0.7);//缩放
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_NoPersonView.mas_left).mas_offset(MARGIN);
+            make.height.mas_offset(ADJUST_PERCENT_FLOAT(30));
+            make.centerY.mas_equalTo(_NoPersonView.mas_centerY);
+        }];
+        [swibtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_NoPersonView.mas_right).mas_offset(10);
+            make.centerY.mas_equalTo(_NoPersonView.mas_centerY);
+            make.size.mas_offset(CGSizeMake(80, 30));
+        }];
+        [line mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.mas_equalTo(_NoPersonView);
+            make.height.mas_offset(0.5);
+            make.bottom.mas_equalTo(_NoPersonView.mas_bottom).mas_offset(0);
+        }];
+    }
+    return _NoPersonView;
+}
+@end

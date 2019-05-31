@@ -1,0 +1,40 @@
+//
+//  LWNetworkMacro.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/30.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+/**
+ * 网络请求基础URLString
+ */
+public let BASE_URL = "http://px.hntpsjwy.com:80/"
+
+public let BASE_VSERSON_URL = "/v2/clientAPP/app/"
+
+/**
+ 登录获取验证码
+ */
+public let LOGIN_SENDCODE_URL = "get_code"
+/**
+ 通过验证码登录
+ */
+public let LOGIN_WITHCODE_URL = "login"
+
+/// 首页数据
+public let HOMEPAGE_URL = "v2/web/client_app_popu/get_banner_and_popu_pic_"
+
+/// 房源列表数据
+public let HOUSERESOURCE_LIST_URL = "get_item_list"
+
+/// 城市列表
+public let CITY_LIST_URL = "get_city_list"
+
+public let DISCOVER_MAIN_URLS  = "mp.weixin.qq.com/mp/homepage?__biz=MzU1NjU4NjgyOA==&hid=1&sn=1946efb80af26d6e8d8c2f0fea9b7987&scene=18#wechat_redirect"
+
+/// 城市列表
+public let QUYU_LIST_URL = "get_townList_by_cityId"
+

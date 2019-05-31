@@ -1,0 +1,20 @@
+//
+//  HYSurfaceDeatilView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+#import "HYShuiDianBiaoModel.h"
+@interface HYSurfaceDeatilView : HYBaseView
+@property (nonatomic, copy) HYEventCallBackBlock  clickHistoryLBlock;
+/**
+ 水 / 电 表
+ */
+@property (nonatomic, strong) NSString * typeStr;
+@property (nonatomic, strong) HYDefaultLabel * payLable;
+@property (nonatomic, strong) HYShuiDianBiaoModel * dataModel;
+
+@end

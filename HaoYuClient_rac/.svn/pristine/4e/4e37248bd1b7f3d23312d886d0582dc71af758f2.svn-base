@@ -1,0 +1,33 @@
+//
+//  HYHomeTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHomeTableViewCell.h"
+@interface HYHomeTableViewCell ()
+
+@end
+
+@implementation HYHomeTableViewCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+
+        _cellView = [[HYHomeTableViewCellView alloc] init];
+        [self.contentView addSubview:_cellView];
+        [_cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self.contentView);
+        }];
+    }
+    return self;
+}
+- (void)setIndexPath:(NSIndexPath *)indexPath
+{
+    _cellView.section = indexPath.section;
+}
+
+@end

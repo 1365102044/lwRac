@@ -1,0 +1,53 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+#import "HYAnnotationView.h"
+#import "HYPaoView.h"
+#import "HYPointAnnotation.h"
+#import "HYPointModel.h"
+#import "CoustomSlider.h"
+#import "UIControl+LWdelay.h"
+
+@interface ViewController ()
+@property (nonatomic, strong) UISlider * sliderView;
+@property (nonatomic, strong) BMKMapView * mapView;
+@property(nonatomic , strong) BMKUserLocation *userLocation;
+@property (nonatomic, strong) UIButton * btn;
+
+@end
+
+@implementation ViewController
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    self.btn = [[UIButton alloc] initWithFrame:CGRectMake(100, 100, 100, 400)];
+    self.btn.backgroundColor = [UIColor redColor];
+    [self.view addSubview:self.btn];
+    self.btn.lw_acceptEventInterval = 2;
+    [self.btn addTarget:self action:@selector(clickbtn) forControlEvents:UIControlEventTouchUpInside];
+    
+}
+- (void)clickbtn
+{
+    NSLog(@"**************************%@",[NSDate date]);
+}
+
+- (NSInteger)getnum:(NSInteger)a b:(NSInteger)b
+{
+    return a + b;
+}
+
+@end

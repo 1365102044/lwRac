@@ -1,0 +1,349 @@
+//
+//  HYPayMainView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayMainView.h"
+#import "HYPayItemView.h"
+#import "WXApi.h"
+#import "HYLevelLable.h"
+#import "HYDiscountModel.h"
+@interface HYPayMainView ()
+@property (nonatomic, strong) HYBaseView * topView;
+@property (nonatomic, strong) HYBaseView * payItemsView;
+@property (nonatomic, strong) HYDefaultLabel * payTitleLable;
+@property (nonatomic, strong) NSArray * payTypys;
+@property (nonatomic, strong) HYPayItemView * laseSelectItem;
+//价格的信息
+@property (nonatomic, strong) HYBaseView * moneyInforView;
+@property (nonatomic, strong) HYDefaultLabel * totalMoneyLable;//总价
+@property (nonatomic, strong) HYDefaultLabel * shouldPayMoneyLable;//应付
+@property (nonatomic, strong) HYDefaultLabel * total_L;
+
+@property (nonatomic, assign) HYPayMainHeaderType HeaderType;
+@property (nonatomic, strong) HYDefaultLabel * top_title_lable;
+@property (nonatomic, strong) HYBaseView * disc_bgView;
+
+@end
+
+@implementation HYPayMainView
+/**
+ 为顶部视图赋值（无优惠券的账单、使用优惠券的账单，）
+ */
+- (void)setHeaderViewDatas:(NSDictionary *)data
+{
+    NSString *totalStr = StringWithFormat(data[@"total"]);
+    NSString *payStr = StringWithFormat(data[@"pay"]);
+    if ([totalStr isEqualToString:payStr]) {
+        _total_L.hidden = YES;
+        _totalMoneyLable.hidden = YES;
+        [_shouldPayMoneyLable mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.mas_equalTo(_moneyInforView).mas_offset(MARGIN);
+            make.bottom.mas_equalTo(_moneyInforView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        _shouldPayMoneyLable.text = [NSString stringWithFormat:@"应付金额:%@元",payStr];
+    }else{
+        if(data[@"total"]) {
+            NSString *textStr = [NSString stringWithFormat:@"%@元",data[@"total"]];
+            if (textStr != nil) {
+                //中划线
+                NSDictionary *attribtDic = @{NSStrikethroughStyleAttributeName: [NSNumber numberWithInteger:NSUnderlineStyleSingle]};
+                NSMutableAttributedString *attribtStr = [[NSMutableAttributedString alloc]initWithString:textStr attributes:attribtDic];
+                // 赋值
+                self.totalMoneyLable.attributedText = attribtStr;
+            }
+        }
+        if(data[@"pay"]) _shouldPayMoneyLable.text = [NSString stringWithFormat:@"优惠价：%@元",data[@"pay"]];
+    }
+}
+
+/**
+ 更新约束
+ */
+- (void)updateConstraintsHeaderViewWithHeaderType:(HYPayMainHeaderType )HeaderType;
+{
+    _HeaderType = HeaderType;
+    if (HeaderType == HeaderTypeCanInputMoney) {
+        self.topView.hidden = NO;
+        self.moneyInforView.hidden = YES;
+        [self.topView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT + MARGIN);
+            make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        }];
+        [self.payItemsView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self).mas_offset(MARGIN);
+            make.top.mas_equalTo(_topView.mas_bottom).mas_offset(MARGIN);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }else if(HeaderType == HeaderTypeShowDiscount){
+        self.topView.hidden = YES;
+        self.moneyInforView.hidden = NO;
+        [self.moneyInforView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT + MARGIN);
+            make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        }];
+        [self.payItemsView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self).mas_offset(MARGIN);
+            make.top.mas_equalTo(_moneyInforView.mas_bottom).mas_offset(MARGIN);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }else{
+        self.topView.hidden = YES;
+        self.moneyInforView.hidden = YES;
+        [self.payItemsView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self).mas_offset(MARGIN);
+            make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT + MARGIN*2);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+}
+
+/**
+ 选择优惠券
+ */
+- (void)clickSeleDisc:(UIButton *)sender
+{
+    [self endEditing:YES];
+    if ([self.delegate respondsToSelector:@selector(pushChooseDiscountViewController)]) {
+        [self.delegate pushChooseDiscountViewController];
+    }
+}
+
+/**
+ 显示选择的优惠券
+ */
+- (void)setDiscountDatas:(NSArray *)datas
+{
+    if (datas == nil || datas.count == 0) {
+        [self.disc_bgView removeAllSubviews];
+        return;
+    }
+    for (int i = 0; i < datas.count; i ++) {
+        HYDiscountModel *model = datas[i];
+        HYLevelLable *item = [HYLevelLable creatLevelLable:model.couponTitle rightStr:[NSString stringWithFormat:@"优惠%@元",model.couponMoney]];
+        HYLevelLable *last = _disc_bgView.subviews.lastObject;
+        [_disc_bgView addSubview:item];
+        [item mas_makeConstraints:^(MASConstraintMaker *make) {
+            if (i == 0) {
+                make.top.mas_equalTo(_disc_bgView.mas_top).mas_offset(MARGIN);
+            }else{
+                make.top.mas_equalTo(last.mas_bottom).mas_offset(MARGIN);
+            }
+            make.left.mas_equalTo(_disc_bgView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_disc_bgView.mas_right).mas_offset(-MARGIN);
+            if (i == datas.count - 1) {
+                make.bottom.mas_equalTo(_disc_bgView.mas_bottom).mas_offset(-MARGIN);
+            }
+        }];
+    }
+}
+
+/**
+ 充值水电表时 支付时 修改金额后，重新选择优惠券
+ */
+- (void)changeInputMoney:(NSNotification *)noti
+{
+    NSString *inputMoney = noti.object;
+    [self setDiscountDatas:nil];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUI];
+        self.backgroundColor = HYCOLOR.color_c1;
+        //        NSArray *tem_arr  = @[@{@"icon":@"pay_zhifubao_b_icon",@"title":@"支付宝",@"paytype":@"2"}];
+        //        self.selPayTypeTag = 2;
+        //        if ([WXApi isWXAppInstalled]) {
+        NSArray *tem_arr = @[@{@"icon":@"pay_weixin_b_icon",@"title":@"微信",@"paytype":@"1"},
+                             @{@"icon":@"pay_zhifubao_b_icon",@"title":@"支付宝",@"paytype":@"2"}];
+        self.selPayTypeTag = 1;
+        //        }
+        self.payTypys = tem_arr;
+        /**
+         充值水电表时 支付时 修改金额后，重新选择优惠券
+         */
+        ADD_NOTI(changeInputMoney:, CHANGE_INPUTMONEY_FOR_RECHARGE_DISCOUNT_KEY);
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    [self addSubview:self.topView];
+    [self addSubview:self.moneyInforView];
+    [self addSubview:self.payItemsView];
+    [self.topView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(NAVIGATOR_HEIGHT + MARGIN);
+        make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+//        make.height.mas_offset(MARGIN*10);
+    }];
+    [self.payItemsView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self).mas_offset(MARGIN);
+        make.top.mas_equalTo(_topView.mas_bottom).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+    [self.topView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    [self.payItemsView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+}
+
+- (HYBaseView*)topView
+{
+    if (!_topView) {
+        _topView = [[HYBaseView alloc] init];
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(20)
+                                                              text:@"支付金额"
+                                                         textColor:HYCOLOR.color_c26];
+        _moneyTextFlied = [HYMoneyTextFiled creatMoneyTextFiledplaceHolder:@"请输入金额"
+                                                                      font:SYSTEM_REGULARFONT(22)
+                                                                 textColor:HYCOLOR.color_c26
+                                                                  maxCount:0];
+        
+        _moneyTextFlied.textFiled.textAlignment = NSTextAlignmentRight;
+        
+        _moneyTextFlied.textFiled.keyboardType =  UIKeyboardTypeDecimalPad;
+        HYDefaultLabel *danyuanLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(20)
+                                                                text:@"元"
+                                                           textColor:HYCOLOR.color_c26];
+        HYFillLongButton *seleDiscBtn = [HYFillLongButton buttonCorWithTitleStringKey:@"选择优惠券" target:self selector:@selector(clickSeleDisc:)];
+        _disc_bgView = [[HYBaseView alloc] init];
+        [_topView addSubview:seleDiscBtn];
+        [_topView addSubview:titleLable];
+        [_topView addSubview:_moneyTextFlied];
+        [_topView addSubview:danyuanLable];
+        [_topView addSubview:self.disc_bgView];
+        _top_title_lable = titleLable;
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_topView.mas_left).mas_offset(MARGIN*1.5);
+            make.width.mas_offset(MARGIN*10);
+            make.top.mas_equalTo(_topView.mas_top).mas_offset(MARGIN*2);
+//            make.bottom.mas_equalTo(_topView.mas_bottom).mas_offset(-MARGIN*2);
+        }];
+        [danyuanLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_topView.mas_right).mas_offset(-MARGIN*2);
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+            make.width.mas_offset(MARGIN*3);
+        }];
+        [_moneyTextFlied mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(danyuanLable.mas_left).mas_offset(-MARGIN*.5);
+            make.centerY.mas_equalTo(titleLable.mas_centerY);
+            make.height.mas_offset(MARGIN*4);
+            make.left.mas_equalTo(titleLable.mas_right).mas_offset(MARGIN*2);
+        }];
+        [seleDiscBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(MARGIN*9, MARGIN*2.5));
+            make.right.mas_equalTo(danyuanLable.mas_right);
+            make.top.mas_equalTo(_moneyTextFlied.mas_bottom).mas_offset(MARGIN);
+        }];
+        [_disc_bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(seleDiscBtn.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(titleLable.mas_left);
+            make.right.mas_equalTo(danyuanLable.mas_right);
+            make.bottom.mas_equalTo(_topView.mas_bottom).mas_equalTo(-MARGIN*2);
+        }];
+    }
+    return _topView;
+}
+
+- (void)setPayTypys:(NSArray *)payTypys
+{
+    _payTypys = payTypys;
+    if (payTypys.count == 0 ) {
+        _payTitleLable.hidden = YES;
+        return;
+    }
+    NSMutableArray *temp = [NSMutableArray array];
+    for (int i = 0; i<payTypys.count; i++) {
+        HYPayItemView *item = [[HYPayItemView alloc] init];
+        item.leftIcon.image = IMAGENAME(payTypys[i][@"icon"]);
+        item.descLable.text = payTypys[i][@"title"];
+        [_payItemsView addSubview:item];
+        [item mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_payItemsView);
+            make.height.mas_offset(MARGIN*6);
+            if (i == 0) {
+                make.top.mas_equalTo(_payTitleLable.mas_bottom).mas_offset(MARGIN);
+            }else{
+                HYDefaultLabel *lastLable = temp.lastObject;
+                make.top.mas_equalTo(lastLable.mas_bottom);
+            }
+            if(i == payTypys.count - 1){
+                make.bottom.mas_equalTo(_payItemsView.mas_bottom);
+            }
+        }];
+        item.tag = [_payTypys[i][@"paytype"] integerValue];
+        [temp addObject:item];
+        WEAKSELF(self);
+        [item bk_whenTapped:^{
+            [weakself clickPayItems:item];
+        }];
+        if (i == 0) {
+            item.rightIcon.selected = YES;
+            self.laseSelectItem = item;
+        }
+    }
+}
+
+- (void)clickPayItems:(HYPayItemView *)payitemView
+{
+    self.laseSelectItem.rightIcon.selected = NO;
+    payitemView.rightIcon.selected = YES;
+    self.laseSelectItem = payitemView;
+    self.selPayTypeTag = payitemView.tag;
+}
+
+- (HYBaseView*)payItemsView
+{
+    if (!_payItemsView) {
+        _payItemsView = [[HYBaseView alloc] init];
+        _payTitleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                  text:@"请选择支付方式"
+                                             textColor:HYCOLOR.color_c4];
+        [_payItemsView addSubview:_payTitleLable];
+        [_payTitleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_payItemsView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_payItemsView.mas_left).mas_offset(MARGIN);
+        }];
+    }
+    return _payItemsView;
+}
+
+- (HYBaseView*)moneyInforView
+{
+    if (!_moneyInforView) {
+        _moneyInforView = [[HYBaseView alloc] init];
+        _shouldPayMoneyLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(17) text:@"" textColor:HYCOLOR.color_c4];
+        _totalMoneyLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(17) text:@"" textColor:HYCOLOR.color_c4];
+        HYDefaultLabel *total_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(17) text:@"总金额：" textColor:HYCOLOR.color_c4];
+        _total_L = total_L;
+        [_moneyInforView addSubview:_totalMoneyLable];
+        [_moneyInforView addSubview:_shouldPayMoneyLable];
+        [_moneyInforView addSubview:total_L];
+        [total_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.top.mas_equalTo(_moneyInforView).mas_offset(MARGIN);
+        }];
+        [_totalMoneyLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.mas_equalTo(total_L.mas_centerY);
+            make.left.mas_equalTo(total_L.mas_right).mas_offset(2);
+        }];
+        [_shouldPayMoneyLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(total_L.mas_left);
+            make.top.mas_equalTo(_totalMoneyLable.mas_bottom).mas_offset(MARGIN/2);
+            make.bottom.mas_equalTo(_moneyInforView.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+    return _moneyInforView;
+}
+
+@end

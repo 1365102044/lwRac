@@ -1,0 +1,160 @@
+//
+//  HYHouseProjectInforTool.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/17.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHouseProjectInforTool.h"
+#import "HYHouseRescourcesModel.h"
+@interface HYHouseProjectInforTool ()
+@property (nonatomic, copy) HYEventCallBackBlock callBackBlock;
+@property (nonatomic, strong) NSMutableArray * DatasMutableArray;
+@end
+
+@implementation HYHouseProjectInforTool
+
+/**
+ 获取项目列表
+ */
+- (void)requestProjectInfor:(NSString *)cityId
+              callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    PARA_SET(@"d94bba14-dec1-11e5-bcc3-00163e1c066c", @"cityId");
+    [[HYServiceManager share] postRequestWithurl:GET_PROJECT_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n项目列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYProjectLevelListModel *model = [HYProjectLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 获取意向户型列表信息
+ houseItemId   项目id
+ */
+- (void)requestHuxingListInfor:(NSString *)houseItemId
+                 callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    PARA_SET(houseItemId, @"houseItemId");
+    [[HYServiceManager share] postRequestWithurl:GET_HUXING_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n意向户型列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYHuXingLevelListModel *model = [HYHuXingLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ roomTypeId  户型id
+ */
+- (void)requestFangJianHaoLevelInfor:(NSString *)roomTypeId
+                       callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    para[@"roomTypeId"] = roomTypeId;
+    [[HYServiceManager share] postRequestWithurl:GET_FANGJIANNUMBER_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n房间号列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYFangJianHaoLevelListModel *model = [HYFangJianHaoLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 根据城市获取项目列表 (地图找房)
+ */
+- (void)requestProjectInforByCityForMapFindHouseCallBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    //    PARA_SET([HYStringTool checkString:[HYPublic_LocalData share].location_City_Id], @"cityId");
+    [[HYServiceManager share] postRequestWithurl:GET_PROJECT_LIST_BYCITY_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSMutableArray *tem_Arr = [[NSMutableArray alloc] init];
+                                        NSArray *tem = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem) {
+                                            HYHouseRescourcesModel *projectModel = [HYHouseRescourcesModel modelWithJSON:dict];
+                                            [tem_Arr addObject:projectModel];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(tem_Arr);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+    
+}
+
+/**
+ 获取优惠活动信息
+ */
+- (void)requestDiscountInforWithhouseId:(NSString *)houseId
+                              startTime:(NSString *)startTime
+                                endTime:(NSString *)endTime
+callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    PARA_CREART;
+    PARA_SET([HYStringTool checkString:houseId], @"houseId");
+    PARA_SET([HYStringTool checkString:startTime], @"startTime");
+    PARA_SET([HYStringTool checkString:endTime], @"endTime");
+    [[HYServiceManager share] postRequestWithurl:GET_DISCOUNTFORQIANYUE_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(objc);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+- (NSMutableArray*)DatasMutableArray
+{
+    if (!_DatasMutableArray) {
+        _DatasMutableArray = [[NSMutableArray alloc] init];
+    }
+    return _DatasMutableArray;
+}
+
+@end

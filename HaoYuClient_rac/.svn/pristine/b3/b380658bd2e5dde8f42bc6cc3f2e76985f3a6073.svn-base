@@ -1,0 +1,14 @@
+//
+//  HYQianYue_XieYiView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+@interface HYQianYue_XieYiView : HYBaseView
+@property (nonatomic, strong) NSString * XieYi_URL;
+
+@end

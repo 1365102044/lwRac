@@ -1,0 +1,36 @@
+//
+//  HYBannerHandlerViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/10/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBannerHandlerManager.h"
+#import "HYBannerActivityViewController.h"
+
+@interface HYBannerHandlerManager ()
+
+@end
+
+@implementation HYBannerHandlerManager
+
+/**
+ bannerModel:  数据模型
+ sourceVC:     来源控制器
+ extend:       扩展数据
+ */
++ (void)handleWithBannerModel:(HYHomeBannnerModel *)bannerModel
+         sourceViewControlelr:(HYBaseViewController *)sourceVC
+                       extend:(id)extend
+{
+    if (!bannerModel || ![bannerModel isKindOfClass:[HYHomeBannnerModel class]]) {
+        return;
+    }
+    HYBannerActivityViewController *activity =  [[HYBannerActivityViewController alloc] init];
+    activity.web_url  = bannerModel.picUrl;
+    activity.hidesBottomBarWhenPushed = YES;
+    [sourceVC.navigationController pushViewController:activity animated:YES];
+}
+
+@end

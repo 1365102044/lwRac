@@ -1,0 +1,248 @@
+//
+//  HYNetWorkConst.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYNetWorkConst.h"
+
+@implementation HYNetWorkConst
+
+/**
+ *  网络请求异常key
+ */
+NSString * const NETREQUEST_ERRORINFO_KEY                                           = @"errorInfo";
+
+
+
+//** =========================================================================================== */
+//** ============================================个人中心========================================== */
+//** =========================================================================================== */
+
+/**
+ 使用验证码登录
+ */
+NSString * const LOGINWITHCODE_URL                      = @"/v2/clientAPP/app/login";
+/**
+ 获取登录的验证码
+ */
+NSString * const GETLOGINCODE_URL                      = @"/v2/clientAPP/app/get_code";
+
+/**
+ 请求我的主页面
+ */
+NSString * const GETMINEMAININFOR_URL                      = @"v2/clientAPP/app/getUserInfo";
+
+/**
+ 切换头像
+ */
+NSString * const CHANGE_HEADERICON_URL                  = @"";
+/**
+ 上传被修改过的信息
+ */
+NSString *const UPLOAD_USERINFOR_URL                    = @"v2/clientAPP/app/modify_personal_information";
+
+/**
+ 获取账单列表
+ */
+NSString *const GET_MINEBILLLISTINFOR_URL                    = @"v2/clientAPP/app/get_renter_list";
+
+/**
+ 获取合同信息
+ */
+NSString *const GET_MINEHETONGLISTINFOR_URL                    = @"v2/clientAPP/app/get_contract_list";
+/**
+ 获取合同详情
+ */
+NSString *const GET_MINEHETONGDEATILINFOR_URL                    = @"v2/clientAPP/app/get_contract_by_id";
+/**
+ 预览合同
+ */
+NSString *const GET_MINEHETONGPDFINFOR_URL                    = @"v2/clientAPP/app/selcontract";
+/**
+ 维修列表
+ */
+NSString *const GET_MINEWEIXIULISTINFOR_URL                    = @"v2/clientAPP/app/get_maintain_list";
+/**
+ 申请维修
+ */
+NSString *const GET_MINEAPPLYWEIXIUINFOR_URL                    = @"v2/clientAPP/app/apply_maintain";
+/**
+ 保洁列表
+ */
+NSString *const GET_MINEBAOJIELISTINFOR_URL                    = @"v2/clientAPP/app/get_cleaning_list";
+/**
+ 申请保洁
+ */
+NSString *const GET_MINEAPPLYBAOJIEINFOR_URL                    = @"v2/clientAPP/app/apply_cleaning";
+/**
+ 维修区域
+ */
+NSString *const GET_MINEWEIXIUQUYUINFOR_URL                    = @"v2/sys/zi_dian/get_list_by_mark";
+
+/**
+ 维修 上传图片
+ */
+NSString *const UPLOAD_MINEWEIXIU_IMAGE_URL                    = @"/UploadAllObjectServlet?server=upload&";
+
+/**
+ 电表信息
+ */
+NSString *const GET_MINEDIANBAO_INFOR_URL                    = @"/v2/clientAPP/app/mineDianBiao";
+/**
+ 水表信息
+ */
+NSString *const GET_MINESHUIBAO_INFOR_URL                    = @"v2/clientAPP/app/mineShuiBiao";
+
+/**
+ 只能门锁信息
+ */
+NSString *const GET_MINELOCKMESSAGE_INFOR_URL                    = @"v2/clientAPP/app/getMyLockMsg";
+/**
+ 远程开锁
+ */
+NSString *const GET_REMOTERUNLOCK_URL                    = @"v2/clientAPP/app/weChatRemoteUnlocking";
+/**
+ 修改门锁密码
+ */
+NSString *const CHANGE_MYLOCKPW_URL                    = @"v2/clientAPP/app/updatePwd";
+/**
+ 修改门锁密码 发生验证码
+ */
+NSString *const CHANGE_MYLOCKPW_SENDCODE_URL                    = @"v2/sciencelock/send_verification_code";
+/**
+ 预约列表
+ */
+NSString *const GET_YUYUELIST_INFOR_URL                    = @"v2/clientAPP/app/get_reservation_list";
+/**
+ 取消预约
+ */
+NSString *const CANCLE_YUYUE_ORDER_URL                    = @"v2/clientAPP/app/cancel_appointment";
+/**
+ 预订列表
+ */
+NSString *const GET_YUDINGLIST_INFOR_URL                    = @"v2/clientAPP/app/get_preordain_list";
+/**
+ 取消预订
+ */
+NSString *const CANCLE_YUDING_ORDER_URL                    = @"v2/clientAPP/app/cancel_book";
+/**
+ 收藏列表
+ */
+NSString *const GET_COLLECTLIST_INFOR_URL                    = @"v2/clientAPP/app/get_favorites_list";
+/**
+ 收藏户型
+ */
+NSString *const ADD_HUXING_COLLECT_URL                    = @"v2/clientAPP/app/collector_houseType";
+/**
+ 取消收藏户型
+ */
+NSString *const CANCLE_HUXING_COLLECT_URL                    = @"v2/clientAPP/app/collector_houseType";
+
+/**
+ 投诉建议
+ */
+NSString *const TOUSUJIANYI_INFOR_URL                    = @"v2/clientAPP/app/suggestions";
+/**
+ 投诉建议 列表
+ */
+NSString *const TOUSUJIANYI_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_complaint_letter_list";
+/**
+服务评价
+ */
+NSString *const FUPINGJIA_INFOR_URL                    = @"v2/clientAPP/app/serviceRating";
+
+
+
+
+/**
+ 户型详情信息
+ */
+NSString *const HUXINGDEATIL_INFOR_URL                    = @"v2/clientAPP/app/get_roomType_details";
+
+/**
+ 项目列表
+ */
+NSString *const HOUSE_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_item_list";
+/**
+ 项目详情
+ */
+NSString *const HOUSE_DEATIL_INFOR_URL                    = @"v2/clientAPP/app/get_item_details";
+/**
+ 户型列表
+ */
+NSString *const HUXING_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_room_type_list";
+
+/**
+ 城市列表
+ */
+NSString *const HAVEHOUSE_CITY_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_city_list";
+
+/**
+ 获取项目列表名称
+ */
+NSString *const GET_PROJECT_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_itemList_by_cityId";
+/**
+ 获取户型列表
+ */
+NSString *const GET_HUXING_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_roomTypeList_by_itemId";
+/**
+ 获取房间号列表
+ */
+NSString *const GET_FANGJIANNUMBER_LIST_INFOR_URL                    = @"v2/clientAPP/app/get_houseNo_by_roomTypeId";
+
+/**
+ 预约房源
+ */
+NSString *const COMMIT_YUYUEHOUSTE_INFOR_URL                    = @"v2/clientAPP/app/yu_yue";
+
+/**
+ 预订房源
+ */
+NSString *const COMMIT_YUDINGHOUSTE_INFOR_URL                    = @"v2/clientAPP/app/book_house";
+
+/**
+ 获取房源的信息 （预订时，选择房间号后，获取房间号的信息）
+ */
+NSString *const GET_YUDINGHOUSTE_DEATIL_INFOR_URL                    = @"v2/clientAPP/app/get_house_details";
+
+/**
+ 签约账单
+ */
+NSString *const COMMIT_QIANYUEHOUSTE_INFOR_URL                    = @"v2/clientAPP/app/anticipated_bill_clientApp";
+
+/**
+ 租客签约
+ */
+NSString *const ZUKE_QIANYUEHOUSTE_INFOR_URL                    = @"v2/clientAPP/app/sign_contract";
+
+/**
+ 根据城市id获取区域列 (房源 筛选的 区域列表)
+ */
+NSString *const GET_QUYU_LIST_BY_CITY_INFOR_URL                    = @"v2/clientAPP/app/get_townList_by_cityId";
+
+/**
+ 根据城市获取项目列表 (地图找房)
+ */
+NSString *const GET_PROJECT_LIST_BYCITY_INFOR_URL                    = @"v2/clientAPP/app/get_itemInformation_by_city";
+
+
+/**
+ 获取优惠活动信息
+ */
+NSString *const GET_DISCOUNTFORQIANYUE_INFOR_URL                    = @"v2/clientAPP/app/getDiscount_clientApp";
+
+/**
+ 获取签约的付款方式
+ */
+NSString *const GET_QIANYUPAY_TYPE_MARK_URL                    = @"v2/sys/zi_dian/get_list_by_mark";
+
+
+/**
+ 获取首页的数据
+ */
+NSString *const GET_HOMEPAGE_INFOR_URL                    = @"v2/web/client_app_popu/get_banner_and_popu_pic_";
+
+@end

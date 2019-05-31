@@ -1,0 +1,266 @@
+//
+//  HYHeTongYouQiXianView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/20.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHeTongYouQiXianView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYChooseListView.h"
+#import "HYDatePickerManager.h"
+
+@interface HYHeTongYouQiXianView ()
+@property (nonatomic, strong) HYLeftRightArrowView *qizhiriqi;
+@property (nonatomic, strong) HYLeftRightArrowView *qianyueshichang;
+@property (nonatomic, strong) HYDefaultButton * lastSelectBtn;
+@property (nonatomic, strong) HYLeftRightArrowView *fukuanfangshi;
+@property (nonatomic, strong) HYBaseView * qizhiriqiView;
+@property (nonatomic, strong) HYDefaultTextField * startTime_TF;
+@property (nonatomic, strong) HYDefaultTextField * endTime_TF;
+@property (nonatomic, strong) NSDate * endTime_Date;
+@property (nonatomic, strong) NSDate * startTime_Date;
+
+@end
+
+@implementation HYHeTongYouQiXianView
+/**
+ 付款方式
+ */
+- (void)chooseFukuanfangshi
+{
+    NSArray *arr = @[@"月付",@"季付",@"半年付",@"年付",];
+    [HYChooseListView showChooseListView:arr callBackBlock:^(id sender) {
+        NSInteger index = [sender  integerValue];
+        _fukuanfangshi.rightLable.text = arr[index];
+    }];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        HYDefaultLabel *titlelable = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(15)
+                                                              text:@"合同期限"
+                                                         textColor:HYCOLOR.color_c4];
+        HYLeftRightArrowView *fukuanfangshi = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"付款方式:"
+                                                                                                   rightStr:@"选择付款方式"
+                                                                                              showArrowIcon:YES
+                                                                                              CallBackBlock:^(id sender) {
+                                                                                                  [self chooseFukuanfangshi];
+                                                                                              }];
+        HYLeftRightArrowView *gudingfukuanriqi = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"固定付款日期:"
+                                                                                                      rightStr:@"每月1号"
+                                                                                                 showArrowIcon:NO
+                                                                                                 CallBackBlock:^(id sender) {
+                                                                                                     
+                                                                                                 }];
+        _fukuanfangshi = fukuanfangshi;
+        [self addSubview:titlelable];
+        [self addSubview:self.qizhiriqiView];
+        [self addSubview:self.qianyueshichang];
+        [self addSubview:fukuanfangshi];
+        [self addSubview:gudingfukuanriqi];
+        
+        [titlelable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.mas_equalTo(self).mas_offset((MARGIN));
+        }];
+        [self.qizhiriqiView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(titlelable);
+            make.right.mas_equalTo(self.mas_right).mas_offset(-MARGIN);
+            make.top.mas_equalTo(titlelable.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*4);
+        }];
+        [self.qianyueshichang mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_qizhiriqiView);
+            make.top.mas_equalTo(_qizhiriqiView.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_equalTo(_qizhiriqiView.mas_height);
+        }];
+        [fukuanfangshi mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_qizhiriqiView);
+            make.top.mas_equalTo(self.qianyueshichang.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_equalTo(_qizhiriqiView.mas_height);
+        }];
+        [gudingfukuanriqi mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_qizhiriqiView);
+            make.top.mas_equalTo(fukuanfangshi.mas_bottom).mas_offset(MARGIN);
+            make.height.mas_equalTo(_qizhiriqiView.mas_height);
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+    return self;
+}
+/**
+ 选择时间
+ */
+- (void)chooseDateWithType:(NSInteger )type
+{
+    HYDatePickerManager *manger =  [HYDatePickerManager showDatePicker:^(id sender) {
+        NSArray *firstArr = [sender componentsSeparatedByString:@" "];
+        if (type == 1) {
+            self.startTime_TF.textFiled.text = firstArr.firstObject;
+            self.param[@"beginDate"] = self.startTime_TF.textFiled.text;
+        }else if(type == 2){
+            self.endTime_TF.textFiled.text = firstArr.firstObject;
+            self.param[@"endDate"] = self.endTime_TF.textFiled.text;
+        }
+    } DateStyle:DateStyleShowYearMonthDay];
+    manger.callBackDateBlock = ^(id sender) {
+        if (type == 2) {
+            _endTime_Date = (NSDate *)sender;
+        }else if (type == 1){
+            _startTime_Date = (NSDate *)sender;
+        }
+    };
+}
+
+/**
+ 切换签约时长
+ */
+- (void)clickItems:(HYDefaultButton *)sender
+{
+    self.lastSelectBtn.selected = NO;
+    sender.selected = YES;
+    self.lastSelectBtn = sender;
+    NSDate *Temp_Date = _startTime_Date;
+    if (!Temp_Date) {
+        return;
+    }
+    if (sender.tag == 1) {
+        NSDate *nowDate =  [[HYStringTool share] datejishuangYear:0 Month:3 Day:0 withData:Temp_Date];
+        self.endTime_TF.textFiled.text =  [nowDate stringWithFormat:@"yyyy-MM-dd"];
+    }else if (sender.tag == 2){
+        NSDate *nowDate =  [[HYStringTool share] datejishuangYear:0 Month:6 Day:0 withData:Temp_Date];
+        self.endTime_TF.textFiled.text =  [nowDate stringWithFormat:@"yyyy-MM-dd"];
+    }else if (sender.tag == 3){
+        NSDate *nowDate =  [[HYStringTool share] datejishuangYear:1 Month:0 Day:0 withData:Temp_Date];
+        self.endTime_TF.textFiled.text =  [nowDate stringWithFormat:@"yyyy-MM-dd"];
+    }else if (sender.tag == 4){
+        NSDate *nowDate =  [[HYStringTool share] datejishuangYear:2 Month:0 Day:0 withData:Temp_Date];
+        self.endTime_TF.textFiled.text =  [nowDate stringWithFormat:@"yyyy-MM-dd"];
+    }
+    self.param[@"endDate"] = self.endTime_TF.textFiled.text;
+    POST_NOTI(GET_DISCOUNTINFOR_BY_HETONGSTARADNENDTIEM_KEY, self.param);
+}
+
+- (HYLeftRightArrowView*)qianyueshichang
+{
+    if (!_qianyueshichang) {
+        _qianyueshichang = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"签约时长:"
+                                                                                rightStr:@""
+                                                                           showArrowIcon:NO
+                                                                           CallBackBlock:^(id sender) {
+                                                                               
+                                                                           }];
+        HYBaseView *chooseView = [self chooseShiChangView];
+        [_qianyueshichang addSubview:chooseView];
+        [chooseView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(_qianyueshichang.mas_right);
+            make.centerY.mas_equalTo(_qianyueshichang.mas_centerY);
+        }];
+        
+    }
+    return _qianyueshichang;
+}
+
+- (HYBaseView *)chooseShiChangView
+{
+    HYBaseView *tem = [[HYBaseView alloc] init];
+    NSArray *arr = @[@"两年",@"一年",@"半年",@"三个月"];
+    for (int i = 0 ; i < arr.count; i ++) {
+        HYDefaultButton *item = [HYDefaultButton buttonWithTitleStringKey:arr[i]
+                                                               titleColor:HYCOLOR.color_c4
+                                                                titleFont:SYSTEM_REGULARFONT(14)
+                                                                   target:self
+                                                                 selector:@selector(clickItems:)];
+        item.tag = arr.count - i;
+        [tem addSubview:item];
+        CGFloat ITEM_W = MARGIN * 5;
+        CGFloat ITEM_H = MARGIN * 3;
+        [item mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.mas_equalTo(tem.mas_right).mas_offset(-MARGIN-(MARGIN + ITEM_W)*i);
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_H));
+            make.centerY.mas_equalTo(tem.mas_centerY);
+            make.top.bottom.mas_equalTo(tem);
+            if (i == arr.count - 1) {
+                make.left.mas_equalTo(tem.mas_left).mas_offset(MARGIN/2);
+            }
+        }];
+        [item setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+        [item setBackgroundImage:[UIImage imageWithColor:HYCOLOR.color_c3] forState:UIControlStateSelected];
+        [item setTitleColor:HYCOLOR.color_c0 forState:UIControlStateSelected];
+        if (i == 1) {
+            [self clickItems:item];
+        }
+    }
+    return tem;
+}
+
+- (HYBaseView*)qizhiriqiView
+{
+    if (!_qizhiriqiView) {
+        _qizhiriqiView = [[HYBaseView alloc] init];
+        HYLeftRightArrowView *qizhiriqi = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"起止日期:"
+                                                                                               rightStr:@""
+                                                                                          showArrowIcon:NO
+                                                                                          CallBackBlock:^(id sender) {
+                                                                                              
+                                                                                          }];
+        [_qizhiriqiView addSubview:qizhiriqi];
+        [qizhiriqi mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(_qizhiriqiView);
+        }];
+        HYDefaultTextField *lable_L = [HYDefaultTextField creatDefaultTextField:@"开始时间"
+                                                                           font:SYSTEM_REGULARFONT(13)
+                                                                      textColor:HYCOLOR.color_c4];
+        HYDefaultLabel *lable_M = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12)
+                                                          text:@"——"
+                                                     textColor:HYCOLOR.color_c4];
+        HYDefaultTextField *lable_R = [HYDefaultTextField creatDefaultTextField:@"结束时间"
+                                                                           font:SYSTEM_REGULARFONT(13)
+                                                                      textColor:HYCOLOR.color_c4];
+        lable_L.textFiled.enabled = NO;
+        lable_R.textFiled.enabled = NO;
+        _startTime_TF = lable_L;
+        _endTime_TF = lable_R;
+        [_qizhiriqiView addSubview:lable_L];
+        [_qizhiriqiView addSubview:lable_M];
+        [_qizhiriqiView addSubview:lable_R];
+        [lable_R mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_offset(MARGIN*3.5);
+            make.centerY.mas_equalTo(qizhiriqi.mas_centerY);
+            make.right.mas_equalTo(_qizhiriqiView);
+            make.width.mas_offset(MARGIN*8);
+        }];
+        [lable_M mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(lable_R.mas_height);
+            make.centerY.mas_equalTo(lable_R.mas_centerY);
+            make.right.mas_equalTo(lable_R.mas_left).mas_offset(-2);
+            make.width.mas_offset(MARGIN*3);
+        }];
+        [lable_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(lable_R.mas_height);
+            make.centerY.mas_equalTo(qizhiriqi.mas_centerY);
+            make.right.mas_equalTo(lable_M.mas_left).mas_offset(-2);
+            make.width.mas_offset(MARGIN*8);
+        }];
+        
+        [lable_L bk_whenTapped:^{
+            [self chooseDateWithType:1];
+        }];
+        [lable_R bk_whenTapped:^{
+            [self chooseDateWithType:2];
+        }];
+    }
+    return _qizhiriqiView;
+}
+
+- (NSMutableDictionary*)param
+{
+    if (!_param) {
+        _param = [[NSMutableDictionary alloc] init];
+    }
+    return _param;
+}
+@end

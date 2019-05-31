@@ -1,0 +1,49 @@
+//
+//  HYBaoXiuTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaoXiuTableViewCell.h"
+#import "HYBaoXiuCellView.h"
+#import "HYStringTool.h"
+@interface HYBaoXiuTableViewCell()
+@property (nonatomic, strong) HYBaoXiuCellView * cellView;
+@end
+@implementation HYBaoXiuTableViewCell
+
+- (void)setBaoXiuModel:(HYBaoXiuModel *)BaoXiuModel
+{
+    _BaoXiuModel = BaoXiuModel;
+    self.cellView.houseNameLable.text = BaoXiuModel.title;
+    self.cellView.houseWhereLable.text = [NSString stringWithFormat:@"%@ %@栋 %@室",BaoXiuModel.houseItemName,BaoXiuModel.buildingNo,BaoXiuModel.fangNo];
+    self.cellView.hetongDescLable.text = [NSString stringWithFormat:@"申报时间：%@",[[HYStringTool share] returnTimeStrformeTimestr:BaoXiuModel.filingTime timestyle:@"yyyy-MM-dd hh:mm"]];
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        self.cellView = [[HYBaoXiuCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.cellView.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.bottom.mas_equalTo(self.contentView);
+        }];
+        
+//        self.cellView.statuImageView.image = IMAGENAME(@"11");
+        self.cellView.houseNameLable.text = @"卫生间漏水";
+        self.cellView.houseWhereLable.text = @"好寓北京-牡丹园店 1栋 110室";
+        self.cellView.hetongDescLable.text = @"申报时间：2018-06-01 12:30";
+//        [self.cellView bk_whenTapped:^{
+//            if (self.clickBlock) {
+//                self.clickBlock(self.indexPath);
+//            }
+//        }];
+    }
+    return  self;
+}
+
+@end

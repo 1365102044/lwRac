@@ -1,0 +1,21 @@
+//
+//  HYYuDingListCellView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYWaterSurfaceCellView.h"
+
+@interface HYYuDingListCellView : HYWaterSurfaceCellView
+@property (nonatomic, strong) HYDefaultLabel * yudingTimeLable;
+@property (nonatomic, strong) HYDefaultLabel * zuyueStarTimeLable;
+@property (nonatomic, strong) HYDefaultLabel * dingweiLable;
+@property (nonatomic, strong) HYBaseView * lineview;
+@property (nonatomic, strong) HYFillLongButton * bottomBtn1;
+@property (nonatomic, strong) HYFillLongButton * bottomBtn2;
+@property (nonatomic, strong) HYFillLongButton * bottomBtn3;
+@property (nonatomic, copy) HYEventCallBackBlock  clickFuncBtnBlock;
+
+@end

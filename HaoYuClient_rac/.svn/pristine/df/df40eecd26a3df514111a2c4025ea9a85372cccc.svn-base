@@ -1,0 +1,78 @@
+//
+//  HYTouSuJianYiListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYTouSuJianYiListTableViewCell.h"
+#import "HYTouSuJianYiCellView.h"
+@interface HYTouSuJianYiListTableViewCell ()
+@property (nonatomic, strong) HYTouSuJianYiCellView * cellView;
+@end
+@implementation HYTouSuJianYiListTableViewCell
+
+- (void)setDataModel:(HYTouSuJianYiModel *)dataModel
+{
+    _dataModel = dataModel;
+    _cellView.titleLable.text = [dataModel.title ex_base64Decode]? [dataModel.title ex_base64Decode] : @"无标题（公众号提交）";
+    _cellView.phoneLable.text = dataModel.customerCalls;
+    [_cellView.descLable setAttributedStringWithContentArray:@[@{@"color" :HYCOLOR.color_c4,
+                                                                 @"content" : [dataModel.repairContent ex_base64Decode] ? [dataModel.repairContent ex_base64Decode] : @"",
+                                                                 @"size" : SYSTEM_REGULARFONT(13),
+                                                                 @"lineSpacing": @5}]];
+    
+    NSInteger sta = [dataModel.status integerValue];
+    switch (sta) {
+        case 1://待处理
+            [_cellView hiddenBtn:NO];
+            _cellView.statusImageView.image = IMAGENAME(@"statu_no_handle_icon");
+            break;
+        case 2://已派单
+            [_cellView hiddenBtn:NO];
+            _cellView.statusImageView.image = IMAGENAME(@"statu_alearlyPaiDan_icon");
+            break;
+        case 3://已完成
+            [_cellView hiddenBtn:YES];
+            _cellView.statusImageView.image = IMAGENAME(@"statu_alearlySuccess_icon");
+            break;
+        case 4://取消
+            [_cellView hiddenBtn:YES];
+            _cellView.statusImageView.image = IMAGENAME(@"statu_alearlyCancle_icon");
+            break;
+        case 5://已验收
+//            [_cellView hiddenBtn:YES];
+            [_cellView hiddenFanKuiView:NO];
+            _cellView.fanKuiContentLable.text = dataModel.repairDetail;
+            _cellView.statusImageView.image = IMAGENAME(@"statu_alearlyYanShou_icon");
+            break;
+        default:
+            break;
+    }
+    
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if(self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])
+    {
+        self.cellView = [[HYTouSuJianYiCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.cellView.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.bottom.mas_equalTo(self.contentView);
+        }];
+        [_cellView.cancleBtn addTarget:self action:@selector(clickCancleBtn) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return self;
+}
+
+- (void)clickCancleBtn
+{
+    if (self.clickBlock) {
+        self.clickBlock(self.indexPath);
+    }
+}
+
+@end

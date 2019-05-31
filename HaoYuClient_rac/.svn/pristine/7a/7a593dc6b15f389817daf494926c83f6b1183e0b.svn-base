@@ -1,0 +1,114 @@
+//
+//  HYMessageDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/28.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMessageDeatilViewController.h"
+#import "HYMessageDeatilTableViewCell.h"
+
+#define  MESSAGEDEATILINDIFIER  @"MESSAGEDEATILINDIFIER"
+
+@interface HYMessageDeatilViewController ()
+@property (nonatomic, strong) HYBaseTableView * tableView;
+@property (nonatomic, strong) NSArray * dataArr;
+
+@end
+
+@implementation HYMessageDeatilViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYMessageDeatilTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:MESSAGEDEATILINDIFIER];
+    if (!cell) {
+        cell = [[HYMessageDeatilTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:MESSAGEDEATILINDIFIER];
+        [cell setData:self.dataArr[indexPath.row]];
+        cell.indexPath = indexPath;
+        cell.clickBlock = ^(NSIndexPath *indexpath) {
+//            [self.tableView reloadSection:indexPath.section withRowAnimation:UITableViewRowAnimationNone];
+            [self.tableView reloadData];
+//            [self.tableView reloadRow:indexPath.row inSection:indexPath.section withRowAnimation:UITableViewRowAnimationAutomatic];
+        };
+    }
+    return cell;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.dataArr.count;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return ADJUST_PERCENT_FLOAT(40);
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+    return 0.001;
+}
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *sectionview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, ADJUST_PERCENT_FLOAT(40))];
+    HYDefaultLabel *timerLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(12) text:@"2018-05-28 15:24" textColor:HYCOLOR.color_c4];
+    timerLable.textAlignment = NSTextAlignmentCenter;
+    sectionview.backgroundColor = HYCOLOR.color_c1;
+    timerLable.backgroundColor = [UIColor clearColor];
+    [sectionview addSubview:timerLable];
+    [timerLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_offset(ADJUST_PERCENT_FLOAT(150));
+        make.centerX.mas_equalTo(sectionview.mas_centerX);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(20));
+        make.centerY.mas_equalTo(sectionview.mas_centerY);
+    }];
+    return sectionview;
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = self.titleStr;
+    
+    self.dataArr = nil;
+    self.MainTableView = self.tableView;
+    [self.view addSubview:self.MainTableView];
+    
+    self.MainTableView.emptyDataSetSource = self;
+    self.MainTableView.emptyDataSetDelegate = self;
+    [self refreshData];
+}
+- (void)refreshData
+{
+    self.dataArr = @[@{@"title":@"消息标题",@"desc":@"消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述"},
+                     @{@"title":@"消息标题",@"desc":@"消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述"},
+                     @{@"title":@"消息标题",@"desc":@"消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述消息描述"}];
+    [self.MainTableView reloadData];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (HYBaseTableView *)tableView {
+    if (!_tableView) {
+        _tableView = [[HYBaseTableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.rowHeight = UITableViewAutomaticDimension;
+        _tableView.estimatedRowHeight = ADJUST_PERCENT_FLOAT(80);
+        _tableView.backgroundColor = HYCOLOR.color_c1;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    }
+    return _tableView;
+}
+#pragma mark - Eigth.Other
+
+@end

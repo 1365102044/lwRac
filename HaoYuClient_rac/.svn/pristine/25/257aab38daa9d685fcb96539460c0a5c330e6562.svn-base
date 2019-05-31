@@ -1,0 +1,334 @@
+
+//
+//  HYYuDingXuanFangView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/14.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuDingXuanFangView.h"
+#import "HYCityModel.h"
+#import "HYLeftRightArrowView.h"
+#import "HYJiuGongGeView.h"
+#import "HYChooseListView.h"
+
+@interface HYYuDingXuanFangView ()
+@property (nonatomic, strong) UIScrollView * mainScrollView;
+@property (nonatomic, strong) HYBaseView * topInfor;
+@property (nonatomic, strong) HYLeftRightArrowView * fangYuanXiangMuView;
+@property (nonatomic, strong) HYLeftRightArrowView * fangXingView;
+@property (nonatomic, strong) HYLeftRightArrowView * fangHaoView;
+
+@property (nonatomic, strong) HYBaseView * fangJianInforView;
+@property (nonatomic, strong) HYDefaultLabel * shitingLable;
+@property (nonatomic, strong) HYDefaultLabel * mianJiLable;
+@property (nonatomic, strong) HYDefaultLabel * chaoXiangLable;
+@property (nonatomic, strong) HYDefaultLabel * zuJinLable;
+@property (nonatomic, strong) UIImageView * fangxingImageView;
+@property (nonatomic, strong) HYJiuGongGeView * jiugonggeView;
+
+@property (nonatomic, strong) HYProjectLevelListModel * selectPro_Model;
+@property (nonatomic, strong) HYHuXingLevelListModel * selectHuxing_Model;
+@property (nonatomic, strong) HYFangJianHaoLevelListModel * selectFangjianhao_Model;
+
+@end
+
+@implementation HYYuDingXuanFangView
+
+- (void)setProjectDatas:(NSArray *)projectDatas
+{
+    _projectDatas = projectDatas;
+    if (projectDatas == nil || projectDatas.count == 0) {
+        ALERT(@"没有查询到房源项目信息");
+        return;
+    }
+    [HYChooseListView showChooseListView:projectDatas callBackBlock:^(id sender) {
+        NSInteger index = [sender integerValue];
+        _selectPro_Model = projectDatas[index];
+        _fangYuanXiangMuView.rightLable.text = _selectPro_Model.houseItemName;
+        self.param[@"houseItemName"] = _selectPro_Model.houseItemName;
+        self.fangXingView.rightLable.text = @"请选择房型";
+        self.fangHaoView.rightLable.text = @"请选择房号";
+        [self.param removeObjectForKey:@"roomTypeId"];
+        self.selectHuxing_Model = nil;
+        self.selectFangjianhao_Model = nil;
+        [self.param removeObjectForKey:@"houseId"];
+        [self.param removeObjectForKey:@"roomTypeName"];
+        [self.param removeObjectForKey:@"fangNo"];
+        _fangJianInforView.hidden = YES;
+    }];
+}
+
+- (void)setHuxingDatas:(NSArray *)huxingDatas
+{
+    _huxingDatas = huxingDatas;
+    if (huxingDatas == nil || huxingDatas.count == 0) {
+        ALERT(@"没有查询到户型信息");
+        return;
+    }
+    [HYChooseListView showChooseListView:huxingDatas callBackBlock:^(id sender) {
+        NSInteger index = [sender integerValue];
+        _selectHuxing_Model = huxingDatas[index];
+        _fangXingView.rightLable.text = _selectHuxing_Model.roomTypeName;
+        self.param[@"roomTypeName"] = _selectHuxing_Model.roomTypeName;
+        self.fangHaoView.rightLable.text = @"请选择房号";
+        self.selectFangjianhao_Model = nil;
+        [self.param removeObjectForKey:@"houseId"];
+        [self.param removeObjectForKey:@"fangNo"];
+        _fangJianInforView.hidden = YES;
+    }];
+}
+
+-(void)setFangjianhaoDatas:(NSArray *)fangjianhaoDatas
+{
+    _fangjianhaoDatas = fangjianhaoDatas;
+    if (fangjianhaoDatas == nil || fangjianhaoDatas.count == 0) {
+        ALERT(@"没有查询到房间号信息");
+        return;
+    }
+    [HYChooseListView showChooseListView:fangjianhaoDatas callBackBlock:^(id sender) {
+        NSInteger index = [sender integerValue];
+        _selectFangjianhao_Model = fangjianhaoDatas[index];
+        _fangHaoView.rightLable.text = _selectFangjianhao_Model.fangNo;
+        self.param[@"houseId"] = _selectFangjianhao_Model.houseId;
+        self.param[@"fangNo"] = _selectFangjianhao_Model.fangNo;
+        _fangJianInforView.hidden = NO;
+        if (self.requestHouseInforBlock) {
+            self.requestHouseInforBlock(_selectFangjianhao_Model.houseId);
+        }
+    }];
+}
+
+- (void)setHouseInfor_M:(HYHouseRescourcesModel *)houseInfor_M
+{
+    _houseInfor_M = houseInfor_M;
+    _shitingLable.text = [NSString stringWithFormat:@"%@室%@厅",@"1",@"1"];
+    _mianJiLable.text = [NSString stringWithFormat:@"面积：%@㎡",houseInfor_M.mianJi];
+    _chaoXiangLable.text = [NSString stringWithFormat:@"朝向：%@",houseInfor_M.chaoXiang];
+    _zuJinLable.text = [NSString stringWithFormat:@"实时租金：%@元/月",houseInfor_M.rent];
+    
+    NSMutableArray *temp_arr = [[NSMutableArray alloc] init];
+    for (NSDictionary *dict in houseInfor_M.roomTypePeizhi) {
+        NSMutableDictionary *temp_dic = [[NSMutableDictionary alloc] init];
+        temp_dic[@"title"] = dict[@"peizhi"];
+        temp_dic[@"image"] = [self getIconNameWithPeiZhi:dict[@"peizhi"]];
+        [temp_arr addObject:temp_dic];
+    }
+    
+    self.jiugonggeView.dataArr = temp_arr;
+    self.param[@"monthMoney"] =  houseInfor_M.rent;
+    self.param[@"electronicTemplateId"] = houseInfor_M.templateId;
+    self.param[@"shoudingId"] = houseInfor_M.houseShouDingId;
+    
+}
+
+/**
+ 检查参数是否合法
+ */
+- (BOOL)isCheckPara
+{
+    if(self.param[@"houseId"] == nil ||
+       [self.param[@"houseId"] isEqualToString:@""]){
+        ALERT(@"请先选择要预订的房间号");
+        return NO;
+    }
+    return YES;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {        
+        self.backgroundColor = HYCOLOR.color_c1;
+        self.param = [[NSMutableDictionary alloc] init];
+        [self setUI];
+        _fangJianInforView.hidden = YES;
+        if(self.param[@"houseId"]){
+            _fangJianInforView.hidden = NO;
+        }
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    [self addSubview:self.mainScrollView];
+    [self.mainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+    }];
+    [self setTestData];
+}
+
+- (void)setTestData
+{
+//    _shitingLable.text = @"一室一厅";
+//    _mianJiLable.text = @"面积：15㎡";
+//    _chaoXiangLable.text = @"朝向：朝南";
+//    _zuJinLable.text = @"实时租金：1600元/月";
+}
+
+- (HYBaseView*)topInfor
+{
+    if (!_topInfor) {
+        _topInfor = [[HYBaseView alloc] init];
+        _fangYuanXiangMuView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"房源项目"
+                                                                                    rightStr:@"请选择房源项目"
+                                                                               showArrowIcon:YES
+                                                                               CallBackBlock:^(id sender) {
+                                                                                   if (self.clickProjectBlock) {
+                                                                                       self.clickProjectBlock(nil);
+                                                                                   }
+                                                                               }];
+        _fangXingView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"选择房型"
+                                                                                    rightStr:@"请选择房型"
+                                                                               showArrowIcon:YES
+                                                                               CallBackBlock:^(id sender) {
+                                                                                   if (self.clickHuxignBlock) {
+                                                                                       self.clickHuxignBlock(_selectPro_Model.customId);
+                                                                                   }
+                                                                               }];
+        _fangHaoView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"选择房号"
+                                                                                    rightStr:@"请选择房号"
+                                                                               showArrowIcon:YES
+                                                                               CallBackBlock:^(id sender) {
+                                                                                   if (self.clickFangJianHaoBlock) {
+                                                                                       self.clickFangJianHaoBlock(_selectHuxing_Model.roomTypeId);
+                                                                                   }
+                                                                               }];
+        [_topInfor addSubview:_fangYuanXiangMuView];
+        [_topInfor addSubview:_fangXingView];
+        [_topInfor addSubview:_fangHaoView];
+        [_fangYuanXiangMuView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_topInfor).mas_offset(MARGIN);
+            make.right.mas_equalTo(_topInfor).mas_offset(-MARGIN);
+            make.left.mas_equalTo(_topInfor).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_fangXingView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangYuanXiangMuView.mas_bottom).mas_offset(MARGIN);
+            make.right.mas_equalTo(_topInfor).mas_offset(-MARGIN);
+            make.left.mas_equalTo(_topInfor).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [_fangHaoView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangXingView.mas_bottom).mas_offset(MARGIN);
+            make.right.mas_equalTo(_topInfor).mas_offset(-MARGIN);
+            make.left.mas_equalTo(_topInfor).mas_offset(MARGIN);
+            make.height.mas_offset(MARGIN*5);
+            make.bottom.mas_equalTo(_topInfor.mas_bottom).mas_offset(MARGIN);
+        }];
+    }
+    return _topInfor;
+}
+
+- (HYBaseView*)fangJianInforView
+{
+    if (!_fangJianInforView) {
+        _fangJianInforView = [[HYBaseView alloc] init];
+        
+        HYDefaultLabel *titleLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                              text:@"房间信息"
+                                                         textColor:HYCOLOR.color_c4];
+        HYBaseView *line = [[HYBaseView alloc] init];
+        line.backgroundColor = HYCOLOR.color_c6;
+     
+        _shitingLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c0];
+        _mianJiLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c4];
+        _chaoXiangLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c4];
+        _zuJinLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                 text:@""
+                                            textColor:HYCOLOR.color_c4];
+        _fangxingImageView = [[UIImageView alloc] init];
+        _fangxingImageView.image = IMAGENAME(@"11");
+        _jiugonggeView = [[HYJiuGongGeView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH - MARGIN*2, 1)];
+        [_fangJianInforView addSubview:titleLable];
+        [_fangJianInforView addSubview:line];
+        [_fangJianInforView addSubview:_shitingLable];
+        [_fangJianInforView addSubview:_mianJiLable];
+        [_fangJianInforView addSubview:_chaoXiangLable];
+        [_fangJianInforView addSubview:_zuJinLable];
+        [_fangJianInforView addSubview:_fangxingImageView];
+        [_fangJianInforView addSubview:_jiugonggeView];
+        _shitingLable.backgroundColor = [UIColor greenColor];
+        [_shitingLable setBoundWidth:0 cornerRadius:4];
+        [titleLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangJianInforView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_fangJianInforView).mas_offset(MARGIN);
+        }];
+        [line mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(titleLable.mas_bottom).mas_offset(MARGIN);
+            make.right.left.mas_equalTo(_fangJianInforView);
+            make.height.mas_offset(0.5);
+        }];
+        [_fangxingImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(SCREEN_WIDTH*.3, SCREEN_WIDTH*.3));
+            make.right.mas_equalTo(_fangJianInforView.mas_right).mas_offset(-MARGIN);
+            make.top.mas_equalTo(line.mas_bottom).mas_offset(MARGIN*3);
+        }];
+        [_shitingLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangxingImageView.mas_top);
+            make.height.mas_offset(MARGIN*2.5);
+            make.left.mas_equalTo(_fangJianInforView.mas_left).mas_offset(MARGIN*1.5);
+        }];
+        [_mianJiLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_shitingLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_fangJianInforView.mas_left).mas_offset(MARGIN);
+        }];
+        [_chaoXiangLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_mianJiLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_fangJianInforView.mas_left).mas_offset(MARGIN);
+        }];
+        [_zuJinLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_chaoXiangLable.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_fangJianInforView.mas_left).mas_offset(MARGIN);
+        }];
+        [_jiugonggeView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_fangxingImageView.mas_bottom).mas_offset(MARGIN);
+            make.left.mas_equalTo(_fangJianInforView.mas_left);
+            make.right.mas_equalTo(_fangJianInforView.mas_right);
+            make.bottom.mas_equalTo(_fangJianInforView.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+    return _fangJianInforView;
+}
+
+- (UIScrollView*)mainScrollView
+{
+    if (!_mainScrollView) {
+        _mainScrollView = [[UIScrollView alloc] init];
+        [_mainScrollView addSubview:self.topInfor];
+        [_mainScrollView addSubview:self.fangJianInforView];
+        
+        [self.topInfor mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_mainScrollView.mas_top).mas_offset(MARGIN);
+            make.left.mas_equalTo(_mainScrollView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_mainScrollView.mas_right).mas_offset(-MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH -MARGIN*2);
+        }];
+        [self.fangJianInforView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.topInfor.mas_bottom).mas_offset(MARGIN);
+            make.width.mas_offset(SCREEN_WIDTH -MARGIN*2);
+            make.left.mas_equalTo(_mainScrollView.mas_left).mas_offset(MARGIN);
+            make.right.mas_equalTo(_mainScrollView.mas_right).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(_mainScrollView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        
+        [_topInfor setBoundWidth:0 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+        [_fangJianInforView setBoundWidth:0 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    }
+    return _mainScrollView;
+}
+- (NSMutableDictionary*)param
+{
+    if (!_param) {
+        _param = [[NSMutableDictionary alloc] init];
+    }
+    return _param;
+}
+@end

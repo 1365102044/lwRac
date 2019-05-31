@@ -1,0 +1,117 @@
+//
+//  AppDelegate.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "LWComponentAppDelegate.h"
+#import "LWDelegateConfigure.h"
+
+@interface AppDelegate ()
+
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    
+#ifdef DEBUG
+    //    设置连接的服务器 默认是测试服务器(0:测试，1:培训 2:正式 3:薛云 4:新安，5:开发)
+    USERDEFAULTS_SET(@(3), SAVE_CURRENT_SERVICETYPE_KEY);
+    [SYSTEM_USERDEFAULTS synchronize];
+#else
+    
+#endif
+    
+    //配置
+    [LWDelegateConfigure configureWithLaunchOptions:launchOptions];
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+            [service application:application didFinishLaunchingWithOptions:launchOptions];
+        }
+    }
+    return YES;
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)]) {
+            [service application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)]) {
+            [service application:application didFailToRegisterForRemoteNotificationsWithError:error];
+        }
+    }
+}
+
+#pragma mark -----------支付回调--------------
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:openURL:sourceApplication:annotation:)]) {
+            [service application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+        }
+    }
+    return YES;
+}
+
+// NOTE: 9.0以后使用新API接口
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString*, id> *)options
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:openURL:options:)]) {
+            [service application:app openURL:url options:options];
+        }
+    }
+    return YES;
+}
+
+//前台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+            [service application:application didReceiveRemoteNotification:userInfo];
+        }
+    }
+}
+
+//后台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+            [service application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
+        }
+    }
+}
+
+-(void)applicationDidBecomeActive:(UIApplication *)application
+{
+    id<UIApplicationDelegate> service;
+    for (service in [LWComponentAppDelegate.share services]) {
+        if ([service respondsToSelector:@selector(applicationDidBecomeActive:)]) {
+            [service applicationDidBecomeActive:application];
+        }
+    }
+}
+
+@end

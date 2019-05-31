@@ -1,0 +1,34 @@
+//
+//  HYZuYue_HetongFeiXiangView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/14.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYZuYue_HetongFeiXiangView.h"
+
+@interface HYZuYue_HetongFeiXiangView ()
+@end
+@implementation HYZuYue_HetongFeiXiangView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _baseView = [[HYZuYue_InforBaseView alloc] init];
+        _baseView.titleLable.text = @"房间信息";
+        _baseView.dataArray = @[@{@"left":@"押金",@"right":@"1500元"},
+                                @{@"left":@"管理费",@"right":@"200元"},
+                                @{@"left":@"水费",@"right":@"10元/吨"},
+                                @{@"left":@"电费",@"right":@"1.5元/度"},];
+        [self addSubview:_baseView];
+        [_baseView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(self);
+        }];
+        [_baseView setBoundWidth:1 cornerRadius:6 boardColor:HYCOLOR.color_c6];
+    }
+    return self;
+}
+
+@end

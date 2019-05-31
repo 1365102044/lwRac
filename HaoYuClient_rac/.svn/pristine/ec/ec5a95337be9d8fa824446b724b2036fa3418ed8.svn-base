@@ -1,0 +1,59 @@
+//
+//  HYCityModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/12.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+
+//房间号列表-------
+@interface HYFangJianHaoLevelListModel : HYBaseModel
+//房源id
+@property (nonatomic, copy) NSString * houseId;
+//房间号
+@property (nonatomic, copy) NSString * fangNo;
+@end
+
+
+//户型列表-------
+@interface HYHuXingLevelListModel : HYBaseModel
+/**
+ 户型名称
+ */
+@property (nonatomic, copy) NSString * roomTypeName;
+/**
+ 户型id
+ */
+@property (nonatomic, copy) NSString * roomTypeId;
+@end
+
+//项目列表-------
+@interface HYProjectLevelListModel: HYBaseModel
+/**
+ 项目名称
+ */
+@property (nonatomic, copy) NSString * houseItemName;
+//项目id
+@end
+
+
+@interface HYCityGroupModel : HYBaseModel
+//@property (nonatomic, copy) NSString * cityName;
+//城市id
+@property (nonatomic, strong) NSString *cityID;
+//城市编号
+@property (nonatomic, copy) NSString * cityCode;
+//经度
+@property (nonatomic, copy) NSString * lng;
+//纬度
+@property (nonatomic, copy) NSString * lat;
+//城市名称
+@property (nonatomic, copy) NSString * name;
+@end
+
+@interface HYCityModel : HYBaseModel
+@property (nonatomic, strong) NSArray * cityGroup;
+@property (nonatomic, copy) NSString * fristChara;
+@end

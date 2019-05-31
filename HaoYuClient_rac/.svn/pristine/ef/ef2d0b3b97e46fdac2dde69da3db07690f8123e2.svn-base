@@ -1,0 +1,108 @@
+PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - BaiduMapKit (3.3.4)
+  - BlocksKit (2.2.5):
+    - BlocksKit/All (= 2.2.5)
+  - BlocksKit/All (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+    - BlocksKit/MessageUI
+    - BlocksKit/UIKit
+  - BlocksKit/Core (2.2.5)
+  - BlocksKit/DynamicDelegate (2.2.5)
+  - BlocksKit/MessageUI (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+  - BlocksKit/UIKit (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+  - Bugly (2.5.0)
+  - DZNEmptyDataSet (1.8.1)
+  - IQKeyboardManager (6.1.1)
+  - JCore (1.2.1)
+  - JPush (3.1.0):
+    - JCore (~> 1.2.0)
+  - Masonry (1.1.0)
+  - MJRefresh (3.1.15.3)
+  - Reveal-SDK (4)
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
+  - SVProgressHUD (2.2.5)
+  - YYKit (1.0.9):
+    - YYKit/no-arc (= 1.0.9)
+  - YYKit/no-arc (1.0.9)
+
+DEPENDENCIES:
+  - AFNetworking
+  - BaiduMapKit (~> 3.3.0)
+  - BlocksKit
+  - Bugly
+  - DZNEmptyDataSet
+  - IQKeyboardManager
+  - JPush
+  - Masonry
+  - MJRefresh
+  - Reveal-SDK (from `https://git.coding.net/kakukeme/Reveal-SDK.git`)
+  - SDWebImage
+  - SVProgressHUD
+  - YYKit
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - BaiduMapKit
+    - BlocksKit
+    - Bugly
+    - DZNEmptyDataSet
+    - IQKeyboardManager
+    - JCore
+    - JPush
+    - Masonry
+    - MJRefresh
+    - SDWebImage
+    - SVProgressHUD
+    - YYKit
+
+EXTERNAL SOURCES:
+  Reveal-SDK:
+    :git: https://git.coding.net/kakukeme/Reveal-SDK.git
+
+CHECKOUT OPTIONS:
+  Reveal-SDK:
+    :commit: ffdbc623851467394a99effb2dfced2f61c358f1
+    :git: https://git.coding.net/kakukeme/Reveal-SDK.git
+
+SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  BaiduMapKit: 6f2d76a04b72e9af938afb5ca0f97d4417bbf9c0
+  BlocksKit: 7f422b971407001178d181a43b99014ea2591fe6
+  Bugly: 3ca9f255c01025582df26f9222893b383c7e4b4e
+  DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
+  IQKeyboardManager: 79c57795f5c2408d259d37b9da2ed07efcbb5225
+  JCore: 467b5b56bd367c548f88ee1b5794d94ee07ab319
+  JPush: 5921e25ad13e0386351079217b009f2039084eac
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MJRefresh: b48380ae2b927b46c4ef000de9adb8dc748e1df7
+  Reveal-SDK: 6504f524a2e7138913251139ba30a03b3da91792
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  YYKit: 7cda43304a8dc3696c449041e2cb3107b4e236e7
+
+PODFILE CHECKSUM: e231449d637791ab504688a937528f1ac8082e37
+
+COCOAPODS: 1.5.2

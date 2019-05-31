@@ -1,0 +1,32 @@
+//
+//  LWAccountInforModel.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/18.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import UIKit
+import SwiftyJSON
+
+/// 登录的信息
+struct LWAccountInforModel {
+    
+    var token:String?
+    var userName:String?
+    var userId:String?
+    var userMail:String?
+    var userPhoneNumber:String?
+    var userSign:String?
+    var headpicUrl:String?
+    
+    init(jsonData:JSON) {
+        token = jsonData["token"].stringValue
+        userName = jsonData["userName"].stringValue
+        userId = jsonData["userId"].stringValue
+        userMail = jsonData["userMail"].stringValue
+        userPhoneNumber = jsonData["userPhoneNumber"].stringValue
+        userSign = jsonData["userSign"].stringValue
+        headpicUrl = jsonData["headpicUrl"].stringValue
+    }
+}

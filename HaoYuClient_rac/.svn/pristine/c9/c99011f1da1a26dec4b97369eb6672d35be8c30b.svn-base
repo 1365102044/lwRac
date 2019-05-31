@@ -1,0 +1,262 @@
+//
+//  HYBaseTableViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewController.h"
+#import "HYBaseTableViewCell.h"
+@interface HYBaseTableViewController ()<DZNEmptyDataSetSource, DZNEmptyDataSetDelegate,UITableViewDelegate,UITableViewDataSource>
+
+//显示空数据页面 默认不显示
+@property(nonatomic,assign) BOOL isDisplayEmptyData;
+
+//空数据页面title
+@property(nonatomic,strong) NSString *emptyDataTitle;
+
+//空数据页面的图片
+@property(nonatomic,strong) NSString *emptyDataImage;
+
+//空数据页面详情title
+@property(nonatomic,strong) NSString *emptyDataDetail;
+
+//占位按钮标题、图片二选一
+@property(nonatomic,strong) NSString *buttonTitle;
+
+@property(nonatomic,strong) NSString *buttonImageName;
+
+@end
+
+@implementation HYBaseTableViewController
+
+#pragma mark - First.通知
+
+//数据异常占位图
+- (void)showTableViewPlaceholder:(EmptyDataPage)Placeholder
+{
+    self.isDisplayEmptyData = YES;
+    if (Placeholder == Empty_Holder)
+    {
+        self.emptyDataImage = @"empty";
+        self.emptyDataTitle = @"暂时没有数据!";
+        self.buttonTitle = @"点击刷新";
+        
+    }else if (Placeholder == NoNetwork_Holder ||
+              Placeholder == RequestError_Holder)
+    {
+        self.emptyDataImage = @"noNetwork";
+        self.emptyDataTitle = @"网络环境异常！";
+        self.buttonTitle = @"点击刷新";
+    }else{
+        
+        self.isDisplayEmptyData = NO;
+        self.MainTableView.mj_footer.hidden = NO;
+    }
+    [self.MainTableView reloadEmptyDataSet];
+}
+#pragma mark - Second.网络请求
+
+
+#pragma mark - Third.点击事件
+- (void)refreshData
+{
+    [super requestListInfor];
+}
+
+/**
+ 获取页面数
+ */
+- (void)getPageNumberWithObjc:(id)objc
+{
+    if ([objc isKindOfClass:[NSDictionary class]]) {
+        self.totalPage = [objc[@"result"][@"totalPage"] integerValue];
+        self.curretnPageNo = [objc[@"result"][@"pageNo"] integerValue];
+    }
+}
+
+#pragma mark - Fourth.代理方法
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYBaseTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@""];
+    cell.indexPath = indexPath;
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+#pragma mark - DZNEmptyDataSetSource Methods
+//主标题
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = self.emptyDataTitle?self.emptyDataTitle:@"亲，暂时没有数据!";
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:16.0f],
+                                 NSForegroundColorAttributeName: [UIColor grayColor]};
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+//标题详情
+- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = self.emptyDataDetail;
+    
+    NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
+    paragraph.lineBreakMode = NSLineBreakByWordWrapping;
+    paragraph.alignment = NSTextAlignmentCenter;
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
+                                 NSForegroundColorAttributeName: [UIColor lightGrayColor],
+                                 NSParagraphStyleAttributeName: paragraph};
+    
+    return self.emptyDataDetail?[[NSAttributedString alloc] initWithString:text attributes:attributes]:nil;
+}
+
+//空数据页面的图片
+-(UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
+{
+    if (self.emptyDataImage)
+    {
+        return IMAGENAME(self.emptyDataImage);
+    }
+    return [UIImage imageNamed:@"nodata"];
+    
+}
+
+- (CAAnimation *)imageAnimationForEmptyDataSet:(UIScrollView *)scrollView
+{
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform"];
+    animation.fromValue = [NSValue valueWithCATransform3D:CATransform3DIdentity];
+    animation.toValue = [NSValue valueWithCATransform3D: CATransform3DMakeRotation(M_PI_2, 0.0, 0.0, 1.0) ];
+    animation.duration = 0.25;
+    animation.cumulative = YES;
+    animation.repeatCount = MAXFLOAT;
+    
+    return animation;
+}
+
+//返回点击的按钮 上面带文字
+- (NSAttributedString *)buttonTitleForEmptyDataSet:(UIScrollView *)scrollView forState:(UIControlState)state
+{
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:16.0f],
+                                 NSForegroundColorAttributeName: [UIColor blackColor],
+                                 NSStrokeColorAttributeName:[UIColor  redColor],
+                                 };
+    
+    return self.buttonTitle?[[NSAttributedString alloc] initWithString:self.buttonTitle attributes:attributes]:nil;
+}
+
+//返回点击的按钮 上面带图片
+- (UIImage *)buttonBackgroundImageForEmptyDataSet:(UIScrollView *)scrollView forState:(UIControlState)state
+{
+    
+    return self.buttonImageName?[UIImage imageNamed:self.buttonImageName]:nil;
+    
+}
+
+//返回空白区域的颜色自定义
+- (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
+{
+    
+    return  [UIColor whiteColor];
+}
+
+
+//调整垂直对齐的内容视图(即:有用tableHeaderView时可见):
+//返回间距离
+- (CGFloat)verticalOffsetForEmptyDataSet:(UIScrollView *)scrollView
+{
+    return 0;
+    
+}
+
+//设置空白页title、description、button等的竖直间隔
+- (CGFloat)spaceHeightForEmptyDataSet:(UIScrollView *)scrollView{
+    
+    return  20;
+}
+
+#pragma mark - DZNEmptyDataSetDelegate Methods
+
+//空白占位视图是否要显示(默认YES)
+- (BOOL)emptyDataSetShouldFadeIn:(UIScrollView *)scrollView{
+    
+    return  YES;
+}
+
+//要求知道空的状态应该渲染和显示 ( 默认YES) :
+- (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
+{
+    return self.isDisplayEmptyData;
+    
+}
+//是否允许点击 (默认YES)
+- (BOOL)emptyDataSetShouldAllowTouch:(UIScrollView *)scrollView
+{
+    return YES;
+}
+//是否允许滚动 (默认NO)
+- (BOOL)emptyDataSetShouldAllowScroll:(UIScrollView *)scrollView
+{
+    return YES;
+}
+
+//占位图片是否动态
+- (BOOL)emptyDataSetShouldAnimateImageView:(UIScrollView *)scrollView
+{
+    return NO;
+}
+
+//空白区域点击事件
+- (void)emptyDataSet:(UIScrollView *)scrollView didTapView:(UIView *)view
+{
+}
+
+//按钮响应时间
+- (void)emptyDataSet:(UIScrollView *)scrollView didTapButton:(UIButton *)button
+{
+    [self requestListInfor];
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    self.isDisplayEmptyData = NO;
+    
+    ADD_NOTI(NoNetWork_Noti, NONETWORK_FOR_BASETABLEVIEWCONTROLL_SHOWBLANKPAGE_NOTI);
+}
+
+- (void)NoNetWork_Noti
+{
+    [self showTableViewPlaceholder:NoNetwork_Holder];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (HYBaseTableView *)MainTableView {
+    if (!_MainTableView) {
+        _MainTableView = [[HYBaseTableView alloc] initWithFrame:self.view.bounds];
+        _MainTableView.delegate = self;
+        _MainTableView.dataSource = self;
+        _MainTableView.emptyDataSetSource = self;
+        _MainTableView.emptyDataSetDelegate = self;
+        _MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(80);
+        _MainTableView.tableFooterView = [[UIView alloc] init];
+        _MainTableView.backgroundColor = HYCOLOR.color_c1;
+        _MainTableView.separatorStyle = UITableViewCellSelectionStyleNone;
+        _MainTableView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestListInfor)];
+    }
+    return _MainTableView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

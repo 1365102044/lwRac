@@ -1,0 +1,21 @@
+//
+//  LWChoosePayMentTableViewCell.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/25.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewCell.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface LWChoosePayMentTableViewCell : HYBaseTableViewCell
+
+- (void)setTitle:(NSString *)title imageName:(NSString *)imageName;
+
+- (void)isSelectCell:(BOOL)isSelect;
+
+@end
+
+NS_ASSUME_NONNULL_END

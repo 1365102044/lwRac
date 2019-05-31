@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="HOMEHOTINFORINDENTIFITER" rowHeight="158" id="KGk-i7-Jjw" customClass="LWHomeHotInforListTableViewCell">
+            <rect key="frame" x="0.0" y="0.0" width="359" height="158"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="359" height="157.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VzS-wP-ohu">
+                        <rect key="frame" x="0.0" y="5" width="359" height="147.5"/>
+                    </imageView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="VzS-wP-ohu" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="5" id="DjJ-ah-AfV"/>
+                    <constraint firstItem="VzS-wP-ohu" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="Zpg-ee-gn7"/>
+                    <constraint firstAttribute="bottom" secondItem="VzS-wP-ohu" secondAttribute="bottom" constant="5" id="mK2-De-y5D"/>
+                    <constraint firstAttribute="trailing" secondItem="VzS-wP-ohu" secondAttribute="trailing" id="yEt-oE-Aho"/>
+                </constraints>
+            </tableViewCellContentView>
+            <accessibility key="accessibilityConfiguration" identifier="HOMEHOTINFORINDENTIFITER"/>
+            <viewLayoutGuide key="safeArea" id="aW0-zy-SZf"/>
+            <connections>
+                <outlet property="pic" destination="VzS-wP-ohu" id="OHe-c9-GNp"/>
+            </connections>
+            <point key="canvasLocation" x="-36" y="104"/>
+        </tableViewCell>
+    </objects>
+</document>

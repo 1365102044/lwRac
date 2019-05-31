@@ -1,0 +1,439 @@
+//
+//  HYStringTool.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYStringTool.h"
+#import <sys/utsname.h>
+@implementation HYStringTool
+
++ (instancetype)share
+{
+    static dispatch_once_t onceToken;
+    static HYStringTool *instance;
+    dispatch_once(&onceToken, ^{
+        instance = [[HYStringTool alloc]init];
+    });
+    return instance;
+}
+
+/**
+ 金额 逗号 分割(内部 分->元) 2位小数
+ */
+-(NSString*)strmethodCommaWith:(NSString *)price
+{
+    NSString *tempricestr;
+    if (price==nil) return nil;
+    if ([price isKindOfClass:[NSString class]]) {
+        tempricestr = [NSString stringWithFormat:@"%.2f",[price doubleValue]/100];
+    }else {
+        tempricestr = [NSString stringWithFormat:@"%.2f",[[NSString stringWithFormat:@"%@",price] doubleValue]/100] ;
+    }
+    NSMutableString *pricestr = tempricestr.mutableCopy;
+    NSRange range = [pricestr rangeOfString:@"."];
+    NSInteger index = 0;
+    if (range.length >0) {
+        
+        index = range.location;
+    }else{
+        
+        index = pricestr.length;
+    }
+    while ((index-3) > 0) {
+        index-=3;
+        [pricestr insertString:@"," atIndex:index];
+    }
+    return pricestr;
+}
+
+/**
+ 金额 逗号 分割(内部 分->元) 没有小数
+ */
+-(NSString*)strmethodIntCommaWith:(NSString *)price
+{
+    NSString *tempricestr;
+    if (price==nil) return nil;
+    if ([price isKindOfClass:[NSString class]]) {
+        tempricestr = [NSString stringWithFormat:@"%.0f",[price floatValue]];
+    }else {
+        tempricestr = [NSString stringWithFormat:@"%@",price];
+    }
+    NSMutableString *pricestr = tempricestr.mutableCopy;
+    NSRange range = [pricestr rangeOfString:@"."];
+    NSInteger index = 0;
+    if (range.length >0) {
+        
+        index = range.location;
+    }else{
+        
+        index = pricestr.length;
+    }
+    while ((index-3) > 0) {
+        index-=3;
+        [pricestr insertString:@"," atIndex:index];
+    }
+    return pricestr;
+}
+
+/**
+ 金额 逗号 分割(内部 元->元) 2位小数
+ */
+-(NSString*)strmethodYUANCommaWith:(NSString *)price
+{
+    NSString *tempricestr;
+    if (price==nil) return nil;
+    if ([price isKindOfClass:[NSString class]]) {
+        tempricestr = [NSString stringWithFormat:@"%.2f",[price doubleValue]];
+    }else {
+        tempricestr = [NSString stringWithFormat:@"%@",price];
+    }
+    NSMutableString *pricestr = tempricestr.mutableCopy;
+    NSRange range = [pricestr rangeOfString:@"."];
+    NSInteger index = 0;
+    if (range.length >0) {
+        
+        index = range.location;
+    }else{
+        
+        index = pricestr.length;
+    }
+    while ((index-3) > 0) {
+        index-=3;
+        [pricestr insertString:@"," atIndex:index];
+    }
+    return pricestr;
+}
+
+/**
+ 打电话
+ */
++(void)CallPhoneWith:(UIView*)backview phone:(NSString *)phone
+{
+    NSString *callPhone = [NSString stringWithFormat:@"telprompt://%@", phone];
+    NSComparisonResult compare = [[UIDevice currentDevice].systemVersion compare:@"10.0"];
+    if (compare == NSOrderedDescending || compare == NSOrderedSame) {
+        /// 大于等于10.0系统使用此openURL方法
+        if (@available(iOS 10.0, *)) {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callPhone] options:@{} completionHandler:nil];
+        } else {
+            // Fallback on earlier versions
+        }
+    } else {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callPhone]];
+    }
+}
+
+
+/**
+ 获取到的毫秒->需要到时间格式
+ timestyle 时间格式 字符 @“yyyy-MM-dd hh:mm”
+ */
+- (NSString *)returnTimeStrformeTimestr:(NSString *)str timestyle:(NSString *)timestyle
+{
+    NSDate *timedate = [NSDate dateWithTimeIntervalSince1970:([str doubleValue] / 1000.0)];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc]init];
+    [formatter setDateStyle:NSDateFormatterShortStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    [formatter setLocale:[[NSLocale alloc]initWithLocaleIdentifier:@"zh_CN"]];
+    [formatter setDateFormat:timestyle];
+    NSString *time = [formatter stringFromDate:timedate];
+    return time;
+}
+
+/**
+ 过滤 HTML标签
+ */
+-(NSString *)filterHTML:(NSString *)html
+{
+    NSScanner * scanner = [NSScanner scannerWithString:html];
+    NSString * text = nil;
+    while([scanner isAtEnd]==NO)
+    {
+        [scanner scanUpToString:@"<" intoString:nil];
+        [scanner scanUpToString:@">" intoString:&text];
+        html = [html stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@>",text] withString:@""];
+    }
+    return html;
+}
+
+/**
+ 倒计时展示
+ */
+- (NSString *)getTimeStrWithDifftime:(NSString *)diffTime
+{
+    if ([diffTime integerValue] == 0) {
+        return @"";
+    }
+    
+    NSDate *now                 = [NSDate date];
+    NSCalendar *calendar        = [NSCalendar currentCalendar];
+    
+    /**
+     *  比较时间
+     */
+    NSCalendarUnit unit         = NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitHour |
+    NSCalendarUnitMinute | NSCalendarUnitSecond;
+    NSDateComponents *cmps      = [calendar components:unit
+                                              fromDate:[NSDate dateWithTimeIntervalSinceNow:diffTime.doubleValue]
+                                                toDate:now
+                                               options:0];
+    
+    /**
+     *  判断是否有天
+     */
+    if (cmps.day != 0) {
+        return [NSString stringWithFormat:@"%02ld天%02ld时%02ld分",
+                (long)diffTime.longLongValue/86400,
+                (long)diffTime.longLongValue%86400/3600,
+                (long)diffTime.longLongValue%3600/60];
+    }else{
+        
+        /**
+         *  判断是否有小时
+         */
+        if (cmps.hour != 0) {
+            return [NSString stringWithFormat:@"%02ld时%02ld分",
+                    (long)diffTime.longLongValue%86400/3600,
+                    (long)diffTime.longLongValue%3600/60];
+        }else{
+            
+            /**
+             *  判断是否有分钟
+             */
+            if (cmps.minute != 0) {
+                return [NSString stringWithFormat:@"%02ld分%02ld秒",
+                        (long)diffTime.longLongValue%3600/60,
+                        (long)diffTime.longLongValue%60];
+            }else{
+                return [NSString stringWithFormat:@"%02ld秒",
+                        (long)diffTime.longLongValue%60];
+            }
+        }
+    }
+}
+
+- (NSString*)iphoneType {
+    
+    //需要导入头文件：#import <sys/utsname.h>
+    
+    struct utsname systemInfo;
+    
+    uname(&systemInfo);
+    
+    NSString*platform = [NSString stringWithCString: systemInfo.machine encoding:NSASCIIStringEncoding];
+    
+//    if([platform isEqualToString:@"iPhone1,1"])  return@"iPhone 2G";
+//    
+//    if([platform isEqualToString:@"iPhone1,2"])  return@"iPhone 3G";
+//    
+//    if([platform isEqualToString:@"iPhone2,1"])  return@"iPhone 3GS";
+//    
+//    if([platform isEqualToString:@"iPhone3,1"])  return@"iPhone 4";
+//    
+//    if([platform isEqualToString:@"iPhone3,2"])  return@"iPhone 4";
+//    
+//    if([platform isEqualToString:@"iPhone3,3"])  return@"iPhone 4";
+//    
+//    if([platform isEqualToString:@"iPhone4,1"])  return@"iPhone 4S";
+//    
+//    if([platform isEqualToString:@"iPhone5,1"])  return@"iPhone 5";
+//    
+//    if([platform isEqualToString:@"iPhone5,2"])  return@"iPhone 5";
+//    
+//    if([platform isEqualToString:@"iPhone5,3"])  return@"iPhone 5c";
+//    
+//    if([platform isEqualToString:@"iPhone5,4"])  return@"iPhone 5c";
+//    
+//    if([platform isEqualToString:@"iPhone6,1"])  return@"iPhone 5s";
+//    
+//    if([platform isEqualToString:@"iPhone6,2"])  return@"iPhone 5s";
+//    
+//    if([platform isEqualToString:@"iPhone7,1"])  return@"iPhone 6 Plus";
+//    
+//    if([platform isEqualToString:@"iPhone7,2"])  return@"iPhone 6";
+//    
+//    if([platform isEqualToString:@"iPhone8,1"])  return@"iPhone 6s";
+//    
+//    if([platform isEqualToString:@"iPhone8,2"])  return@"iPhone 6s Plus";
+//    
+//    if([platform isEqualToString:@"iPhone8,4"])  return@"iPhone SE";
+//    
+//    if([platform isEqualToString:@"iPhone9,1"])  return@"iPhone 7";
+//    
+//    if([platform isEqualToString:@"iPhone9,2"])  return@"iPhone 7 Plus";
+//    
+//    if([platform isEqualToString:@"iPhone10,1"]) return@"iPhone 8";
+//    
+//    if([platform isEqualToString:@"iPhone10,4"]) return@"iPhone 8";
+//    
+//    if([platform isEqualToString:@"iPhone10,2"]) return@"iPhone 8 Plus";
+//    
+//    if([platform isEqualToString:@"iPhone10,5"]) return@"iPhone 8 Plus";
+//    
+//    if([platform isEqualToString:@"iPhone10,3"]) return@"iPhone X";
+//    
+//    if([platform isEqualToString:@"iPhone10,6"]) return@"iPhone X";
+//    
+//    if([platform isEqualToString:@"iPod1,1"])  return@"iPod Touch 1G";
+//    
+//    if([platform isEqualToString:@"iPod2,1"])  return@"iPod Touch 2G";
+//    
+//    if([platform isEqualToString:@"iPod3,1"])  return@"iPod Touch 3G";
+//    
+//    if([platform isEqualToString:@"iPod4,1"])  return@"iPod Touch 4G";
+//    
+//    if([platform isEqualToString:@"iPod5,1"])  return@"iPod Touch 5G";
+//    
+//    if([platform isEqualToString:@"iPad1,1"])  return@"iPad 1G";
+//    
+//    if([platform isEqualToString:@"iPad2,1"])  return@"iPad 2";
+//    
+//    if([platform isEqualToString:@"iPad2,2"])  return@"iPad 2";
+//    
+//    if([platform isEqualToString:@"iPad2,3"])  return@"iPad 2";
+//    
+//    if([platform isEqualToString:@"iPad2,4"])  return@"iPad 2";
+//    
+//    if([platform isEqualToString:@"iPad2,5"])  return@"iPad Mini 1G";
+//    
+//    if([platform isEqualToString:@"iPad2,6"])  return@"iPad Mini 1G";
+//    
+//    if([platform isEqualToString:@"iPad2,7"])  return@"iPad Mini 1G";
+//    
+//    if([platform isEqualToString:@"iPad3,1"])  return@"iPad 3";
+//    
+//    if([platform isEqualToString:@"iPad3,2"])  return@"iPad 3";
+//    
+//    if([platform isEqualToString:@"iPad3,3"])  return@"iPad 3";
+//    
+//    if([platform isEqualToString:@"iPad3,4"])  return@"iPad 4";
+//    
+//    if([platform isEqualToString:@"iPad3,5"])  return@"iPad 4";
+//    
+//    if([platform isEqualToString:@"iPad3,6"])  return@"iPad 4";
+//    
+//    if([platform isEqualToString:@"iPad4,1"])  return@"iPad Air";
+//    
+//    if([platform isEqualToString:@"iPad4,2"])  return@"iPad Air";
+//    
+//    if([platform isEqualToString:@"iPad4,3"])  return@"iPad Air";
+//    
+//    if([platform isEqualToString:@"iPad4,4"])  return@"iPad Mini 2G";
+//    
+//    if([platform isEqualToString:@"iPad4,5"])  return@"iPad Mini 2G";
+//    
+//    if([platform isEqualToString:@"iPad4,6"])  return@"iPad Mini 2G";
+//    
+//    if([platform isEqualToString:@"iPad4,7"])  return@"iPad Mini 3";
+//    
+//    if([platform isEqualToString:@"iPad4,8"])  return@"iPad Mini 3";
+//    
+//    if([platform isEqualToString:@"iPad4,9"])  return@"iPad Mini 3";
+//    
+//    if([platform isEqualToString:@"iPad5,1"])  return@"iPad Mini 4";
+//    
+//    if([platform isEqualToString:@"iPad5,2"])  return@"iPad Mini 4";
+//    
+//    if([platform isEqualToString:@"iPad5,3"])  return@"iPad Air 2";
+//    
+//    if([platform isEqualToString:@"iPad5,4"])  return@"iPad Air 2";
+//    
+//    if([platform isEqualToString:@"iPad6,3"])  return@"iPad Pro 9.7";
+//    
+//    if([platform isEqualToString:@"iPad6,4"])  return@"iPad Pro 9.7";
+//    
+//    if([platform isEqualToString:@"iPad6,7"])  return@"iPad Pro 12.9";
+//    
+//    if([platform isEqualToString:@"iPad6,8"])  return@"iPad Pro 12.9";
+//    
+//    if([platform isEqualToString:@"i386"])  return@"iPhone Simulator";
+//    
+//    if([platform isEqualToString:@"x86_64"])  return@"iPhone Simulator";
+    
+    return platform;
+    
+}
+
+//获取某个字符串或者汉字的首字母.
+
+- (NSString *)firstCharactorWithString:(NSString *)string
+{
+    NSMutableString *str = [NSMutableString stringWithString:string];
+    
+    CFStringTransform((CFMutableStringRef) str, NULL, kCFStringTransformMandarinLatin, NO);
+    
+    CFStringTransform((CFMutableStringRef)str, NULL, kCFStringTransformStripDiacritics, NO);
+    
+    NSString *pinYin = [str capitalizedString];
+    
+    return [pinYin substringToIndex:1];
+    
+}
+
+/**
+ 检查字符串是否为空，空：返回@“”，
+ */
++ (NSString *)checkString:(NSString *)str
+{
+    if (!str || str == nil) {
+        return @"";
+    }
+    return  [str isNullToString];
+}
+
++ (BOOL)isNull:(NSString *)str
+{
+    if (str == nil) {
+        return YES;
+    }
+    return  [str isNull];
+    return NO;
+}
+
+/**
+ *  时间算法
+ *  @param year  计算年=》加1年：1；减1年：-1
+ *  @param month 计算月=》加1月：1；减1月：-1
+ *  @param day   计算天=》加一周：7；减一周：-7
+ *  @param date  要计算的时间
+ *
+ *  @return 计算好的时间
+ */
+- (NSDate *)datejishuangYear:(int)year Month:(int)month Day:(int)day withData:(NSDate *)date {
+    if (!date) {
+        return nil;
+    }
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    //NSCalendarIdentifierGregorian:iOS8之前用NSGregorianCalendar
+    NSDateComponents *comps = nil;
+    
+    comps = [calendar components:NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay fromDate:date];
+    //NSCalendarUnitYear:iOS8之前用NSYearCalendarUnit,NSCalendarUnitMonth,NSCalendarUnitDay同理
+    
+    NSDateComponents *adcomps = [[NSDateComponents alloc] init];
+    
+    [adcomps setYear:year];
+    
+    [adcomps setMonth:month];
+    
+    [adcomps setDay:day];
+    
+    return [calendar dateByAddingComponents:adcomps toDate:date options:0];
+}
+
+/**
+ *  修改 8小时差的date  (2018-07-30 14:13:43 +0000)
+ */
++ (NSDate *)ex_getCurrentDate
+{
+    NSDate *date = [NSDate date];
+    NSTimeZone *zone = [NSTimeZone systemTimeZone];
+    NSInteger interval = [zone secondsFromGMTForDate: date];
+    NSDate *localeDate = [date  dateByAddingTimeInterval: interval];
+    return localeDate;
+}
+
+@end

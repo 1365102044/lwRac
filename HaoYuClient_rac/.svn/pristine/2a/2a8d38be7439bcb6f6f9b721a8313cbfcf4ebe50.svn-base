@@ -1,0 +1,37 @@
+//
+//  LWNetWorkMacro.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#ifndef LWNetWorkMacro_h
+#define LWNetWorkMacro_h
+//** =========================================================================================== */
+//** =========================================基础网络请求配置===================================== */
+//** =========================================================================================== */
+
+/**
+ * 网络请求基础URLString
+ */
+#ifdef DEBUG
+//#define BASE_URL                            @"https://pms.hntpsjwy.com"
+
+#define BASE_URL                              @"http://192.168.1.222"  //测试服务器 192.168.1.222
+//#define BASE_URL                            @"http://192.168.1.103:52001" //xue yun
+//#define BASE_URL                            @"http://192.168.1.118:52001"// 李凌志
+
+#define BASE_XIYI_URL                          @"http://pms.hntpsjwy.com"
+#define BASE_ALIYUNPIC_URL                     @"http://pms.hntpsjwy.com"
+#else
+
+//正式接口
+#define BASE_URL                               @"https://pms.hntpsjwy.com"
+#define BASE_XIYI_URL                          @"http://pms.hntpsjwy.com"
+#define BASE_ALIYUNPIC_URL                     @"http://pms.hntpsjwy.com"
+
+#endif
+
+#endif /* LWNetWorkMacro_h */
+

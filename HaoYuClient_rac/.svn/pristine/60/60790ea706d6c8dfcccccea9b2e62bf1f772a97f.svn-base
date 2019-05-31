@@ -1,0 +1,239 @@
+//
+//  HYMineInformationView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineInformationView.h"
+#import "HYLeftRightArrowView.h"
+
+@interface HYMineInformationView()
+@property (nonatomic, strong) HYLeftRightArrowView * aboutUsView;
+@end
+
+@implementation HYMineInformationView
+
+/**
+ 获取缓存大小
+ */
+- (double )getCachesSize
+{
+    // 获取Caches目录路径
+    NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *imageCachesPath = [cachesPath stringByAppendingPathComponent:@"default/com.hackemist.SDWebImageCache.default"];
+    long long fileSize = [imageCachesPath fileSize];
+    return ((fileSize ) / (1000.0 * 1000.0) );
+}
+
+/**
+ 处理点击事件
+ */
+- (void)handleClickCellViewWithCellView:(HYLeftRightArrowView *)sender
+{
+    HYLeftRightArrowView *tempview = (HYLeftRightArrowView *)sender;
+    NSString *leftStr = tempview.leftLable.text;
+    if ([self.delegate respondsToSelector:@selector(handleClickCellView:)]) {
+        [self.delegate handleClickCellView:leftStr];
+    }
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        [self setConfi_UI];
+        UIView *temp0 = [self setContentView0_UI];
+        UIView *temp1 = [self setContentView1_UI];
+        UIView *temp2 = [self setContentView2_UI];
+        UIView *temp3 = [self setContentView3_UI];
+        [self addSubview:temp0];
+        [self addSubview:temp1];
+        [self addSubview:temp2];
+        [self addSubview:temp3];
+        
+        CGFloat rota = 6;
+        temp0.layer.cornerRadius  = rota;
+        temp0.layer.masksToBounds = YES;
+        temp1.layer.masksToBounds = YES;
+        temp1.layer.cornerRadius = rota;
+        temp2.layer.masksToBounds = YES;
+        temp2.layer.cornerRadius = rota;
+        temp3.layer.masksToBounds = YES;
+        temp3.layer.cornerRadius = rota;
+        
+        [temp0 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(5));
+            make.right.mas_equalTo(self.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+            make.top.mas_equalTo(self.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        [temp1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.mas_equalTo(temp0);
+            make.top.mas_equalTo(temp0.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        [temp2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.mas_equalTo(temp0);
+            make.top.mas_equalTo(temp1.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        }];
+        [temp3 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.mas_equalTo(temp0);
+            make.top.mas_equalTo(temp2.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+            make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-20);
+        }];
+        
+        self.clearCacheView.rightLable.text = [NSString stringWithFormat:@"%.2fM",[self getCachesSize]];
+        /**
+         本地有头像则显示
+         */
+        if (USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL)) {
+            [self.headerIconView.rightImageView sd_setImageWithURL:[NSURL URLWithString:HYIMAGEURLSTRING(HYProjectImageURLStringListMid, USERDEFAULTS_GET(USER_INFOR_HEADERICON_URL))] placeholderImage:IMAGENAME(@"mine_headericon_login")];
+        }
+    }
+    return self;
+}
+
+- (UIView *)setContentView0_UI
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = HYCOLOR.color_c0;
+    [backView addSubview:self.headerIconView];
+    [backView addSubview:self.userNameView];
+    [backView addSubview:self.qianMingView];
+    [self.headerIconView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(backView.mas_top).mas_offset(1);
+        make.left.right.mas_equalTo(backView);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(60));
+    }];
+    [self.userNameView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(backView);
+        make.top.mas_equalTo(self.headerIconView.mas_bottom);
+    }];
+    [self.qianMingView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(backView);
+        make.top.mas_equalTo(self.userNameView.mas_bottom);
+        make.bottom.mas_equalTo(backView.mas_bottom).mas_offset(-1);
+    }];
+    return backView;
+}
+
+- (UIView *)setContentView1_UI
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = HYCOLOR.color_c0;
+    [backView addSubview:self.phoneView];
+    [backView addSubview:self.mailView];
+    [self.phoneView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(backView.mas_top).mas_offset(1);
+        make.left.right.mas_equalTo(backView);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(60));
+    }];
+    [self.mailView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(50));
+        make.left.right.mas_equalTo(backView);
+        make.top.mas_equalTo(self.phoneView.mas_bottom);
+        make.bottom.mas_equalTo(backView.mas_bottom).mas_offset(-1);
+    }];
+    return backView;
+}
+- (UIView *)setContentView2_UI
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = HYCOLOR.color_c0;
+    [backView addSubview:self.clearCacheView];
+    [self.clearCacheView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(backView.mas_top).mas_offset(1);
+        make.left.right.mas_equalTo(backView);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(60));
+        make.bottom.mas_equalTo(backView.mas_bottom).mas_offset(-1);
+    }];
+    return backView;
+}
+
+- (UIView *)setContentView3_UI
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = HYCOLOR.color_c0;
+    [backView addSubview:self.aboutUsView];
+    [self.aboutUsView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(backView.mas_top).mas_offset(1);
+        make.left.right.mas_equalTo(backView);
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(60));
+        make.bottom.mas_equalTo(backView.mas_bottom).mas_offset(-1);
+    }];
+    return backView;
+}
+
+- (void)setConfi_UI
+{
+    WEAKSELF(self);
+    self.headerIconView = [HYLeftRightArrowView creatLeftRightImageViewArrowViewWithLeftStr:@"头像"
+                                                                                  imageName:@"mine_headericon_n"
+                                                                                  imageSize:CGSizeMake(50, 50)
+                                                                              showArrowIcon:YES
+                                                                              CallBackBlock:^(id sender) {
+                                                                                  [weakself handleClickCellViewWithCellView:sender];
+                                                                              }];
+    self.userNameView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"用户名"
+                                                                                 rightStr:@"请填写"
+                                                                            showArrowIcon:NO
+                                                                            CallBackBlock:^(id sender) {
+                                                                        [weakself handleClickCellViewWithCellView:sender];
+                                                                            }];
+    self.qianMingView = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"个性签名"
+                                                                                 rightStr:@"请输入"
+                                                                            showArrowIcon:NO
+                                                                            CallBackBlock:^(id sender) {
+                                                                         [weakself handleClickCellViewWithCellView:sender];
+                                                                            }];
+    self.phoneView  = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"手机号"
+                                                                               rightStr:@""
+                                                                          showArrowIcon:NO
+                                                                          CallBackBlock:^(id sender) {
+//                                                                          [weakself handleClickCellViewWithCellView:sender];
+                                                                          }];
+    self.phoneView.rightTextField.textFiled.enabled = NO;
+    HYLeftRightArrowView *extractedExpr = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"邮箱"
+                                                                                                   rightStr:@"请输入"
+                                                                                              showArrowIcon:NO
+                                                                                              CallBackBlock:^(id sender) {
+                                                                                                  [weakself handleClickCellViewWithCellView:sender];
+                                                                                              }];
+    self.mailView = extractedExpr;
+    self.clearCacheView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"清理缓存"
+                                                                               rightStr:@"0.00"
+                                                                          showArrowIcon:YES
+                                                                          CallBackBlock:^(id sender) {
+                                                                         [weakself handleClickCellViewWithCellView:sender];
+                                                                          }];
+    self.aboutUsView = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"关于我们"
+                                                                             rightStr:@""
+                                                                        showArrowIcon:YES
+                                                                        CallBackBlock:^(id sender) {
+                                                                       [weakself handleClickCellViewWithCellView:sender];
+                                                                        }];
+    self.aboutUsView.bottomLine.hidden = YES;
+    self.clearCacheView.bottomLine.hidden = YES;
+    self.mailView.bottomLine.hidden = YES;
+    self.qianMingView.bottomLine.hidden = YES;
+    self.headerIconView.rightImageView.layer.cornerRadius = 25;
+    self.headerIconView.rightImageView.layer.masksToBounds = YES;
+    self.phoneView.rightTextField.textFiled.keyboardType = UIKeyboardTypeNumberPad;
+    
+    [self setValueToUserInfor];
+}
+/**
+ 初始化信息
+ */
+- (void)setValueToUserInfor
+{
+    self.userNameView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_NAME);
+    self.qianMingView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_QIANMING);
+    self.phoneView.rightTextField.textFiled.text = USERDEFAULTS_GET(USER_INFOR_PHONE);
+    self.mailView.rightTextField.text = USERDEFAULTS_GET(USER_INFOR_MAIL);
+}
+
+@end

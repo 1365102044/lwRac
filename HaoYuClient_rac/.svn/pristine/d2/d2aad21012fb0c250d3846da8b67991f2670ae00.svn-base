@@ -1,0 +1,18 @@
+//
+//  HYLoginMainView.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/23.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+//typedef void(^clickCodeBtn)(void);
+
+@interface HYLoginMainView : HYBaseView
+@property (weak, nonatomic) IBOutlet UITextField *PhoneTextField;
+@property (weak, nonatomic) IBOutlet UITextField *CodeTextField;
+@property (weak, nonatomic) IBOutlet UIButton *CodeBtn;
+
+@end

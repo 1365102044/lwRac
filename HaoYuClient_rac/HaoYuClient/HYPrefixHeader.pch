@@ -1,0 +1,16 @@
+//
+//  HYPrefixHeader.pch
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#ifndef HYPrefixHeader_pch
+#define HYPrefixHeader_pch
+
+
+#import "LWProjectHeader.h"
+#import "ZJCategories.h"
+
+#endif /* HYPrefixHeader_pch */

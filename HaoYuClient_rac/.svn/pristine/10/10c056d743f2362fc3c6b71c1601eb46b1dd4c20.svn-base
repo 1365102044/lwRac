@@ -1,0 +1,285 @@
+//
+//  HYQianYue_IdCardView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYue_IdCardView.h"
+#import "HYIdCardItemView.h"
+#import "LWImagePicker.h"
+#import "HYLeftRightArrowView.h"
+#import "HYActionSheet.h"
+@interface HYQianYue_IdCardView ()
+@property (nonatomic, strong) HYBaseView * bgView;
+@property (nonatomic, strong) HYBaseView * idCardPhotoBigView;
+@property (nonatomic, strong) HYBaseView * inforBigView;
+@property (nonatomic, strong) HYLeftRightArrowView *name;
+@property (nonatomic, strong)  HYLeftRightArrowView *shenfenzheng;
+@property (nonatomic, strong) HYLeftRightArrowView *six;
+@property (nonatomic, strong) HYLeftRightArrowView *youxiaoqi;
+
+@property (nonatomic, strong) HYIdCardItemView *zhengmian;
+@property (nonatomic, strong) HYIdCardItemView *fanmian;
+@property (nonatomic, strong) HYIdCardItemView *shouchizhao;
+@end
+
+@implementation HYQianYue_IdCardView
+/**
+ 图片地址回传
+ */
+- (void)setUrlPara:(NSString *)urlKey urlValue:(NSString *)urlValue
+{
+    if (urlKey == nil || urlValue == nil) {
+        return;
+    }
+    self.param[urlKey] = urlValue;
+}
+
+//识别身份证正面信息
+- (void)setIdcardModel:(HYIdCardORCModel *)idcardModel
+{
+    _name.rightTextField.textFiled.text  = idcardModel.name;
+    _six.rightTextField.textFiled.text = idcardModel.six;
+    _shenfenzheng.rightTextField.textFiled.text = idcardModel.idcardNumber;
+}
+
+//上传失败 处理UI
+- (void)handleUploadResult:(NSString *)imageKey status:(BOOL)isSuccess
+{
+    if ([imageKey isEqualToString:@"zukeSfzZheng"]) {
+        _zhengmian.descLabel.text = isSuccess ? @"" : @"上传失败！";
+         if (!isSuccess){ ALERT(@"身份证正面上传失败");
+             [self.param removeObjectForKey:@"zukeSfzZheng"];}
+    }else if ([imageKey isEqualToString:@""]){
+        _fanmian.descLabel.text = isSuccess ? @"" : @"上传失败！";
+        if (!isSuccess) {ALERT(@"身份证反面上传失败");
+        [self.param removeObjectForKey:@"zukeSfzFan"];}
+    }else if ([imageKey isEqualToString:@""]){
+        _shouchizhao.descLabel.text = isSuccess ? @"" : @"上传失败！";
+        if (!isSuccess) { ALERT(@"手持身份证上传失败");
+        [self.param removeObjectForKey:@"handheldIdentityCard"];}
+    }
+}
+
+- (void)clickImageView:(HYIdCardItemView *)item type:(NSString *)type
+{
+    [[LWImagePicker share] imagePickerWithSourceVc:self.viewController allowsEditing:NO callBlock:^(id sender) {
+        [item setPicImage:(UIImage *)sender];
+        if (self.uploadImageBlock) {
+            self.uploadImageBlock(type,sender);
+        }
+    }];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setConfiUI];
+        self.backgroundColor = HYCOLOR.color_c1;
+    }
+    return self;
+}
+
+- (void)setConfiUI
+{
+    [self addSubview:self.bgView];
+    [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(self).mas_offset(MARGIN);
+        make.right.bottom.mas_equalTo(self).mas_offset(-MARGIN);
+    }];
+    [_bgView setBoundWidth:1 cornerRadius:6];
+}
+
+- (HYBaseView *)idCardPhotoBigView
+{
+    if (!_idCardPhotoBigView) {
+        _idCardPhotoBigView = [[HYBaseView alloc] init];
+        HYDefaultLabel *title1 = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                          text:@"*请上传证件照片"
+                                                     textColor:HYCOLOR.color_c4];
+        HYIdCardItemView *zhengmian  = [HYIdCardItemView creatIdCardImageView:@"身份证正面" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"zukeSfzZheng"];
+        }];
+        HYIdCardItemView *fanmian  = [HYIdCardItemView creatIdCardImageView:@"身份证反面" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"zukeSfzFan"];
+        }];
+        HYIdCardItemView *shouchizhao  = [HYIdCardItemView creatIdCardImageView:@"手持身份证" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"handheldIdentityCard"];
+        }];
+        _zhengmian = zhengmian;
+        _fanmian = fanmian;
+        _shouchizhao = shouchizhao;
+        [_idCardPhotoBigView addSubview:title1];
+        [_idCardPhotoBigView addSubview:zhengmian];
+        [_idCardPhotoBigView addSubview:fanmian];
+        [_idCardPhotoBigView addSubview:shouchizhao];
+        
+        CGFloat ITEM_W = (SCREEN_WIDTH - MARGIN*12)/3;
+        [title1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_idCardPhotoBigView.mas_top).mas_offset(MARGIN*2);
+            make.left.mas_equalTo(_idCardPhotoBigView).mas_offset(MARGIN*2);
+        }];
+        [zhengmian mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.left.mas_equalTo(_idCardPhotoBigView.mas_left).mas_offset(MARGIN*3);
+            make.top.mas_equalTo(title1.mas_bottom).mas_offset(MARGIN*2);
+            make.bottom.mas_equalTo(_idCardPhotoBigView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        [shouchizhao mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.right.mas_equalTo(_idCardPhotoBigView.mas_right).mas_offset(-MARGIN*3);
+            make.centerY.mas_equalTo(zhengmian.mas_centerY);
+        }];
+        [fanmian mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.centerX.mas_equalTo(_idCardPhotoBigView.mas_centerX);
+            make.centerY.mas_equalTo(zhengmian.mas_centerY);
+        }];
+        
+        [zhengmian setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+        [fanmian setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+        [shouchizhao setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+    }
+    return _idCardPhotoBigView;
+}
+
+- (HYBaseView *)inforBigView
+{
+    if (!_inforBigView) {
+        _inforBigView = [[HYBaseView alloc] init];
+        
+        HYLeftRightArrowView *name = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"真实姓名"
+                                                                                              rightStr:self.param[@"nickname"] ? self.param[@""] : @"输入姓名"
+                                                                                         showArrowIcon:NO
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                         }];
+        HYLeftRightArrowView *shenfenzheng = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"身份证"
+                                                                                                      rightStr:self.param[@"sfzNo"] ? self.param[@"sfzNo"] : @"输入身份证号"
+                                                                                                 showArrowIcon:NO
+                                                                                                 CallBackBlock:^(id sender) {
+                                                                                                     
+                                                                                                 }];
+        HYLeftRightArrowView *six = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"性别"
+                                                                                             rightStr:self.param[@"gender"] ? self.param[@"gender"] : @"选择性别"
+                                                                                        showArrowIcon:NO
+                                                                                        CallBackBlock:^(id sender) {
+                                                                                            
+                                                                                        }];
+        HYLeftRightArrowView *youxiaoqi = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"有效期"
+                                                                                               rightStr:self.param[@"outTime"] ? self.param[@"outTime"] : @"请选择"
+                                                                                          showArrowIcon:NO
+                                                                                          CallBackBlock:^(id sender) {
+//                                                                                              [self chooseOutTimeDate];
+                                                                                          }];
+        six.rightTextField.textFiled.enabled = NO;
+        
+        _name = name;
+        _shenfenzheng = shenfenzheng;
+        _six = six;
+        _youxiaoqi = youxiaoqi;
+        [_inforBigView addSubview:name];
+        [_inforBigView addSubview:shenfenzheng];
+        [_inforBigView addSubview:six];
+        
+        [name mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_inforBigView).mas_offset(MARGIN);
+            make.left.right.mas_equalTo(_inforBigView);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [shenfenzheng mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(name.mas_bottom);
+            make.height.left.right.mas_equalTo(name);
+        }];
+        [shenfenzheng.rightTextField mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_offset(MARGIN*20);
+        }];
+        [six mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(shenfenzheng.mas_bottom);
+            make.height.left.right.mas_equalTo(name);
+            make.bottom.mas_equalTo(_inforBigView.mas_bottom).mas_offset(-MARGIN);
+        }];
+        
+        [_inforBigView setBoundWidth:0 cornerRadius:6];
+        [six.rightTextField bk_whenTapped:^{
+            [HYActionSheet showDefaultAlert:self.viewController titleKey:@"选择性别" buttonArr:@[@"男",@"女"] callBack:^(id sender) {
+                if([sender integerValue] == 0 ){
+                    _six.rightTextField.textFiled.text = @"男";
+                }else if ([sender integerValue] == 1){
+                    _six.rightTextField.textFiled.text = @"女";
+                }
+            }];
+        }];
+    }
+    return _inforBigView;
+}
+
+- (HYBaseView*)bgView
+{
+    if (!_bgView) {
+        _bgView = [[HYBaseView alloc] init];
+        _bgView.backgroundColor = HYCOLOR.color_c1;
+        [_bgView addSubview:self.idCardPhotoBigView];
+        [_bgView addSubview:self.inforBigView];
+        
+        [_idCardPhotoBigView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.mas_equalTo(_bgView);
+            make.top.mas_equalTo(_bgView.mas_top).mas_offset(0);
+        }];
+        [_inforBigView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_idCardPhotoBigView.mas_bottom);
+            make.left.right.mas_equalTo(_bgView);
+        }];
+    }
+    return _bgView;
+}
+
+/**
+ 检查参数的合法性
+ */
+- (BOOL)checkParaLegal
+{
+    [self endEditing:YES];
+    
+    self.param[@"nickname"] = _name.rightTextField.textFiled.text;
+    self.param[@"sfzNo"]                                = _shenfenzheng.rightTextField.textFiled.text;
+    self.param[@"gender"]                                = [_six.rightTextField.textFiled.text isEqualToString:@"男"] ? @"1" : @"0";
+    self.param[@"sfzOutTime"] = _youxiaoqi.rightLable.text;
+    
+    if (!self.param[@"zukeSfzZheng"]) {
+        ALERT(@"请上传身份证正面照");
+        return NO;
+    }
+    if (!self.param[@"zukeSfzFan"]) {
+        ALERT(@"请上传身份证反面照");
+        return NO;
+    }
+    if (!self.param[@"handheldIdentityCard"]) {
+        ALERT(@"请上传手持身份证照");
+        return NO;
+    }
+    if (!self.param[@"nickname"]) {
+        ALERT(@"姓名不能为空");
+        return NO;
+    }
+    if (!self.param[@"sfzNo"]) {
+        ALERT(@"身份证号不能为空");
+        return NO;
+    }
+    if (!self.param[@"gender"]) {
+        ALERT(@"请选择性别");
+        return NO;
+    }
+    return YES;
+}
+
+- (NSMutableDictionary*)param
+{
+    if (!_param) {
+        _param = [[NSMutableDictionary alloc] init];
+    }
+    return _param;
+}
+@end

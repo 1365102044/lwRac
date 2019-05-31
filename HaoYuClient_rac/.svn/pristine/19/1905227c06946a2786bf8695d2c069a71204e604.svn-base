@@ -1,0 +1,30 @@
+//
+//  HYCollectModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+
+@interface HYCollectModel : HYBaseModel
+//项目名称
+@property (nonatomic, copy) NSString * hiItemName;
+//室
+@property (nonatomic, copy) NSString * shi;
+//户型名称
+@property (nonatomic, copy) NSString * roomTypeName;
+//厅
+@property (nonatomic, copy) NSString * ting;
+//户型图
+@property (nonatomic, copy) NSDictionary * roomTypePic;
+//项目详细地址
+@property (nonatomic, copy) NSString * hiDetailedAddress;
+
+@property (nonatomic, copy) NSString * roomTypeId;
+
+//门店状态：1正常营业，2暂停业，3停业，4筹建中
+@property (nonatomic, copy) NSString * hiItemStatus;
+
+@end

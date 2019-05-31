@@ -1,0 +1,65 @@
+//
+//  HYKeplerManager.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/10/16.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYKeplerManager.h"
+
+@implementation HYKeplerManager
+
+/**
+ *  注册Kepler 服务
+ *
+ *  @param appKey      注册的appKey
+ *  @param appSecret   注册的secretKey
+ */
++ (void)asyncInitSdk:(NSString *)appKey
+           secretKey:(NSString *)appSecret
+      sucessCallback:(initSuccessCallback)sucessCallback
+      failedCallback:(initFailedCallback)failedCallback
+{
+    [[KeplerApiManager sharedKPService] asyncInitSdk:appKey
+                                           secretKey:appSecret
+                                      sucessCallback:sucessCallback
+                                      failedCallback:failedCallback];
+}
+
+/**
+ *  Kepler处理URL
+ *
+ *  @param url url
+ *
+ *  @return 处理结果
+ */
++ (BOOL)handleOpenURL:(NSURL*)url
+{
+    BOOL status = [[KeplerApiManager sharedKPService] handleOpenURL:url];
+    //检查登录状态，
+//    [[KeplerApiManager sharedKPService] keplerLoginWithSuccess:^{
+//
+//    } failure:^{
+//        ALERT(@"登录授权发生未知错误，请稍后重试！");
+//    }];
+   return status;
+}
+
+/**
+ *  打开导航页
+ */
++ (void)openNavigationPage:(UIViewController *)sourceController
+                  jumpType:(NSInteger)jumpType
+              customParams:(NSString *)customParams
+{
+    [[KeplerApiManager sharedKPService] openNavigationPage:sourceController
+                                                  jumpType:jumpType
+                                              customParams:customParams];
+}
+
++ (void)setIsOpenByH5:(BOOL)isOpenByH5
+{
+    [KeplerApiManager sharedKPService].isOpenByH5 = isOpenByH5;
+}
+@end

@@ -1,0 +1,17 @@
+//
+//  HYPayListTableViewCell.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewCell.h"
+#import "HYContractModel.h"
+@interface HYPayListTableViewCell : HYBaseTableViewCell
+/**
+ 合同数据
+ */
+@property (nonatomic, strong) HYContractModel * contractModel;
+
+@end

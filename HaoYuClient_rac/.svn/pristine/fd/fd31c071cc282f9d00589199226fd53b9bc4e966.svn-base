@@ -1,0 +1,215 @@
+//
+//  HYChangeLockPwViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/8.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYChangeLockPwViewController.h"
+#import "HYChangeLockPwMainView.h"
+#import "HYChangePwView.h"
+#import "HYLockModel.h"
+#import "HYAlertCentersView.h"
+
+@interface HYChangeLockPwViewController ()
+@property (nonatomic, strong) HYChangeLockPwMainView * mainView;
+@property (nonatomic, strong) HYChangePwView * changePwView;
+@property (nonatomic, strong) HYLockModel * lockMesgModel;
+@property (nonatomic, strong) NSString * houseId;
+@end
+
+@implementation HYChangeLockPwViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+/**
+ 请求验证码
+ */
+- (void)rquestCode {
+    PARA_CREART;
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"phone");
+    PARA_SET([_houseId isNullToString], @"houseId");
+    [[HYServiceManager share] postRequestAnWithurl:CHANGE_MYLOCKPW_SENDCODE_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n-----------\n\nrequestcode:%@",objc);
+                                          [self.changePwView startTimer];
+                                      }failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+/**
+ 修改密码
+ */
+- (void)commitInfo:(NSDictionary *)param
+{
+    PARA_CREART;
+    PARA_SET([HYStringTool checkString:USERDEFAULTS_GET(USER_INFOR_PHONE)], @"userphone");
+    PARA_SET([HYStringTool checkString:_lockMesgModel.lockid], @"lockid");
+//    PARA_SET(@"11.135.83.148", @"lockid");
+    PARA_SET([HYStringTool checkString:_lockMesgModel.lockType], @"lockType");
+    [para addEntriesFromDictionary:param];
+    LWLog(@"------%@",para);
+    [[HYServiceManager share] postRequestAnWithurl:CHANGE_MYLOCKPW_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSString *status_code = objc[@"status"][@"code"];
+                                          if ([status_code integerValue] == 200) {
+                                              ALERT(@"密码修改成功！");
+                                              [self.navigationController popViewControllerAnimated:YES];
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                      
+                                      }];
+}
+
+/**
+ 开锁界面信息
+ */
+- (void)requestMyLockInfor
+{
+    PARA_CREART;
+    PARA_SET([_houseId isNullToString], @"houseId");
+    [[HYServiceManager share] postRequestAnWithurl:GET_MINELOCKMESSAGE_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"-------\n\n\nmensuo_infor:%@",objc);
+
+                                          if (!objc[@"result"] ||
+                                              [objc[@"result"] isEqualToString:@""]) {
+                                              NSString *msg = objc[@"status"][@"msg"];
+                                              if (msg) {
+                                                  [HYWraingAlert showAlert:self
+                                                                     title:@"提示"
+                                                                   message:msg ? msg : @""
+                                                         cancelButtonTitle:@"确定" cancelButtonCallBackBlock:^(id sender) {
+                                                             [self.navigationController popViewControllerAnimated:YES];
+                                                         }];
+                                                  return ;
+                                              }
+                                          }
+                                          
+                                          NSArray *list = objc[@"result"][@"list"];
+                                          if ([list isKindOfClass:[NSArray class]]) {                                          
+                                              _lockMesgModel = [HYLockModel modelWithJSON:list.firstObject];
+                                              _mainView.lockMesgModel = _lockMesgModel;
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                        
+                                      }];
+}
+/**
+ 远程开锁
+ */
+- (void)requestRemoterUnLock
+{
+    PARA_CREART;
+    PARA_SET([_houseId isNullToString], @"houseId");
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"userPhone");
+    PARA_SET([_lockMesgModel.lockid isNullToString], @"lockId");
+//    PARA_SET(@"11.135.83.148", @"lockId");
+    PARA_SET([_lockMesgModel.lockType isNullToString], @"lockType");
+    [[HYServiceManager share] postRequestAnWithurl:GET_REMOTERUNLOCK_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSString *status = objc[@"status"][@"code"];
+                                          if ([status isEqualToString:@"200"]) {
+                                              ALERT(@"开锁成功！");
+                                          }else if ([status isEqualToString:@"201"]){
+                                              //欠租
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatChangeLockPwViewController:(NSString *)titleStr houseId:(NSString *)houseId
+{
+    HYChangeLockPwViewController *instance = [[HYChangeLockPwViewController alloc] init];
+    instance.houseId = houseId;
+    return instance;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"智能门锁";
+    if ([self.sourceVC isKindOfClass:[HYChangeLockPwViewController class]]) {
+        self.title = @"修改密码";
+        [self setChangeUI];
+    }else{
+        [self setMainUI];
+    }
+    
+    [self requestMyLockInfor];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    [[HYTimerManager shareTimer] stopTimer];
+}
+#pragma mark - Sixth.界面配置
+- (void)setChangeUI{
+    [self.view addSubview:self.changePwView];
+    [self.changePwView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.left.mas_equalTo(self.view);
+        make.size.mas_offset(CGSizeMake(self.view.width, self.view.height));
+    }];
+    WEAKSELF(self);
+    self.changePwView.callBlock = ^(id sender) {
+        [weakself commitInfo:sender];
+    };
+    self.changePwView.getCodeBlock = ^{
+        [weakself rquestCode];
+    };
+}
+- (void)setMainUI
+{
+    [self.view addSubview:self.mainView];
+    [self.mainView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.left.mas_equalTo(self.view);
+        make.size.mas_offset(CGSizeMake(self.view.width, self.view.height));
+    }];
+    WEAKSELF(self);
+    self.mainView.callBlock = ^(id sender) {
+        if ([sender isEqualToString:@"修改密码"]) {
+            HYChangeLockPwViewController *temp = [[HYChangeLockPwViewController alloc] init];
+            temp.sourceVC = weakself;
+            temp.houseId = weakself.houseId;
+            [weakself.navigationController pushViewController:temp animated:YES];
+        }else if ([sender isEqualToString:@"远程开锁"]){
+            [HYWraingAlert showAlert:weakself title:@"" message:[NSString stringWithFormat:@"确定对“%@”进行远程开锁吗？",weakself.lockMesgModel.fullAdress] leftButtonTitle:@"取消" rightButtonTitle:@"确认" TextAlignment:NSTextAlignmentCenter leftButtonCallBackBlock:^(id sender) {
+                
+            } rightButtonCallBackBlock:^(id sender) {
+                [weakself requestRemoterUnLock];
+            }];
+        }
+    };
+}
+
+#pragma mark - Seventh.懒加载
+- (HYChangeLockPwMainView*)mainView
+{
+    if (!_mainView) {
+        _mainView = [[HYChangeLockPwMainView alloc] init];
+    }
+    return _mainView;
+}
+- (HYChangePwView*)changePwView
+{
+    if (!_changePwView) {
+        _changePwView = [[HYChangePwView alloc] init];
+    }
+    return _changePwView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

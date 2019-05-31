@@ -1,0 +1,56 @@
+//
+//  LWDefaultTextField.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/7/29.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWDefaultTextField: LWBaseTextField,UITextFieldDelegate {
+    
+    static func defaultTextField(placeholder:String,textFont:UIFont,textColor:UIColor) -> LWDefaultTextField{
+        let defaultTextField = LWDefaultTextField()
+        defaultTextField.textField?.textColor = textColor
+        defaultTextField.textField?.font = textFont
+        defaultTextField.textField?.placeholder = placeholder
+        defaultTextField.textField?.delegate = defaultTextField
+        
+        return defaultTextField
+    }
+    
+    /**
+     修改placeholder颜色
+     */
+    func placeholderColor(ph_color:UIColor){
+        self.textField?.setValue(ph_color, forKeyPath: "_placeholderLabel.textColor")
+    }
+    /**
+     修改placeholder字体大小
+     */
+    func placeholderFont(ph_font:UIColor){
+        self.textField?.setValue(ph_font, forKeyPath: "_placeholderLabel.font")
+    }
+    
+    
+    // 1.避免明文切换成密文后被清空
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        var toBeStr = textField.text
+        let rag = toBeStr?.toRange(range)
+        toBeStr = toBeStr?.replacingCharacters(in: rag!, with: string)
+        
+        if textField.isSecureTextEntry {
+            textField.text = toBeStr
+            return false
+        }
+        
+        if maxLenght != 0 && (toBeStr?.count)! >= maxLenght+1{
+            return false
+        }
+        
+        return true
+    }
+    
+}

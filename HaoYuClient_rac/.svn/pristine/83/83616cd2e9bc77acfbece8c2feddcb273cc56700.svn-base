@@ -1,0 +1,26 @@
+//
+//  LWLocalData.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/8/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWLocalData: NSObject {
+
+    class func saveUserInforFromLogin(infor:LWAccountInforModel){
+        LWUSERDEFAULT_SET(infor.token, forKey: ACCOUNT_INFOR_TOKEN)
+        LWUSERDEFAULT_SET(infor.userId, forKey: ACCOUNT_INFOR_USERID)
+        LWUSERDEFAULT_SET(infor.headpicUrl, forKey: ACCOUNT_INFOR_HEADPICURL)
+        LWUSERDEFAULT_SET(infor.userName, forKey: ACCOUNT_INFOR_USERNAME)
+        LWUSERDEFAULT_SET(infor.userPhoneNumber, forKey: ACCOUNT_INFOR_USERPHONENUMBER)
+        LWUSERDEFAULT_SET(infor.userSign, forKey: ACCOUNT_INFOR_USERSIGN)
+        LWUSERDEFAULT_SET(infor.userMail, forKey: ACCOUNT_INFOR_USERMAIL)
+        UserDefaults.standard.synchronize()
+    }
+    
+}
+
+

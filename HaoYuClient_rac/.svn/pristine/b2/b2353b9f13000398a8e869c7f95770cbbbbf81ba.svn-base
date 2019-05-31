@@ -1,0 +1,23 @@
+//
+//  LWHud.swift
+//  HaoYuDemoSwift
+//
+//  Created by 刘文强 on 2018/8/9.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWHud: NSObject {
+    
+    static func show(){
+        SVProgressHUD.show()
+    }
+    static func show(withStatus:String){
+        SVProgressHUD.show(withStatus: withStatus)
+    }
+    static func dismiss(){
+        SVProgressHUD.dismiss()
+    }
+    
+}

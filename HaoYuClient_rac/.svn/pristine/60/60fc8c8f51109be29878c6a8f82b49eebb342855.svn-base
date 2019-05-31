@@ -1,0 +1,100 @@
+//
+//  HYPayMentRequestManager.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/8/3.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYPayMentRequestManager.h"
+#import "HYPayMentManager.h"
+//部门id
+#define DEPTID @"DBB65BB67208DC4BDD5A341NAB2A1C748C8C"
+
+@implementation HYPayMentRequestManager
+
+/**
+ 订单 / 定金 预支付订单
+ */
++ (void)payCreatPrePaymentForBillDespositWithPara:(NSMutableDictionary *)param
+{
+    PARA_CREART;
+//    PARA_SET(@"", @"ids");
+    //    PARA_SET(param[@"type"], @"type");
+    //    PARA_SET(@"", @"outTradeNo");//商户交易号
+//    PARA_SET(DEPTID, @"deptId");
+    
+    para[@"ids"] = param[@"ids"];
+    NSString *urls = PAYMENT_CREATPREPAYMENT_BILLANDDESPOSIT_ALIP_URL; //支付宝
+    if ([param[@"payType"] integerValue] == 1) {
+        urls = PAYMENT_CREATPREPAYMENT_BILLANDDESPOSIT_URL; //微信
+        PARA_SET([HYStringTool checkString:[HYStringTool getDeviceIPAddresses]], @"ipv4");//客户端终端ip
+        [para addEntriesFromDictionary:param]; // type
+    }
+    LWLog(@"\n\n\n+++++++++para:%@",para);
+    [[HYServiceManager share] postRequestAnWithurl:urls
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n\n============生成与支付订单的objc:%@",objc);
+                                          if ([param[@"payType"] integerValue] == 1) {
+                                              NSDictionary *map_dic = objc[@"result"][@"map"];
+                                              NSDictionary *status_dic = objc[@"result"][@"status"];
+                                              if (status_dic) {
+                                                  ALERT(status_dic[@"msg"]);
+                                                  return ;
+                                              }
+                                              PARA_CREART;
+                                              [para addEntriesFromDictionary:map_dic];
+                                              if(para[@"packageValue"]){
+                                                  [para removeObjectForKey:@"packageValue"];
+                                                  para[@"package"] = map_dic[@"packageValue"];
+                                              }
+                                              [[HYPayMentManager shareManager] WechatPay:para];
+                                          }else{
+                                              [[HYPayMentManager shareManager] alipayWithorderSign:objc[@"result"][@"orderStr"]];
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+/**
+ 充值 生成预支付订单
+ */
++ (void)payCreatPrePaymentForRechargeWithPara:(NSMutableDictionary *)param
+{
+    PARA_CREART;
+    [para addEntriesFromDictionary:param];
+    
+    //    PARA_SET(@"d0e97b7f258a4e809e1bd406fbfa5ccc", @"houseId");
+    //    PARA_SET(@"", @"num");
+    //    PARA_SET(@"", @"payType");
+    //    PARA_SET(@"", @"totalFee");
+//        PARA_SET(@"b4c57f7732cc4cfd902e0f7ba3b4113f", @"meterId");
+    //    PARA_SET(@"", @"openid");
+    //    PARA_SET(@"", @"outTradeNo");//商户交易号
+    PARA_SET(DEPTID, @"deptId");
+    PARA_SET([HYStringTool checkString:[HYStringTool getDeviceIPAddresses]], @"ipv4");
+    
+    LWLog(@"\n\n\n+++++++++para:%@",para);
+    
+    [[HYServiceManager share] postRequestAnWithurl:PAYMENT_CREATPREPAYMENT_RECHARGE_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          NSDictionary *map_dic = objc[@"result"][@"map"];
+                                          LWLog(@"============%@",objc);
+                                          PARA_CREART;
+                                          [para addEntriesFromDictionary:map_dic];
+                                          if(para[@"packageValue"]){
+                                              [para removeObjectForKey:@"packageValue"];
+                                              para[@"package"] = map_dic[@"packageValue"];
+                                          }
+                                          [[HYPayMentManager shareManager] WechatPay:para];
+                                          
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+
+@end

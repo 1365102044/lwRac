@@ -1,0 +1,61 @@
+//
+//  HYBaoXiuTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/1.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaoXiuTableViewCell.h"
+#import "HYBaoXiuCellView.h"
+#import "HYStringTool.h"
+@interface HYBaoXiuTableViewCell()
+@property (nonatomic, strong) HYBaoXiuCellView * cellView;
+
+@end
+@implementation HYBaoXiuTableViewCell
+
+- (void)setBaoXiuModel:(HYBaoXiuModel *)BaoXiuModel
+{
+    _BaoXiuModel = BaoXiuModel;
+    self.cellView.houseNameLable.text = [BaoXiuModel.title ex_base64Decode];
+    self.cellView.houseWhereLable.text = [NSString stringWithFormat:@"%@ %@栋 %@室",BaoXiuModel.houseItemName,BaoXiuModel.buildingNo,BaoXiuModel.fangNo];
+    self.cellView.hetongDescLable.text = [NSString stringWithFormat:@"申报时间：%@",BaoXiuModel.filingTime];
+    
+    NSInteger sta = [BaoXiuModel.status integerValue];
+    switch (sta) {
+        case 1://待处理
+            _cellView.statuImageView.image = IMAGENAME(@"statu_no_handle_icon");
+            break;
+        case 2://已派单
+            _cellView.statuImageView.image = IMAGENAME(@"statu_alearlyPaiDan_icon");
+            break;
+        case 3://已完成
+            _cellView.statuImageView.image = IMAGENAME(@"statu_alearlySuccess_icon");
+            break;
+        case 4://取消
+            _cellView.statuImageView.image = IMAGENAME(@"statu_alearlyCancle_icon");
+            break;
+        case 5://已验收
+            _cellView.statuImageView.image = IMAGENAME(@"statu_alearlyYanShou_icon");
+            break;
+        default:
+            break;
+    }
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        self.cellView = [[HYBaoXiuCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.cellView.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.bottom.mas_equalTo(self.contentView);
+        }];
+    }
+    return  self;
+}
+
+@end

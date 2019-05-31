@@ -1,0 +1,129 @@
+//
+//  HYContactDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/30.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYContactDeatilViewController.h"
+#import "HYContractDeatilMainView.h"
+#import "HYContractModel.h"
+#import "HYContractPDFViewController.h"
+
+@interface HYContactDeatilViewController ()
+@property (nonatomic, strong) HYContractDeatilMainView * MainView;
+@property (nonatomic, strong) HYContractModel *ContractModel;
+@end
+
+@implementation HYContactDeatilViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestContractDeatilInfor
+{
+    PARA_CREART;
+    PARA_SET([_chengzuId isNullToString], @"id");
+    [[HYServiceManager share] postRequestAnWithurl:GET_MINEHETONGDEATILINFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n\n\n\n\n\nhetong_deatil:%@",objc);
+                                          HYContractModel *contractModel = [HYContractModel modelWithJSON:objc[@"result"]];
+                                          self.ContractModel = contractModel;
+                                          self.MainView.contractModel = self.ContractModel;
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+- (void)requestHeTongPDF
+{
+    PARA_CREART;
+    PARA_SET([_chengzuId isNullToString], @"id");
+    [[HYServiceManager share] postRequestAnWithurl:GET_MINEHETONGPDFINFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n\n\n\n\n\nhetong_PDF:%@",objc);
+                                          NSString *pdf_url = objc[@"result"][@"contractUrl"];
+                                          if (pdf_url) {
+                                              HYContractPDFViewController *pdf_vc = [[HYContractPDFViewController alloc] init];
+                                              pdf_vc.pdf_url = pdf_url;
+                                              [self.navigationController pushViewController:pdf_vc animated:YES];
+                                          }else{
+                                              ALERT_MSG(@"未查询到合同信息");
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+- (void)clickBtn:(UIButton *)sender
+{
+    LWLog(@"点击了----%@",sender.titleLabel.text);
+    if ([sender.titleLabel.text isEqualToString:@"查看合同"] &&
+        ([self.ContractModel.status isEqualToString:@"0"] ||
+        [self.ContractModel.status isEqualToString:@"1"])) {
+            ALERT_MSG(@"还没有有效合同！");
+            return;
+    }
+    if ([sender.titleLabel.text isEqualToString:@"查看合同"]) {
+        [self requestHeTongPDF];
+    }else{
+        
+    }
+}
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"合同详情";
+    self.view.backgroundColor = HYCOLOR.color_c0;
+    [self setUI];
+    [self requestContractDeatilInfor];
+}
+
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    self.MainScrollView.backgroundColor = HYCOLOR.color_c1;
+    [self.MainScrollView addSubview:self.MainView];
+    [self.view addSubview:self.MainScrollView];
+    
+    [self.MainView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.MainScrollView);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.mas_equalTo(self.view);
+        make.bottom.mas_equalTo(self.view.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(45));
+    }];
+    
+    HYFillLongButton *btn_left = [HYFillLongButton buttonCorWithTitleStringKey:@"查看合同" target:self selector:@selector(clickBtn:)];
+    HYFillLongButton *btn_right = [HYFillLongButton buttonCorWithTitleStringKey:@"查看物业交割单" target:self selector:@selector(clickBtn:)];
+    [self.view addSubview:btn_left];
+    [self.view addSubview:btn_right];
+    [@[btn_left,btn_right] mas_distributeViewsAlongAxis:MASAxisTypeHorizontal withFixedSpacing:10 leadSpacing:10 tailSpacing:10];
+    [@[btn_left,btn_right] mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_offset(ADJUST_PERCENT_FLOAT(40));
+        make.bottom.mas_equalTo(self.view.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+    }];
+}
+
+#pragma mark - Seventh.懒加载
+- (HYContractDeatilMainView*)MainView
+{
+    if (!_MainView) {
+        _MainView = [[HYContractDeatilMainView alloc] init];
+        _MainView.backgroundColor = HYCOLOR.color_c1;
+    }
+    return _MainView;
+}
+#pragma mark - Eigth.Other
+
+
+@end

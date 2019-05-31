@@ -1,0 +1,59 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+//#import "WYIDScanViewController.h"
+
+@interface ViewController ()
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    self.view.backgroundColor = HYCOLOR.color_c1;
+        
+    
+    self.navigationItem.title = @"第二页";    
+
+    
+    
+}
+
+- (void)clickbtn
+{
+    
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    NSArray *arr = @[@"1",@"3",@"62"];
+//    [SYSTEM_NOTIFICATIONCENTER postNotificationName:@"test" object:arr];
+    POST_NOTI(@"test", arr);
+    
+    
+//    WYIDScanViewController *VC = [[WYIDScanViewController alloc] initWithCarInfo:CardIDFront];
+//    [VC scanDidFinishCarInfo:^(CardType status, WYScanResultModel *scanModel) {
+//        self.scanModel = scanModel;
+//        LWLog(@"=============status:%@\nscanModel:%@",status,scanModel);
+//        [self handleScanModel];
+//    }];
+//    [self.navigationController pushViewController:VC animated:YES];
+    
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

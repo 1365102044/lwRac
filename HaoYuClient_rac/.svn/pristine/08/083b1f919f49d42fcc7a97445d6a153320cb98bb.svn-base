@@ -1,0 +1,625 @@
+//
+//  NSString+Extension.m
+//  Project
+//
+//  Created by 郑键 on 17/1/11.
+//  Copyright © 2017年 zhengjian. All rights reserved.
+//
+
+#import "NSString+Extension.h"
+//#import "HBRSAHandler.h"
+#import <CommonCrypto/CommonDigest.h>
+
+/**
+ * 秘钥
+ */
+#ifdef DEBUG
+#define AES_KEY PROJECT_AESPRIVETKEY_DEV
+#else
+#define AES_KEY PROJECT_AESPRIVETKEY_PRO
+#endif
+
+@implementation NSString (Extension)
+
+- (NSString *)ex_ratio
+{
+    double value = self.doubleValue;
+    return [NSString stringWithFormat:@"%.0f%%", value * 100];
+}
+
+#pragma mark - Escape加解密
+
+/**
+ *  Escape加密
+ *
+ *  @return 加密后字符串
+ */
+- (NSString *)ex_escapeEncode
+{
+    NSString *s1    = [self ex_base64Encode];
+    NSString *s2    = [s1 stringByReplacingOccurrencesOfString:@"/" withString:@"%"];
+    s2              = [s2 stringByReplacingOccurrencesOfString:@"+" withString:@"-"];
+    s2              = [s2 stringByReplacingOccurrencesOfString:@"=" withString:@"~"];
+    NSString *s3    = [s2 stringByReplacingOccurrencesOfString:@"0" withString:@"@"];
+    s3              = [s3 stringByReplacingOccurrencesOfString:@"a" withString:@"$"];
+    s3              = [s3 stringByReplacingOccurrencesOfString:@"A" withString:@"#"];
+    NSMutableString *s4 = [NSMutableString string];
+    for (NSInteger i = 0; i < s3.length; i++) {
+        NSInteger ch = [s3 characterAtIndex:i];
+        if ((ch > '0' && ch <= '9')
+            || (ch > 'A' && ch <= 'Z')
+            || (ch > 'a' && ch <= 'z')) {
+            ch = ch - 1;
+        }
+        [s4 appendFormat:@"%c", (char)ch];
+    }
+    NSString *s5 = [s4 stringByReplacingOccurrencesOfString:@"0" withString:@"9"];
+    s5              = [s5 stringByReplacingOccurrencesOfString:@"a" withString:@"z"];
+    s5              = [s5 stringByReplacingOccurrencesOfString:@"A" withString:@"z"];
+    NSString *s6 = [s5 stringByReplacingOccurrencesOfString:@"%" withString:@"0"];
+    s6              = [s6 stringByReplacingOccurrencesOfString:@"-" withString:@"a"];
+    s6              = [s6 stringByReplacingOccurrencesOfString:@"~" withString:@"A"];
+    return s6;
+}
+
+/**
+ *  Escape解密
+ *
+ *  @return 解密后字符串
+ */
+- (NSString *)ex_escapeDecode
+{
+    NSString *s6 = [self stringByReplacingOccurrencesOfString:@"0" withString:@"%"];
+    s6              = [s6 stringByReplacingOccurrencesOfString:@"a" withString:@"-"];
+    s6              = [s6 stringByReplacingOccurrencesOfString:@"A" withString:@"~"];
+    NSString *s5 = [s6 stringByReplacingOccurrencesOfString:@"9" withString:@"0"];
+    s5              = [s5 stringByReplacingOccurrencesOfString:@"z" withString:@"a"];
+    s5              = [s5 stringByReplacingOccurrencesOfString:@"Z" withString:@"A"];
+    NSMutableString *s4 = [NSMutableString string];
+    for (NSInteger i = 0; i < s5.length; i++) {
+        NSInteger ch = [s5 characterAtIndex:i];
+        if ((ch >= '0' && ch < '9')
+            || (ch >= 'A' && ch < 'Z')
+            || (ch >= 'a' && ch < 'z')) {
+            ch = ch + 1;
+        }
+        [s4 appendFormat:@"%c", (char)ch];
+    }
+    NSString *s3    = [s4 stringByReplacingOccurrencesOfString:@"@" withString:@"0"];
+    s3              = [s3 stringByReplacingOccurrencesOfString:@"$" withString:@"a"];
+    s3              = [s3 stringByReplacingOccurrencesOfString:@"#" withString:@"A"];
+    NSString *s2    = [s3 stringByReplacingOccurrencesOfString:@"%" withString:@"/"];
+    s2              = [s2 stringByReplacingOccurrencesOfString:@"-" withString:@"+"];
+    s2              = [s2 stringByReplacingOccurrencesOfString:@"~" withString:@"="];
+    NSString *s1    = [s2 ex_base64Decode];
+    return s1;
+}
+
+#pragma mark - RSA
+
+///**
+// *  RSA MD5 验签
+// *
+// *  @param string          原串
+// *  @param signString      签名串
+// *  @return                返回验签结果
+// */
+//+ (BOOL)verifyMD5String:(NSString *)string withSign:(NSString *)signString
+//{
+//    HBRSAHandler* handler = [HBRSAHandler new];
+//    NSString* public_key_string = @"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZvHpqtM2wSd5sRupDfpv6X2CisOPtSP5FhhPp0dHKdc3veApuyZ5uEvIXP0APUDZL+1q9SPLqhU3i9S62ezJgpvp5kOFIm8gpIEjEyE1aeO2nCmMK0Dn8WCHP5izyShbcxpRwvOa2GHS2v8rE+ccyp9Ub23PkGaXOtnPCjVef+QIDAQAB";
+//    [handler importKeyWithType:KeyTypePublic andkeyString:public_key_string];
+//    return [handler verifyMD5String:string withSign:signString];
+//}
+
+///**
+// *  RSA sha1 验签
+// *
+// *  @param string          原串
+// *  @param signString      签名串
+// *  @return                返回验签结果
+// */
+//+ (BOOL)verifySha1String:(NSString *)string withSign:(NSString *)signString
+//{
+//    HBRSAHandler* handler = [HBRSAHandler new];
+//    NSString* public_key_string = @"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZvHpqtM2wSd5sRupDfpv6X2CisOPtSP5FhhPp0dHKdc3veApuyZ5uEvIXP0APUDZL+1q9SPLqhU3i9S62ezJgpvp5kOFIm8gpIEjEyE1aeO2nCmMK0Dn8WCHP5izyShbcxpRwvOa2GHS2v8rE+ccyp9Ub23PkGaXOtnPCjVef+QIDAQAB";
+//    [handler importKeyWithType:KeyTypePublic andkeyString:public_key_string];
+//    return [handler verifyString:string withSign:signString];
+//}
+
+#pragma mark - Base64
+
+/**
+ *  base64编码
+ *
+ *  @return 编码后的字符串
+ */
+- (NSString *)ex_base64Encode
+{
+    NSData *data                                = [self dataUsingEncoding:NSUTF8StringEncoding];
+    return [data base64EncodedStringWithOptions:0];
+}
+
+/**
+ *  base64解码
+ *
+ *  @return 解码后的字符串
+ */
+- (NSString *)ex_base64Decode
+{
+    NSData *data                                = [[NSData alloc] initWithBase64EncodedString:self options:0];
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+
+#pragma mark - Extension
+
+/**
+ *  根据正则表达式验证当前字符串
+ *
+ *  @param regularExpression 正则表达式
+ *  @return 是否符合标准
+ */
+- (BOOL)ex_checkStringWithRegularExpression:(NSString *)regularExpression
+{
+    NSPredicate *pred                           = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regularExpression];
+    return [pred evaluateWithObject:self];
+}
+
+/**
+ *  验证邮箱
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isEmail
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_ISMAIL];
+}
+
+
+/**
+ *  昵称
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isNickName
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_ISNICKNAEM];
+}
+
+/**
+ *  验证密码
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isPassword
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_ISPWD];
+}
+
+/**
+ *  验证数字
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isRealNumbers
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_ISNUM];
+}
+
+/**
+ *  验证手机号码
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isMobileNumber
+{
+    NSPredicate *regextestmobile        = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",REGULAREXPRESSION_PHONENUMBER_MOBILE];
+    
+    if (([regextestmobile evaluateWithObject:self]  == YES)){
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+/**
+ *  控制输入不含特殊符号(能够输入汉字、字母、数字)
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isTrueStr
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_ISSTR];
+}
+
+/**
+ *  验证身份证号
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_validateIdentityCard
+{
+    return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_IDENTITYCARD];
+}
+/**
+ *  验证URL
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isUrlStr
+{
+  return [self ex_checkStringWithRegularExpression:REGULAREXPRESSION_IDENTITYCARD];
+}
+
+#pragma mark - string
+
+/**
+ *  是否包涵子字符串
+ *
+ *  @param subString 传入的字符串
+ *
+ *  @return YES or NO
+ */
+- (BOOL)ex_isContainSubString:(NSString *)subString
+{
+    if([self rangeOfString:subString].location != NSNotFound){
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+/**
+ *  是否为空
+ *
+ *  @return YES 空 NO 非空
+ */
+- (BOOL)ex_isEmpty
+{
+    if (self.length == 0
+        || [self isEqualToString:@""]
+        || [self isKindOfClass:[NSNull class]]
+        || self == nil) {
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+
+#pragma mark - Hash Md5
+
+/**
+ *  md5
+ *
+ *  @return md5后的字符串
+ */
+- (NSString *)ex_md5String
+{
+    const char *str                 = self.UTF8String;
+    int length                      = (int)strlen(str);
+    unsigned char bytes[CC_MD5_DIGEST_LENGTH];
+    CC_MD5(str, length, bytes);
+    return [self ex_stringFromBytes:bytes length:CC_MD5_DIGEST_LENGTH];
+}
+
+/**
+ *  sha1
+ *
+ *  @return sha1后的字符串
+ */
+- (NSString *)ex_sha1String
+{
+    const char *str                 = self.UTF8String;
+    int length                      = (int)strlen(str);
+    unsigned char bytes[CC_SHA1_DIGEST_LENGTH];
+    CC_SHA1(str, length, bytes);
+    return [self ex_stringFromBytes:bytes length:CC_SHA1_DIGEST_LENGTH];
+}
+
+/**
+ *  sha256
+ *
+ *  @return sha256后的字符串
+ */
+- (NSString *)ex_sha256String
+{
+    const char *str                 = self.UTF8String;
+    int length                      = (int)strlen(str);
+    unsigned char bytes[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(str, length, bytes);
+    return [self ex_stringFromBytes:bytes length:CC_SHA256_DIGEST_LENGTH];
+}
+
+/**
+ *  sha512
+ *
+ *  @return sha512后的字符串
+ */
+- (NSString *)ex_sha512String
+{
+    const char *str                 = self.UTF8String;
+    int length                      = (int)strlen(str);
+    unsigned char bytes[CC_SHA512_DIGEST_LENGTH];
+    CC_SHA512(str, length, bytes);
+    return [self ex_stringFromBytes:bytes length:CC_SHA512_DIGEST_LENGTH];
+}
+
+- (NSString *)ex_stringFromBytes:(unsigned char *)bytes length:(int)length
+{
+    NSMutableString *strM = [NSMutableString string];
+    
+    for (int i = 0; i < length; i++) {
+        [strM appendFormat:@"%02x", bytes[i]];
+    }
+    
+    return [strM copy];
+}
+
+#pragma mark - ToolMethod
+
+/**
+ *  计算富文本字体高度
+ *
+ *  @param lineSpace  行间距
+ *  @param font       字体
+ *  @param width      字体所占宽度
+ *
+ *  @return 富文本高度
+ */
+-(CGFloat)ex_getSpaceLabelHeightwithSpeace:(CGFloat)lineSpace
+                                  withFont:(UIFont*)font
+                                 withWidth:(CGFloat)width
+{
+    NSMutableParagraphStyle *paraStyle          = [[NSMutableParagraphStyle alloc] init];
+    paraStyle.lineSpacing                       = lineSpace;
+    NSDictionary *dic                           = @{NSFontAttributeName:font,
+                                                    NSParagraphStyleAttributeName:paraStyle,
+                                                    NSKernAttributeName:@1.5f};
+    CGSize size                                 = [self boundingRectWithSize:CGSizeMake(width,MAXFLOAT)
+                                                                     options:NSStringDrawingUsesLineFragmentOrigin
+                                                                  attributes:dic
+                                                                     context:nil].size;
+    return size.height;
+}
+
+/**
+ *  计算label的尺寸
+ *
+ *  @param label label
+ *
+ *  @return 文字所占的尺寸
+ */
++ (CGSize)ex_sizeWithLabel:(UILabel *)label
+{
+    NSString *text                              = label.text;
+    if (text == nil) text                       = @"字体";
+    return [NSString ex_sizeWithText:text
+                             andFont:label.font
+                          andMaxSize:CGSizeMake(MAXFLOAT, MAXFLOAT)];
+}
+
+/**
+ *  文字的内容、字体大小 计算文字所占的尺寸
+ *
+ *  @param text    文字内容
+ *  @param font    文字字体
+ *
+ *  @return 文字所占的尺寸
+ */
++ (CGSize)ex_sizeWithText:(NSString *)text
+                  andFont:(UIFont *)font
+{
+    return [NSString ex_sizeWithText:text
+                             andFont:font
+                          andMaxSize:CGSizeMake(MAXFLOAT, MAXFLOAT)];
+}
+
+/**
+ *  根据文字的内容、字体大小、最大尺寸范围 计算文字所占的尺寸
+ *
+ *  @param text    文字内容
+ *  @param font    文字字体
+ *  @param maxSize 最大尺寸范围
+ *
+ *  @return 文字所占的尺寸
+ */
++ (CGSize)ex_sizeWithText:(NSString *)text
+                  andFont:(UIFont *)font
+               andMaxSize:(CGSize)maxSize
+{
+    CGSize expectedLabelSize                    = CGSizeZero;
+    NSMutableParagraphStyle *paragraphStyle     = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.lineBreakMode                = NSLineBreakByWordWrapping;
+    [paragraphStyle setLineSpacing:0];
+    NSDictionary *attributes                    = @{NSFontAttributeName:font,
+                                                    NSParagraphStyleAttributeName:paragraphStyle.copy};
+    
+    expectedLabelSize                           = [text boundingRectWithSize:maxSize
+                                                                     options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                                                  attributes:attributes
+                                                                     context:nil].size;
+    
+    return CGSizeMake(ceil(expectedLabelSize.width), ceil(expectedLabelSize.height));
+}
+
+/**
+ *  将字典、数组 转换为json字符串
+ *
+ *  @param object 字典、数组
+ *
+ *  @return 转换为json字符串
+ */
++ (NSString *)ex_jsonStringWithObject:(id)object
+{
+    NSError *error                              = nil;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    if ([jsonData length] != 0 && error == nil) {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    } else {
+        return nil;
+    }
+}
+
+/**
+ *  json字典转
+ *
+ *  @return 字典
+ */
+- (NSDictionary *)ex_dictionaryToJsonString {
+    
+    if (self == nil) {
+        return nil;
+    }
+    NSData *jsonData = [self dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *err;
+    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                        options:NSJSONReadingMutableContainers
+                                                          error:&err];
+    if(err) {
+        NSLog(@"json解析失败：%@",err);
+        return nil;
+    }
+    
+    return dic;
+}
+
+/**
+ *  字符串替换
+ *
+ *  @param stringToBeChanged     要替换的字符串
+ *  @param stringToBeChangedWith 替换字符串
+ *  @param oldStr                原始字符串
+ *
+ *  @return 替换后的字符串
+ */
++ (NSString *)ex_replaceOldStr:(NSString *)stringToBeChanged
+                       withStr:(NSString *)stringToBeChangedWith
+                    withString:(NSString *)oldStr{
+    NSString *newStr                            = [oldStr stringByReplacingOccurrencesOfString:stringToBeChanged
+                                                                                    withString:stringToBeChangedWith];
+    return newStr;
+}
+
+/**
+ 计算文件大小
+ */
+- (long long)fileSize
+{
+    NSFileManager *mgr = [NSFileManager defaultManager];
+    
+    // 1.路径不存在就返回
+    BOOL isDirectory = NO;
+    BOOL fileExists = [mgr fileExistsAtPath:self isDirectory:&isDirectory];
+    if (fileExists == NO) return 0;
+    
+    // 2.判断路径是不是文件夹
+    if (isDirectory) { // 是
+        NSArray *subpaths = [mgr contentsOfDirectoryAtPath:self error:nil];
+        long long totalSize = 0;
+        for (NSString *subpath in subpaths) {
+            NSString *fullSubpath = [self stringByAppendingPathComponent:subpath];
+            totalSize += [fullSubpath fileSize];
+        }
+        return totalSize;
+    } else { // 不是
+        // 计算当前文件的尺寸
+        NSDictionary *attr = [mgr attributesOfItemAtPath:self error:nil];
+        return [attr[NSFileSize] longLongValue];
+    }
+}
+
+/**
+ 替换为标准html
+ 
+ @return return value
+ */
+- (NSString *)ex_htmlEntityDecode
+{
+    NSString *string = self;
+    string = [string stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+    string = [string stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
+    string = [string stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+    string = [string stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+    string = [string stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"]; // Do this last so that, e.g. @"&amp;lt;" goes to @"&lt;" not @"<"
+    return string;
+}
+
+/**
+ 暗文替换
+ 
+ @param replaceString           replaceString
+ @param startLocation           startLocation
+ @param lenght                  lenght
+ @return return
+ */
+- (NSString *)ex_replaceStringWithReplaceString:(NSString *)replaceString
+                                  startLocation:(NSInteger)startLocation
+                                         lenght:(NSInteger)lenght
+{
+    NSString *newStr = self;
+    if (self.length == 0) {
+        return @"";
+    }
+    for (int i = 0; i < lenght; i++) {
+        NSRange range = NSMakeRange(startLocation, 1);
+        newStr = [newStr stringByReplacingCharactersInRange:range withString:replaceString];
+        startLocation ++;
+    }
+    return newStr;
+}
+
+
++(NSString *)getUrlStringFromString:(NSString *)urlStr{
+    NSString *outputStr = (__bridge NSString *)
+    CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+                                            (__bridge CFStringRef)urlStr,
+                                            NULL,
+                                            (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                            kCFStringEncodingUTF8);
+    return outputStr;
+}
+
+/**
+ 添加空格
+ */
+-(NSString *)formatterBankCardNum
+{
+    NSString *tempStr = self;
+    NSInteger size =(tempStr.length / 4);
+    NSMutableArray *tmpStrArr = [[NSMutableArray alloc] init];
+    for (int n = 0;n < size; n++){
+        [tmpStrArr addObject:[tempStr substringWithRange:NSMakeRange(n*4, 4)]];
+    }
+    [tmpStrArr addObject:[tempStr substringWithRange:NSMakeRange(size*4, (tempStr.length % 4))]];
+    tempStr = [tmpStrArr componentsJoinedByString:@" "];
+    return tempStr;
+}
+
+/**
+ 字符判空 空:@""
+ */
+- (NSString *)isNullToString
+{
+    NSString *string = self;
+    if ([self isNull]) {
+        return @"";
+    }else{
+        return (NSString *)string;
+    }
+}
+
+/**
+ 是否 为空 BOOL
+ */
+- (BOOL)isNull
+{
+    NSString *string = self;
+    if ([string isEqual:@"NULL"] || [string isKindOfClass:[NSNull class]] || [string isEqual:[NSNull null]] || [string isEqual:NULL] || [[string class] isSubclassOfClass:[NSNull class]] || string == nil || string == NULL || [string isKindOfClass:[NSNull class]] || [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0 || [string isEqualToString:@"<null>"] || [string isEqualToString:@"(null)"]){
+        return YES;
+    }
+    return NO;
+}
+
+@end

@@ -1,0 +1,67 @@
+//
+//  HYYuDingListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuDingListTableViewCell.h"
+#import "HYYuDingListCellView.h"
+
+@interface HYYuDingListTableViewCell()
+
+@property (nonatomic, strong) HYYuDingListCellView * cellView;
+
+@end
+
+@implementation HYYuDingListTableViewCell
+
+- (void)setDataModel:(HYYuDingModel *)dataModel
+{
+    _dataModel = dataModel;
+    NSString *houseImage_url = dataModel.picObj;
+    if (houseImage_url) {
+        [_cellView.houseImage sd_setImageWithURL:[NSURL URLWithString:houseImage_url] placeholderImage:IMAGENAME(@"list_default_icon")];
+    }
+    NSString *houseName = dataModel.houseJson[@"itemJson"][@"hiItemName"];
+    _cellView.houseNameLable.text = houseName;
+    NSString *shi = dataModel.houseJson[@"louNo"];
+    NSString *ting = dataModel.houseJson[@"ting"];
+    _cellView.houseWhereLable.text = [NSString stringWithFormat:@"%@室%@厅",shi,ting];
+    NSString *zujin = dataModel.houseJson[@"rent"];
+    _cellView.houseLayoutLable.text = [NSString stringWithFormat:@"房租：%@元/月",zujin];
+    NSString *yudingshijian = dataModel.ct;
+    _cellView.yudingTimeLable.text = [NSString stringWithFormat:@"预订时间:%@",yudingshijian];
+    NSString *zuyuekaishishijian = dataModel.signTime;
+    _cellView.zuyueStarTimeLable.text = [NSString stringWithFormat:@"租约开始时间：%@",zuyuekaishishijian];
+    NSString *address_deatil = dataModel.houseJson[@"itemJson"][@"hiDetailedAddress"];
+    _cellView.dingweiLable.text = [NSString stringWithFormat:@"%@",address_deatil];
+    if ([dataModel.indentType isEqualToString:@"1"]) {
+        [_cellView setBtnArray:@[@"取消",@"支付",@"去电",@"签约"]];
+    }else{
+        [_cellView setBtnArray:@[@"去电",@"签约"]];
+    }
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        self.cellView = [[HYYuDingListCellView alloc]init];
+        [self.contentView addSubview:self.cellView];
+        self.cellView.backgroundColor = HYCOLOR.color_c1;
+        [self.cellView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.bottom.mas_equalTo(self.contentView);
+        }];
+
+        WEAKSELF(self);
+        self.cellView.clickFuncBtnBlock = ^(id sender) {
+            if (weakself.clickFuncBlock) {
+                weakself.clickFuncBlock(weakself.indexPath,sender);
+            }
+        };
+    }
+    return self;
+}
+@end

@@ -1,0 +1,149 @@
+//
+//  HYNetWorkConst.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HYNetWorkConst : NSObject
+    
+//** =========================================================================================== */
+//** ============================================key=========================================== */
+//** =========================================================================================== */
+
+/**
+ *  网络请求异常key
+ */
+UIKIT_EXTERN NSString * const NETREQUEST_ERRORINFO_KEY;
+
+
+//** =========================================================================================== */
+//** ============================================个人中心========================================== */
+//** =========================================================================================== */
+
+/**
+ 使用验证码登录
+ */
+UIKIT_EXTERN NSString * const LOGINWITHCODE_URL;
+/**
+ 获取登录的验证码
+ */
+UIKIT_EXTERN NSString * const GETLOGINCODE_URL;
+
+/**
+ 请求我的主页面
+ */
+UIKIT_EXTERN NSString * const GETMINEMAININFOR_URL;
+
+/**
+ 切换头像
+ */
+UIKIT_EXTERN NSString * const CHANGE_HEADERICON_URL;
+
+/**
+ 上传被修改过的信息
+ */
+UIKIT_EXTERN NSString *const UPLOAD_USERINFOR_URL;
+
+/**
+ 获取账单列表
+ */
+UIKIT_EXTERN NSString *const GET_MINEBILLLISTINFOR_URL;
+
+/**
+ 获取合同信息
+ */
+UIKIT_EXTERN NSString *const GET_MINEHETONGLISTINFOR_URL;
+/**
+ 获取合同详情
+ */
+UIKIT_EXTERN NSString *const GET_MINEHETONGDEATILINFOR_URL;
+/**
+ 预览合同
+ */
+UIKIT_EXTERN NSString *const GET_MINEHETONGPDFINFOR_URL;
+
+/**
+ 维修列表
+ */
+UIKIT_EXTERN NSString *const GET_MINEWEIXIULISTINFOR_URL;
+/**
+ 申请维修
+ */
+UIKIT_EXTERN NSString *const GET_MINEAPPLYWEIXIUINFOR_URL;
+/**
+ 保洁列表
+ */
+UIKIT_EXTERN NSString *const GET_MINEBAOJIELISTINFOR_URL;
+/**
+ 申请保洁
+ */
+UIKIT_EXTERN NSString *const GET_MINEAPPLYBAOJIEINFOR_URL;
+/**
+ 维修区域
+ */
+UIKIT_EXTERN NSString *const GET_MINEWEIXIUQUYUINFOR_URL;
+/**
+ 维修 上传图片
+ */
+UIKIT_EXTERN NSString *const UPLOAD_MINEWEIXIU_IMAGE_URL;
+
+/**
+ 电表信息
+ */
+UIKIT_EXTERN NSString *const GET_MINEDIANBAO_INFOR_URL;
+/**
+ 水表信息
+ */
+UIKIT_EXTERN NSString *const GET_MINESHUIBAO_INFOR_URL;
+
+/**
+ 只能门锁信息
+ */
+UIKIT_EXTERN NSString *const GET_MINELOCKMESSAGE_INFOR_URL;
+/**
+ 远程开锁
+ */
+UIKIT_EXTERN NSString *const GET_REMOTERUNLOCK_URL;
+/**
+ 修改门锁密码
+ */
+UIKIT_EXTERN NSString *const CHANGE_MYLOCKPW_URL;
+/**
+ 修改门锁密码 发生验证码
+ */
+UIKIT_EXTERN NSString *const CHANGE_MYLOCKPW_SENDCODE_URL;
+
+/**
+ 预约列表
+ */
+UIKIT_EXTERN NSString *const GET_YUYUELIST_INFOR_URL;
+/**
+ 预订列表
+ */
+UIKIT_EXTERN NSString *const GET_YUDINGLIST_INFOR_URL;
+/**
+ 收藏列表
+ */
+UIKIT_EXTERN NSString *const GET_COLLECTLIST_INFOR_URL;
+/**
+ 投诉建议
+ */
+UIKIT_EXTERN NSString *const TOUSUJIANYI_INFOR_URL;
+/**
+ 投诉建议 列表
+ */
+UIKIT_EXTERN NSString *const TOUSUJIANYI_LIST_INFOR_URL;
+/**
+ 服务评价
+ */
+UIKIT_EXTERN NSString *const FUPINGJIA_INFOR_URL;
+/**
+ 户型详情信息
+ */
+UIKIT_EXTERN NSString *const HUXINGDEATIL_INFOR_URL;
+
+@end

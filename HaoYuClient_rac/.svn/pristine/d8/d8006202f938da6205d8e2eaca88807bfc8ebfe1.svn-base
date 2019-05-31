@@ -1,0 +1,33 @@
+//
+//  HYHomePageModel.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseModel.h"
+
+//首页banner
+@interface HYHomeBannnerModel : HYBaseModel
+@property (nonatomic, copy) NSString * picUrl;
+@property (nonatomic, copy) NSString * bannerManagerId;
+
+@end
+
+//推荐户型
+@interface HYHomeHuXingModel : HYBaseModel
+@property (nonatomic, copy) NSString * popuPic;
+@property (nonatomic, copy) NSString * itemName;
+@property (nonatomic, copy) NSString * roomTypeId;
+@property (nonatomic, strong) NSDictionary * ov;
+
+@end
+
+//推荐房源
+@interface HYHomePageModel : HYBaseModel
+@property (nonatomic, copy) NSString * popuPic;
+@property (nonatomic, copy) NSString * itemName;
+@property (nonatomic, copy) NSString * itemId;
+@property (nonatomic, strong) NSDictionary * ov;
+@end

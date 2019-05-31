@@ -1,0 +1,116 @@
+//
+//  HYBaseView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseView.h"
+
+@implementation HYBaseView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c0;
+        MARGIN = ADJUST_PERCENT_FLOAT(10);
+    }
+    return self;
+}
+
+//户型详情/签约/预定中的配置图标
+- (NSString *)getIconNameWithPeiZhi:(NSString *)peizhi
+{
+    if ([peizhi isEqualToString:@"衣柜"]) {
+        return @"yigui";
+    }else if ([peizhi isEqualToString:@"冰箱"]){
+        return @"bingxiang";
+    }else if ([peizhi isEqualToString:@"餐桌"]){
+        return @"canzhuo";
+    }else if ([peizhi isEqualToString:@"茶几"]){
+        return @"chaji";
+    }else if ([peizhi isEqualToString:@"床"]){
+        return @"chuang";
+    }else if ([peizhi isEqualToString:@"橱柜"]){
+        return @"chugui";
+    }else if ([peizhi isEqualToString:@"电视"]){
+        return @"dianshi";
+    }else if ([peizhi isEqualToString:@"空调"]){
+        return @"kongtiao";
+    }else if ([peizhi isEqualToString:@"热水器"]){
+        return @"reshuiqi";
+    }else if ([peizhi isEqualToString:@"沙发"]){
+        return @"shafa";
+    }else if ([peizhi isEqualToString:@"书桌"]){
+        return @"shuzhuo";
+    }else if ([peizhi isEqualToString:@"图"]){
+        return @"tu";
+    }else if ([peizhi isEqualToString:@"电磁灶"]){
+        return @"diancilu";
+    }else if ([peizhi isEqualToString:@"WIFT"]){
+        return @"WiFi";
+    }else if ([peizhi isEqualToString:@"洗衣机"]){
+        return @"xiyiji";
+    }else if ([peizhi isEqualToString:@"衣柜"]){
+        return @"yigui";
+    }else if ([peizhi isEqualToString:@"单人椅"]){
+        return @"yizi";
+    }else if ([peizhi isEqualToString:@"烟机"]){
+        return @"youyanji";
+    }else if ([peizhi isEqualToString:@"智能电表"]){
+        return @"zhinengdianbiao";
+    }else if ([peizhi isEqualToString:@"智能门锁"]){
+        return @"zhinengmensuo";
+    }else if ([peizhi isEqualToString:@"智能水表"]){
+        return @"zhinengshuibiao";
+    }else if ([peizhi isEqualToString:@"鞋柜"]){
+        return @"xiegui";
+    }else if([peizhi isEqualToString:@"书柜"]){
+        return @"shugui";
+    }else if([peizhi isEqualToString:@"电视柜"]){
+        return @"dianshigui";
+    }else if([peizhi isEqualToString:@"床头柜"]){
+        return @"chuangtougui";
+    }else if([peizhi isEqualToString:@"桌子"]){
+        return @"shuzhuo";
+    }else if([peizhi isEqualToString:@"床垫"]){
+        return @"chuangdian";
+    }
+    
+    return @"";
+}
+/**
+ 转字符
+ */
+- (NSString *)toString:(NSString *)str
+{
+    return [NSString stringWithFormat:@"%@",str];
+}
+
+- (NSString *)getPriceStr:(NSString *)minAmount max:(NSString *)maxAmount
+{
+    minAmount = minAmount == nil ? @"0" : minAmount;
+    maxAmount = maxAmount == nil ? @"0" : maxAmount;
+    if ([minAmount integerValue] < 0){
+        return @"";
+    }
+    if ([maxAmount integerValue] < 0){
+        return [NSString stringWithFormat:@"%@ 元/月起",[self getSafeValue:minAmount]];
+    }
+    if ([minAmount integerValue] != [maxAmount integerValue]){
+        return [NSString stringWithFormat:@"￥%@ ~ %@",[self getSafeValue:minAmount],maxAmount];
+    }else {
+        return [NSString stringWithFormat:@"%@ 元/月起",[self getSafeValue:minAmount]];
+    }
+}
+
+- (NSString *)getSafeValue:(NSString *)amount{
+    if ([amount integerValue] <= 0){
+        return @"?";
+    }else {
+        return amount;
+    }
+}
+@end

@@ -1,0 +1,121 @@
+//
+//  HYJiuGongGeView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYJiuGongGeView.h"
+#import "HYVerticalButton.h"
+#import "HYTitleAndImageItemVerView.h"
+@interface HYJiuGongGeView()
+{
+    // 最大的展示图片数量
+    NSInteger MAX_COUNT;
+    // 图片大小
+    CGFloat IMAGE_W;
+    CGFloat IMAGE_H;
+    // 列数
+    NSInteger ColS;
+    
+    NSInteger RowS;
+    // 列间距
+    CGFloat COLS_SPAC;
+    // 行间距
+    CGFloat ROWS_SPAC;
+}
+
+@property(nonatomic,strong) UIView * backView;
+
+@end
+
+@implementation HYJiuGongGeView
+
++ (instancetype)creatJiuGongGeView
+{
+    HYJiuGongGeView *tempview = [[HYJiuGongGeView alloc]init];
+    return tempview;
+}
+
+- (void)setDataArr:(NSArray *)dataArr
+{
+    _dataArr = dataArr;
+    [self setUI];
+    [self addSubview:self.backView];
+    [self.backView mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.top.bottom.mas_equalTo(self);
+        make.height.mas_offset(IMAGE_H * RowS + ROWS_SPAC * (RowS+1));
+    }];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        // 最大的展示图片数量
+        MAX_COUNT = 9;
+        // 列数
+        ColS = 4;
+        // 图片大小 -----初始化时 如果传人宽度就是使用，不传按全屏宽度
+        if (frame.size.width) {
+            IMAGE_W = frame.size.width/ColS;
+        }else{
+            IMAGE_W = SCREEN_WIDTH/ColS;
+        }
+        IMAGE_H = ADJUST_PERCENT_FLOAT(60);
+        // 列间距
+        COLS_SPAC = ADJUST_PERCENT_FLOAT(0);
+        // 行间距
+        ROWS_SPAC = ADJUST_PERCENT_FLOAT(10);
+
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    [self.backView removeAllSubviews];
+    NSInteger MAX                       = _dataArr.count> MAX_CANON ? MAX_CANON : _dataArr.count;
+    RowS = _dataArr.count%ColS == 0 ? _dataArr.count/ ColS : _dataArr.count/ColS+1;
+    for (int i = 0 ; i < MAX; i ++) {
+        NSDictionary *dict =  _dataArr[i];
+        HYTitleAndImageItemVerView *itemView = [[HYTitleAndImageItemVerView alloc] init];
+        if (self.items_image_W > 0) {
+            itemView.imageW = self.items_image_W;
+        }
+        [itemView setTitle:dict[@"title"] ImageName:dict[@"image"] callBack:^(NSString *title) {
+            if (self.callBlock) {
+                self.callBlock(title);
+            }
+        }];
+        itemView.tag = i ;
+        NSInteger rows                  = i/ColS;
+        NSInteger cols                  = i%ColS;
+        CGFloat IMX                     = cols*(IMAGE_W + COLS_SPAC);
+        CGFloat IMY                     = rows*(IMAGE_H + ROWS_SPAC);
+        [self.backView addSubview:itemView];
+        [itemView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self.backView.mas_left).mas_offset(IMX);
+            make.top.mas_equalTo(self.backView.mas_top).mas_offset(IMY);
+            make.size.mas_offset(CGSizeMake(IMAGE_W, IMAGE_H));
+            make.bottom.mas_equalTo(self.backView.mas_bottom).priorityHigh();
+        }];
+    }
+}
+
+- (void)clickItem:(HYVerticalButton *)sender{
+    LWLog(@"---%@",sender);
+}
+
+- (UIView *)backView {
+    if (!_backView) {
+        _backView = [[UIView alloc]init];
+        _backView.backgroundColor = HYCOLOR.color_c0;
+    }
+    return _backView;
+}
+
+
+@end

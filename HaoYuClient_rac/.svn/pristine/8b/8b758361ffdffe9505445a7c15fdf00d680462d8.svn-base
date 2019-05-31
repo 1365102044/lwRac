@@ -1,0 +1,65 @@
+//
+//  HYQianYue_XieYiView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYue_XieYiView.h"
+
+@interface HYQianYue_XieYiView ()<UIWebViewDelegate>
+@property (nonatomic, strong) UIWebView * webview;
+
+@end
+@implementation HYQianYue_XieYiView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c1;
+        self.webview = [[UIWebView alloc] init];
+        [self addSubview:self.webview];
+        self.webview.delegate = self;
+        
+        [self.webview mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self);
+            make.left.mas_equalTo(self).mas_offset(MARGIN);
+            make.right.mas_equalTo(self).mas_offset(-MARGIN);
+            make.bottom.mas_equalTo(self).mas_offset(-MARGIN*3);
+        }];
+    }
+    return self;
+}
+
+/**
+ 签约协议  1
+ 预订协议  2
+ */
+- (void)setWebUrlWithType:(NSInteger)type
+{
+    NSString *url ;
+    if (type == 1) {
+        url = [NSString stringWithFormat:@"%@%@",BASE_XIYI_URL,QIANYU_XIEYI_URL];
+    }else if (type == 2){
+        url = [NSString stringWithFormat:@"%@%@",BASE_XIYI_URL,YUDING_XIEYI_URL];
+    }
+    
+    if (!url) {
+        return;
+    }
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:(NSURLRequestUseProtocolCachePolicy) timeoutInterval:10];
+    [self.webview loadRequest:request];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+//    [SVProgressHUD dismiss];
+}
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+{
+//    [SVProgressHUD dismiss];
+}
+
+@end

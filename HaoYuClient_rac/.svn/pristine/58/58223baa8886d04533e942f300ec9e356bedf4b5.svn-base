@@ -1,0 +1,55 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+//#import "WYIDScanViewController.h"
+#import "HYAnnotationView.h"
+#import "HYPaoView.h"
+#import "HYPointAnnotation.h"
+#import "HYPointModel.h"
+#import "CoustomSlider.h"
+#import <BaiduMapAPI_Map/BMKMapComponent.h>
+@interface ViewController ()<BMKMapViewDelegate,BMKLocationServiceDelegate>
+{
+    BMKLocationService *_locService;
+}
+@property (nonatomic, strong) UISlider * sliderView;
+@property (nonatomic, strong) BMKMapView * mapView;
+@property(nonatomic , strong) BMKUserLocation *userLocation;
+@end
+
+@implementation ViewController
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    
+    CoustomSlider *slider = [[CoustomSlider alloc] initWithFrame:CGRectMake(20, 100, 200, 15)];
+    [slider addTarget:self action:@selector(changeValue) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:slider];
+    slider.minimumValue = 0;
+    slider.maximumValue = 10;
+    //    slider.minimumTrackTintColor = [UIColor redColor];
+    slider.maximumTrackTintColor = [UIColor greenColor];
+    
+    [slider setThumbTintColor:[UIColor grayColor]];
+    UIImage *image =  [[UIImage imageNamed:@"thum_icon"] resizableImageWithCapInsets:UIEdgeInsetsZero];
+    [slider setMinimumTrackImage:image forState:UIControlStateNormal];
+    
+}
+- (void)changeValue{
+    
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+}
+
+@end

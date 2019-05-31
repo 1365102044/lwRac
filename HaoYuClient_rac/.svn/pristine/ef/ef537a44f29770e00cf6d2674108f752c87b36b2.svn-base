@@ -1,0 +1,176 @@
+//
+//  HYIdCardSureInforView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/20.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYIdCardSureInforView.h"
+#import "HYLeftRightArrowView.h"
+#import "HYDatePickerManager.h"
+#import "HYActionSheet.h"
+@interface HYIdCardSureInforView ()
+@property (nonatomic, strong) HYBaseView * bgview;
+@property (nonatomic, strong) HYLeftRightArrowView *name;
+@property (nonatomic, strong)  HYLeftRightArrowView *shenfenzheng;
+@property (nonatomic, strong) HYLeftRightArrowView *six;
+@property (nonatomic, strong) HYLeftRightArrowView *youxiaoqi;
+@end
+@implementation HYIdCardSureInforView
+- (void)setIdcardModel:(HYIdCardORCModel *)idcardModel
+{
+    _idcardModel = idcardModel;
+    _name.rightTextField.textFiled.text                    = idcardModel.name;
+    _shenfenzheng.rightTextField.textFiled.text            = idcardModel.idcardNumber;
+    _six.rightTextField.textFiled.text                     = idcardModel.six;
+    _youxiaoqi.rightLable.text                             = idcardModel.outTime;
+}
+
+- (void)showUI
+{
+    if (_bgview) {
+        return;
+    }
+    [self setUI];
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self showUI];
+    }
+    return self;
+}
+- (void)setUI
+{
+    [self addSubview:self.bgview];
+    [_bgview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self).mas_offset(0);
+        make.left.mas_equalTo(self).mas_offset(MARGIN);
+        make.right.mas_equalTo(self).mas_offset(-MARGIN);
+//        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+}
+- (HYBaseView*)bgview
+{
+    if (!_bgview) {
+        _bgview = [[HYBaseView alloc] init];
+        
+        HYLeftRightArrowView *name = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"真实姓名"
+                                                                                              rightStr:self.param[@"nickname"] ? self.param[@""] : @"输入姓名"
+                                                                                         showArrowIcon:NO
+                                                                                         CallBackBlock:^(id sender) {
+                                                                                             
+                                                                                         }];
+        HYLeftRightArrowView *shenfenzheng = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"身份证"
+                                                                                                      rightStr:self.param[@"sfzNo"] ? self.param[@"sfzNo"] : @"输入身份证号"
+                                                                                                 showArrowIcon:NO
+                                                                                                 CallBackBlock:^(id sender) {
+                                                                                                     
+                                                                                                 }];
+        HYLeftRightArrowView *six = [HYLeftRightArrowView creatLeftRightTextFieldArrowViewWithLeftStr:@"性别"
+                                                                                             rightStr:self.param[@"gender"] ? self.param[@"gender"] : @"选择性别"
+                                                                                        showArrowIcon:NO
+                                                                                        CallBackBlock:^(id sender) {
+                                                                                            
+                                                                                        }];
+        HYLeftRightArrowView *youxiaoqi = [HYLeftRightArrowView creatLeftRightLableArrowViewWithLeftStr:@"有效期"
+                                                                                               rightStr:self.param[@"outTime"] ? self.param[@"outTime"] : @"请选择"
+                                                                                          showArrowIcon:NO
+                                                                                          CallBackBlock:^(id sender) {
+                                                                                  [self chooseOutTimeDate];
+                                                                                          }];
+        six.rightTextField.textFiled.enabled = NO;
+        
+        _name = name;
+        _shenfenzheng = shenfenzheng;
+        _six = six;
+        _youxiaoqi = youxiaoqi;
+        [_bgview addSubview:name];
+        [_bgview addSubview:shenfenzheng];
+        [_bgview addSubview:six];
+//        [_bgview addSubview:youxiaoqi];
+        
+        [name mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(_bgview).mas_offset(MARGIN);
+            make.left.right.mas_equalTo(_bgview);
+            make.height.mas_offset(MARGIN*5);
+        }];
+        [shenfenzheng mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(name.mas_bottom);
+            make.height.left.right.mas_equalTo(name);
+        }];
+        [shenfenzheng.rightTextField mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_offset(MARGIN*20);
+        }];
+        [six mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(shenfenzheng.mas_bottom);
+            make.height.left.right.mas_equalTo(name);
+            make.bottom.mas_equalTo(_bgview.mas_bottom).mas_offset(-MARGIN);
+        }];
+//        [youxiaoqi mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(six.mas_bottom);
+//            make.height.left.right.mas_equalTo(name);
+//            make.bottom.mas_equalTo(_bgview.mas_bottom).mas_offset(-MARGIN);
+//        }];
+        [_bgview setBoundWidth:0 cornerRadius:6];
+        
+        [six.rightTextField bk_whenTapped:^{
+            [HYActionSheet showDefaultAlert:self.viewController titleKey:@"选择性别" buttonArr:@[@"男",@"女"] callBack:^(id sender) {
+            if([sender integerValue] == 0 ){
+                _six.rightTextField.textFiled.text = @"男";
+            }else if ([sender integerValue] == 1){
+                _six.rightTextField.textFiled.text = @"女";
+            }
+            }];
+        }];
+    }
+    return _bgview;
+}
+
+- (void)chooseOutTimeDate
+{
+    [self endEditing:YES];
+    [HYDatePickerManager showDatePicker:^(id sender) {
+        NSArray *firstArr = [sender componentsSeparatedByString:@" "];
+        self.youxiaoqi.rightLable.text = firstArr.firstObject;
+    } DateStyle:DateStyleShowYearMonthDay];
+}
+
+/**
+ 检查参数
+ */
+- (BOOL)checkParam
+{
+    if ([[HYStringTool checkString:_name.rightTextField.textFiled.text] isEqualToString:@""]) {
+        ALERT(@"请输入真实姓名");
+        return NO;
+    }
+    if ([[HYStringTool checkString:_shenfenzheng.rightTextField.textFiled.text] isEqualToString:@""]) {
+        ALERT(@"请输入身份证号码");
+        return NO;
+    }
+    if ([[HYStringTool checkString:_six.rightTextField.textFiled.text] isEqualToString:@""]) {
+        ALERT(@"请输入性别");
+        return NO;
+    }
+//    if ([[HYStringTool checkString:_youxiaoqi.rightLable.text] isEqualToString:@""]) {
+//        ALERT(@"请输入有效期");
+//        return NO;
+//    }
+    self.param[@"nickname"] = _name.rightTextField.textFiled.text;
+    self.param[@"sfzNo"]                                = _shenfenzheng.rightTextField.textFiled.text;
+    self.param[@"gender"]                                = [_six.rightTextField.textFiled.text isEqualToString:@"男"] ? @"1" : @"0";
+    self.param[@"sfzOutTime"] = _youxiaoqi.rightLable.text;
+    return YES;
+}
+
+- (NSMutableDictionary*)param
+{
+    if (!_param) {
+        _param = [[NSMutableDictionary alloc] init];
+    }
+    return _param;
+}
+@end

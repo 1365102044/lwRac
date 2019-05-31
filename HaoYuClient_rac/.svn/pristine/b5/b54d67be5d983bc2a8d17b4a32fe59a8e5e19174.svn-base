@@ -1,0 +1,25 @@
+//
+//  LWBaseViewController.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/15.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import Foundation
+import UIKit
+import SnapKit
+import SwiftyJSON
+
+class LWBaseViewController: UIViewController {
+    
+    override
+    func viewDidLoad() {
+        view.backgroundColor = UIColor.white
+        self.edgesForExtendedLayout = UIRectEdge.init(rawValue: 0)
+    }
+    
+    deinit {
+        LWPrint(message: "++++++++++++++deinit:\(self)+++++++")
+    }
+}

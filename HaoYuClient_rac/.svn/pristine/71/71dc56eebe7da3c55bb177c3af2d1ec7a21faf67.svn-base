@@ -1,0 +1,134 @@
+//
+//  HYBillListCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBillListCellView.h"
+#import "HYBillListItemView.h"
+#import "HYBillModel.h"
+@interface HYBillListCellView ()
+
+@end
+
+@implementation HYBillListCellView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = HYCOLOR.color_c0;
+        _billInfor_Bg = [[HYBaseView alloc] init];
+        self.timeLable = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(14) text:@"2018-05-25" textColor:HYCOLOR.color_c4];
+        self.storeLable = [HYDefaultLabel labelWithFont:SYSTEM_MEDIUMFONT(14) text:@"好禹北京店" textColor:HYCOLOR.color_c4];
+        self.leftSelectBtn = [[HYDefaultButton alloc] init];
+        [self.leftSelectBtn addTarget:self action:@selector(clickSelctbtn) forControlEvents:UIControlEventTouchUpInside];
+        [self.leftSelectBtn setBackgroundImage:IMAGENAME(@"mine_bill_select_n") forState:UIControlStateNormal];
+        [self.leftSelectBtn setBackgroundImage:IMAGENAME(@"mine_bill_select_s") forState:UIControlStateSelected];
+        self.leftSelectBtn.contentMode = UIViewContentModeScaleAspectFit;
+        self.itemsView = [[UIView alloc] init];
+        [self addSubview:self.billInfor_Bg];
+        [_billInfor_Bg addSubview:self.timeLable];
+        [_billInfor_Bg addSubview:self.storeLable];
+        [_billInfor_Bg addSubview:self.itemsView];
+        [self addSubview:self.leftSelectBtn];
+    }
+    return self;
+}
+
++ (instancetype)creatBillListCellViewWithIsShowBtn:(BOOL)isShow
+{
+    HYBillListCellView *temp = [[HYBillListCellView alloc] init];
+    temp.isShow = isShow;
+    temp.leftSelectBtn.hidden =  !isShow;
+    return temp;
+}
+
+- (void)setConfi
+{
+    [self.itemsView removeAllSubviews];
+    for (int i = 0; i< _itemsDataArr.count; i++) {
+        
+        HYBillModel *billModel = _itemsDataArr[i];
+        HYBillListItemView *itemview = [HYBillListItemView creatItemView];
+        [self.itemsView addSubview:itemview];
+        itemview.timeLable.text = [NSString stringWithFormat:@"%@/%@",billModel.beginTime,billModel.endTime];
+        itemview.priceLable.text = [NSString stringWithFormat:@"%@元",billModel.iosDedicated];
+        
+        if ([billModel.desc containsString:@"。"]) {
+            NSArray *des_arr = [billModel.desc componentsSeparatedByString:@"。"];
+            itemview.titleLable.text = des_arr.firstObject;
+            if (des_arr.count > 1) {
+                itemview.descLalbe.text = [NSString stringWithFormat:@"(%@) | %@",des_arr[1],billModel.typeMdodel.key];
+            }
+        }else{
+            if(_isShow){
+                itemview.titleLable.text =  [NSString stringWithFormat:@"%@ | %@",billModel.desc,billModel.typeMdodel.key];
+            }else{
+                itemview.titleLable.text =  [NSString stringWithFormat:@"%@",billModel.typeMdodel.key];
+            }   
+        }
+        if (i == 0) {
+            [itemview mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.left.mas_equalTo(self.itemsView.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(0));
+                make.top.mas_equalTo(self.itemsView.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(10));
+                make.right.mas_equalTo(self.itemsView.mas_right);
+                if (_itemsDataArr.count == 1) {
+                    make.bottom.mas_equalTo(self.itemsView.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(10));
+                }
+            }];
+        }else{
+            HYBillListItemView *lastitem = self.itemsView.subviews[self.itemsView.subviews.count - 2];
+            [itemview mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.left.mas_equalTo(self.itemsView.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(0));
+                make.top.mas_equalTo(lastitem.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+                make.right.mas_equalTo(self.itemsView.mas_right);
+                if (i == _itemsDataArr.count - 1) {
+                    make.bottom.mas_equalTo(self.itemsView.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(10));
+                }
+            }];
+        }
+    }
+    
+    CGFloat left_MRGIN =  _isShow ? 50 : 20;
+    [_billInfor_Bg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        make.right.mas_equalTo(self.mas_right).mas_offset(-ADJUST_PERCENT_FLOAT(10));
+        make.left.mas_equalTo(self.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(left_MRGIN));
+        make.bottom.mas_equalTo(self.mas_bottom).mas_offset(-MARGIN);
+    }];
+    [self.timeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.billInfor_Bg.mas_left);
+        make.top.mas_equalTo(_billInfor_Bg.mas_top);
+    }];
+    [self.storeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.mas_equalTo(self.billInfor_Bg.mas_right);
+        make.centerY.mas_equalTo(self.timeLable.mas_centerY);
+    }];
+    [self.itemsView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(self.timeLable.mas_left);
+        make.top.mas_equalTo(self.timeLable.mas_bottom).mas_offset(ADJUST_PERCENT_FLOAT(10));
+        make.right.mas_equalTo(self.storeLable.mas_right);
+        make.bottom.mas_equalTo(self.billInfor_Bg.mas_bottom).mas_offset(-ADJUST_PERCENT_FLOAT(2));
+    }];
+    [self.leftSelectBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(20), ADJUST_PERCENT_FLOAT(20)));
+        make.centerY.mas_equalTo(_billInfor_Bg.mas_centerY);
+        make.left.mas_equalTo(self.mas_left).mas_offset(ADJUST_PERCENT_FLOAT(10));
+    }];
+    
+    self.leftSelectBtn.hidden = !_isShow;
+}
+
+- (void)clickSelctbtn{}
+
+- (void)setItemsDataArr:(NSArray *)itemsDataArr
+{
+    _itemsDataArr = itemsDataArr;
+    [self setConfi];
+}
+
+
+@end

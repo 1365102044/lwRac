@@ -1,0 +1,95 @@
+//
+//  HYRequstGlobalDataTool.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/13.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYRequstGlobalDataTool.h"
+#import "HYServiceManager.h"
+#import "HYCityModel.h"
+#import "HYStringTool.h"
+@implementation HYRequstGlobalDataTool
+
+/**
+ 获取城市列表数据
+ */
++ (void)requestCityData
+{
+    [[HYServiceManager share] postRequestWithurl:HAVEHOUSE_CITY_LIST_INFOR_URL
+                                       paramters:nil
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSArray *dataArray = objc[@"result"][@"list"];
+//                                        dataArray = @[@{@"lng":@"116.404262",@"id":@"d94bba14-dec1-11e5-bcc3-00163e1c066c",@"lat":@"39.9135",@"name":@"北京市",@"cityCode":@"010"},
+//                                                      @{@"lng":@"116.404262",@"id":@"d94bba14-dec1-11e5-bcc3-00163e1c066c",@"lat":@"39.9135",@"name":@"成都市",@"cityCode":@"010"},
+//                                                      @{@"lng":@"116.404262",@"id":@"d94bba14-dec1-11e5-bcc3-00163e1c066c",@"lat":@"39.9135",@"name":@"郑州市",@"cityCode":@"010"},
+//                                                      @{@"lng":@"116.404262",@"id":@"d94bba14-dec1-11e5-bcc3-00163e1c066c",@"lat":@"39.9135",@"name":@"安阳市",@"cityCode":@"010"},
+//                                                      @{@"lng":@"116.404262",@"id":@"d94bba14-dec1-11e5-bcc3-00163e1c066c",@"lat":@"39.9135",@"name":@"朝阳市",@"cityCode":@"010"},];
+                                        [HYRequstGlobalDataTool handleCityDatas:dataArray];
+                                        [HYRequstGlobalDataTool handleCitySeaction];
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
++ (void)handleCityDatas:(NSArray *)cityArrary
+{
+    if (!cityArrary) {
+        return;
+    }
+    NSMutableArray *temp_cityGroup = [[NSMutableArray alloc] init];
+    for (NSDictionary *dict in cityArrary) {
+        HYCityGroupModel *cityGroupModel = [HYCityGroupModel modelWithJSON:dict];
+        [temp_cityGroup addObject:cityGroupModel];
+    }
+    [HYPublic_LocalData share].cityGroupDatas = temp_cityGroup;
+}
+
+/**
+ 处理 组头
+ */
++ (void)handleCitySeaction
+{
+    NSMutableArray *temp_City = [[NSMutableArray alloc] init];
+    
+    NSArray *cityGroupArrary = HYPublic_LocalData.share.cityGroupDatas;
+    if (!cityGroupArrary) {
+        return;
+    }
+    for (HYCityGroupModel *cityGroupModel  in cityGroupArrary) {
+        NSString *firstChara =  [[HYStringTool share] firstCharactorWithString:cityGroupModel.name];
+        
+        
+        BOOL tempBool = NO;
+        NSMutableArray *groupArrary = [[NSMutableArray alloc] init];
+        for (HYCityModel *cityModle in temp_City) {
+            if (cityModle.fristChara && [cityModle.fristChara isEqualToString:firstChara]) {
+                [groupArrary addObjectsFromArray:cityModle.cityGroup];
+                [groupArrary addObject:cityGroupModel];
+                tempBool = YES;
+                cityModle.cityGroup = groupArrary;
+                LWLog(@"----%@",cityModle.cityGroup);
+                break;
+            }
+        }
+        if (!tempBool) {
+            HYCityModel *cityModle = [[HYCityModel alloc] init];
+            cityModle.fristChara = firstChara;
+            [groupArrary addObject:cityGroupModel];
+            cityModle.cityGroup = groupArrary;
+            [temp_City addObject:cityModle];
+        }
+    }
+    //根据房间号对数组内的对象进行排序
+    NSArray *tem_paixu =  [temp_City sortedArrayUsingComparator:^NSComparisonResult(HYCityModel * obj1, HYCityModel * obj2) {
+        if ([obj1.fristChara compare:obj2.fristChara options:(NSCaseInsensitiveSearch)] == NSOrderedDescending) {
+            return NSOrderedDescending;
+        }else{
+            return NSOrderedAscending;
+        }
+    }];
+    [HYPublic_LocalData share].cityDatas = tem_paixu;
+}
+
+@end

@@ -1,0 +1,333 @@
+//
+//  HYHouseProjectInforTool.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/17.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYHouseProjectInforTool.h"
+#import "HYHouseRescourcesModel.h"
+#import "HYProjectNetRequestManager.h"
+#import "HYDiscountInforModel.h"
+
+//费用类型
+#define FEIYONGTYPEID       @"933283b8-3447-4582-b893-9ac266f387ce"
+//渠道来源 channelSourceId
+#define CHANNELSOURCEID     @"4bed679d23b942e4bd4de4ad28b7a138"
+//成交类型id chengjiaoTypeId
+#define  CHENGJIAOTYPEID     @"63007bd34b544389b3897ee158a8f2b7"
+
+@interface HYHouseProjectInforTool ()
+@property (nonatomic, copy) HYEventCallBackBlock callBackBlock;
+@property (nonatomic, strong) NSMutableArray * DatasMutableArray;
+@end
+
+@implementation HYHouseProjectInforTool
+
+/**
+ 获取项目列表
+ */
+- (void)requestProjectInfor:(NSString *)cityId
+              callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    PARA_SET(cityId, @"cityId");
+    [[HYServiceManager share] postRequestAnWithurl:GET_PROJECT_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n项目列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYProjectLevelListModel *model = [HYProjectLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 获取意向户型列表信息
+ houseItemId   项目id
+ */
+- (void)requestHuxingListInfor:(NSString *)houseItemId
+                 callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    PARA_SET(houseItemId, @"houseItemId");
+    [[HYServiceManager share] postRequestAnWithurl:GET_HUXING_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n意向户型列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYHuXingLevelListModel *model = [HYHuXingLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ roomTypeId  户型id
+ */
+- (void)requestFangJianHaoLevelInfor:(NSString *)roomTypeId
+                       callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    para[@"roomTypeId"] = roomTypeId;
+    [[HYServiceManager share] postRequestAnWithurl:GET_FANGJIANNUMBER_LIST_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        LWLog(@"\n房间号列表：%@",objc);
+                                        [self.DatasMutableArray removeAllObjects];
+                                        NSArray *tem_a = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem_a) {
+                                            HYFangJianHaoLevelListModel *model = [HYFangJianHaoLevelListModel modelWithJSON:dict];
+                                            [self.DatasMutableArray addObject:model];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(self.DatasMutableArray);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 根据城市获取项目列表 (地图找房)
+ */
+- (void)requestProjectInforByCityForMapFindHouseCallBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock = callBackBlock;
+    PARA_CREART;
+    //    PARA_SET([HYStringTool checkString:[HYPublic_LocalData share].location_City_Id], @"cityId");
+    [[HYServiceManager share] postRequestAnWithurl:GET_PROJECT_LIST_BYCITY_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSMutableArray *tem_Arr = [[NSMutableArray alloc] init];
+                                        NSArray *tem = objc[@"result"][@"list"];
+                                        for (NSDictionary *dict in tem) {
+                                            HYHouseRescourcesModel *projectModel = [HYHouseRescourcesModel modelWithJSON:dict];
+                                            [tem_Arr addObject:projectModel];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(tem_Arr);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 获取优惠活动信息
+ */
+- (void)requestDiscountInforWithhouseId:(NSString *)houseId
+                              startTime:(NSString *)startTime
+                                endTime:(NSString *)endTime
+callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    PARA_CREART;
+    PARA_SET([HYStringTool checkString:houseId], @"houseId");
+    PARA_SET([HYStringTool checkString:startTime], @"startTime");
+    PARA_SET([HYStringTool checkString:endTime], @"endTime");
+    [[HYServiceManager share] postRequestWithurl:GET_DISCOUNTFORQIANYUE_INFOR_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        NSArray *result = objc[@"result"][@"list"];
+                                        NSMutableArray *model_Mu = [[NSMutableArray alloc] init];
+                                        for (NSDictionary *dict in result) {
+                                            HYDiscountInforModel *model = [HYDiscountInforModel modelWithJSON:dict];
+                                            [model_Mu addObject:model];
+                                        }
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(model_Mu);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 获取 签约时的付款方式
+ */
+- (void)requestQianYuePayTypeMarkCallBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    if ([HYPublic_LocalData share].payTypeMarkArray) {
+        if (self.callBackBlock) {
+            self.callBackBlock([HYPublic_LocalData share].payTypeMarkArray);
+        }
+        return;
+    }
+    PARA_CREART;
+    PARA_SET(@"31841886-28ec-45dc-aaec-67c40f7a73fe", @"mark");
+    [[HYServiceManager share] postRequestWithurl:GET_QIANYUPAY_TYPE_MARK_URL
+                                       paramters:para
+                                    successBlock:^(id objc, id requestInfo) {
+                                        [HYPublic_LocalData share].payTypeMarkArray = objc[@"result"][@"list"];
+                                        if (self.callBackBlock) {
+                                            self.callBackBlock(objc[@"result"][@"list"]);
+                                        }
+                                    } failureBlock:^(id error, id requestInfo) {
+                                        
+                                    }];
+}
+
+/**
+ 生成签约账单
+ */
+- (void)ZuKeQianYuCreateBill:(NSDictionary *)param callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    PARA_CREART;
+    [para addEntriesFromDictionary:param];
+    para[@"feiYongTypeId"] = FEIYONGTYPEID;
+    [para removeObjectForKey:@"shouZhiList"];
+    [[HYServiceManager share] postRequestAnWithurl:COMMIT_QIANYUEHOUSTE_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"----------\n生成的账单：%@",objc);
+                                          NSArray *billArr = objc[@"result"][@"list"];
+                                          NSMutableArray *bill_M_Arr = [[NSMutableArray alloc] init];
+                                          for (NSDictionary *dic in billArr) {
+                                              NSMutableDictionary *dic_M = [[NSMutableDictionary alloc] init];
+                                              dic_M[@"typeId"] = dic[@"feiYongTypeId"];
+                                              dic_M[@"isIncludeDJ"] = @"0";
+                                              dic_M[@"beginTime"] = dic[@"bqBeginDate"];
+                                              dic_M[@"desc"] = dic[@"feiYongDesc"];
+                                              dic_M[@"endTime"] = dic[@"bqEndDate"];
+                                              dic_M[@"money"] = dic[@"bqMonthMoney"];
+                                              dic_M[@"predictTime"] = dic[@"bqBackPayDate"];
+                                              dic_M[@"type"] = dic[@"type"];
+                                              dic_M[@"discountedPrice"] = dic[@"discountedPrice"];
+                                              [bill_M_Arr addObject:dic_M];
+                                          }
+                                          if (self.callBackBlock) {
+                                              self.callBackBlock(bill_M_Arr);
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          
+                                      }];
+}
+
+/**
+ 生成签约合同
+ */
+- (void)QianYueCreateHeTong:(NSDictionary *)param callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    PARA_CREART;
+    [para addEntriesFromDictionary:param];
+    para[@"feiYongTypeId"] = FEIYONGTYPEID;//费用类型
+    para[@"channelSourceId"] = CHANNELSOURCEID;//渠道来源
+    para[@"certificateType"] = @"1";////证件类型：1.身份证，2.护照，3.港澳通行证，4.台湾同胞证
+    para[@"chengjiaoTypeId"] = CHENGJIAOTYPEID;//成交类型id
+    para[@"chengjiaorenBumenId"] = @"";//成交人部门id            ---nil
+    para[@"contractZuKeMaxNum"] = @"";//合同中租客最多租住人数     ---nil
+//    para[@"contractZuKeNowNum"] = @"";//合同中租客当前租住人数
+//    para[@"electronicTemplateId"] = @"";//电子合同模版id  ++
+    para[@"fuZeRenList"] = @"";//签约人集合      ---nil
+    para[@"homeAddress"] = @"";//房源地址       ---nil
+    para[@"id"] = @"";//合同id                ---nil 后续可能会有
+    para[@"isElectron"] = @"1";//1是电子 2 是纸质
+    para[@"no"] = @"";//手写编号    --nil
+    para[@"phoneBeiyong"] = @"";//租客备用手机号  -- nil
+    para[@"shoudingId"] = @"";//预定id    +++
+    para[@"tiqianDays"] = @"1";//提前付款天数
+    para[@"tiqianType"] = @"1";//提前付款类型
+    para[@"whetherExchange"] = @"";// --- nil
+    para[@"startTime"] = param[@"beginDate"];//转换字段
+    para[@"endTime"] = param[@"endDate"];//转换字段
+    [[HYServiceManager share] postRequestAnWithurl:ZUKE_QIANYUEHOUSTE_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          if (self.callBackBlock) {
+                                              self.callBackBlock(objc);
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          LWLog(@"\n\nerror:%@",error);
+                                      }];
+}
+
+/**
+ 上传图片
+ images         图片数组
+ fileNames      文件名字  与图片个数相同
+ 
+ 返回 :
+    {"success":[{@"pic":@"url",}];@"fail":[]}
+ */
+- (void)uploadIdCardImages:(NSArray *)images
+                 fileNames:(NSArray *)fileNames
+             callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    _callBackBlock  = callBackBlock;
+    NSMutableArray *imageUrls = [[NSMutableArray alloc] init];
+    NSMutableArray *failimages = [[NSMutableArray alloc] init];
+    //调度组
+    dispatch_group_t group = dispatch_group_create();
+    for (NSInteger i = 0  ; i < images.count ; i ++) {
+        dispatch_group_enter(group);
+       [[HYProjectNetRequestManager sharedNetRequestManager] uploadSingleImageWithUrl:UPLOAD_MINEWEIXIU_IMAGE_URL
+                                                                             parameter:nil
+                                                                                 image:images[i]
+                                                                              fileName:fileNames[i]
+                                                                       timeoutInterval:10
+                                                                          successBlock:^(id objc, id requestInfo) {
+                                                                              NSMutableDictionary *imagesUrl_dic = [[NSMutableDictionary alloc] init];
+                                                                              imagesUrl_dic[fileNames[i]] = objc[@"url"];
+                                                                              [imageUrls addObject:imagesUrl_dic];
+                                                                              dispatch_group_leave(group);
+                                                                          } failureBlock:^(id error, id requestInfo) {
+                                                                              dispatch_group_leave(group);
+                                                                          }];
+    }
+    
+    dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+        for (NSInteger i = 0 ; i < imageUrls.count; i ++) {
+            NSDictionary *dic = imageUrls[i];
+            if (!dic.allValues.firstObject) {
+                [failimages addObject:dic.allKeys.firstObject];
+            }
+        }
+        NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+        if (imageUrls) {
+            result[@"success"] = imageUrls;
+        }
+        if (failimages.count > 0) {
+            result[@"fail"] =   failimages;
+        }else{
+            result[@"status"] = @"200";
+        }
+        if (self.callBackBlock) {
+            self.callBackBlock(result);
+        }
+    });
+}
+
+
+- (NSMutableArray*)DatasMutableArray
+{
+    if (!_DatasMutableArray) {
+        _DatasMutableArray = [[NSMutableArray alloc] init];
+    }
+    return _DatasMutableArray;
+}
+
+@end

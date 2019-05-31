@@ -1,0 +1,38 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '8.0'
+
+target 'HaoYuClient' do
+    pod 'AFNetworking'
+    pod 'FMDB'
+    pod 'Masonry'
+    pod 'YYKit'
+    pod 'SDWebImage'
+    pod 'MJRefresh'
+    pod 'IQKeyboardManager'
+    pod 'SVProgressHUD'
+    pod 'BaiduMapKit','~>4.1.1' #更新地图 3.3.0 -> 4.1.1
+    pod 'BlocksKit'
+    pod 'DZNEmptyDataSet'
+    pod 'Bugly'
+#    pod 'JPush'
+#    pod 'EBBannerView'
+    #  :configurations => ['Debug'] 只是在xcode debug 时才会加入；
+#    pod 'Reveal-SDK', :git => 'https://git.coding.net/kakukeme/Reveal-SDK.git', :configurations => ['Debug']
+
+#    pod 'SnapKit'
+#    pod 'AlamofireImage', '~> 3.3'
+#    pod 'Alamofire', '~> 4.0'
+#    pod 'SwiftyJSON', '~> 4.0'
+
+#   界面话测试
+#   pod ‘FLEX'
+
+
+    pod 'SDWebImage'
+    pod 'GPUImage'
+    pod 'ZLPhotoBrowser'
+
+#    检查循环引用
+#    pod 'FBRetainCycleDetector'
+end
+

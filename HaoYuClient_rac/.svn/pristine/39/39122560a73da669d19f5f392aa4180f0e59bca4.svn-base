@@ -1,0 +1,16 @@
+//
+//  HYPayViewController.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseViewController.h"
+#import "HYBaseTableViewController.h"
+@interface HYPayListViewController : HYBaseTableViewController
+/**
+ 选择 合同列表
+ */
+@property (nonatomic, copy) NSArray * HeTongDataArr;
+@end

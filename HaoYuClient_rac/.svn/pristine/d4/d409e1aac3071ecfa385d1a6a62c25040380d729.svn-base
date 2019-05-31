@@ -1,0 +1,104 @@
+//
+//  HYYuDingListCellView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYYuDingListCellView.h"
+
+@implementation HYYuDingListCellView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    
+    _yudingTimeLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                text:@"预订时间："
+                                           textColor:HYCOLOR.color_c2];
+    _zuyueStarTimeLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                                   text:@"租约开始时间："
+                                              textColor:HYCOLOR.color_c2];
+    _dingweiLable = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13)
+                                             text:@"北京海淀牡丹园店"
+                                        textColor:HYCOLOR.color_c2];
+    
+    _bottomBtn1 = [HYFillLongButton buttonCorWithTitleStringKey:@"取消"
+                                                         target:self
+                                                       selector:@selector(clickBottomBtn:)];
+    _bottomBtn2 = [HYFillLongButton buttonCorWithTitleStringKey:@"支付"
+                                                         target:self
+                                                       selector:@selector(clickBottomBtn:)];
+    _bottomBtn3 = [HYFillLongButton buttonCorWithTitleStringKey:@"去电"
+                                                         target:self
+                                                       selector:@selector(clickBottomBtn:)];
+    _lineview = [[HYBaseView alloc] init];
+    _lineview.backgroundColor = HYCOLOR.color_c6;
+    
+    [self addSubview:_yudingTimeLable];
+    [self addSubview:_zuyueStarTimeLable];
+    [self addSubview:_dingweiLable];
+    [self addSubview:_bottomBtn1];
+    [self addSubview:_bottomBtn2];
+    [self addSubview:_bottomBtn3];
+    [self addSubview:_lineview];
+    
+    [self.houseImage mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(120), ADJUST_PERCENT_FLOAT(80)));
+        make.left.mas_equalTo(self.bgView.mas_left).mas_offset(MAGR);
+        make.top.mas_equalTo(self.bgView.mas_top).mas_offset(MAGR);
+    }];
+    [_yudingTimeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.houseImage.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.houseImage.mas_left);
+    }];
+    [_zuyueStarTimeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_yudingTimeLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_yudingTimeLable.mas_left);
+    }];
+    [_dingweiLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_zuyueStarTimeLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(_yudingTimeLable.mas_left);
+    }];
+    [_lineview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_dingweiLable.mas_bottom).mas_offset(MARGIN);
+        make.left.mas_equalTo(self.bgView.mas_left).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.bgView.mas_right).mas_offset(-MARGIN);
+        make.height.mas_offset(0.5);
+    }];
+    [_bottomBtn1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(60), ADJUST_PERCENT_FLOAT(30)));
+        make.top.mas_equalTo(_lineview.mas_bottom).mas_offset(MARGIN);
+        make.right.mas_equalTo(self.bgView.mas_right).mas_offset(-MARGIN);
+    }];
+    [_bottomBtn2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(_bottomBtn1);
+        make.right.mas_equalTo(_bottomBtn1.mas_left).mas_offset(-MARGIN);
+        make.centerY.mas_equalTo(_bottomBtn1.mas_centerY);
+    }];
+    [_bottomBtn3 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(_bottomBtn1);
+        make.right.mas_equalTo(_bottomBtn2.mas_left).mas_offset(-MARGIN);
+        make.centerY.mas_equalTo(_bottomBtn1.mas_centerY);
+    }];
+    
+    [_bottomBtn1 setBackgroundImage:[UIImage imageWithColor:HYCOLOR.color_c1] forState:UIControlStateNormal];
+}
+
+- (void)clickBottomBtn:(UIButton *)sender
+{
+    if(self.clickFuncBtnBlock){
+        self.clickFuncBtnBlock(sender.currentTitle);
+    }
+}
+
+@end

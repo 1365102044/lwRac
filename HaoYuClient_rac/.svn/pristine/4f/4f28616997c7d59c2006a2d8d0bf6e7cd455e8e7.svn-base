@@ -1,0 +1,14 @@
+//
+//  HYWaterElectricSurfacePayRecordListViewController.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/8/15.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseTableViewController.h"
+
+@interface HYWaterElectricSurfacePayRecordListViewController : HYBaseTableViewController
+//extend surface_id 表的ID
++ (instancetype)creatRechargePayRecordListViewControllerWithTitleStr:(NSString *)titleStr extend:(id)extend;
+@end

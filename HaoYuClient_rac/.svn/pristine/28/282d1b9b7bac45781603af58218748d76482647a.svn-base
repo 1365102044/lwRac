@@ -1,0 +1,70 @@
+//
+//  ViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "ViewController.h"
+//#import "WYIDScanViewController.h"
+#import "HYScoreSlider.h"
+@interface ViewController ()
+@property (nonatomic, strong) UISlider * sliderView;
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+
+    
+    _sliderView = [[UISlider alloc] initWithFrame:CGRectMake(50, 200, 200, 20)];
+    
+    _sliderView.minimumValue = 0;
+    _sliderView.maximumValue = 10;
+    [_sliderView setValue:10 animated:YES];
+    [_sliderView addTarget:self action:@selector(changeSlider:) forControlEvents:UIControlEventValueChanged];
+    
+    
+    UIImage *leftTrack = [[UIImage imageWithColor:HYCOLOR.color_c3]
+                          resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 14)];
+    
+    [_sliderView setMinimumTrackImage:leftTrack forState:UIControlStateNormal];
+    
+    UIImage *rightTrack = [[UIImage imageWithColor:[UIColor grayColor]]
+                           resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 14)];
+    
+    [_sliderView setMaximumTrackImage:rightTrack forState:UIControlStateNormal];
+    _sliderView.backgroundColor = [UIColor grayColor];
+
+    
+    
+    [self.view addSubview:_sliderView];
+
+}
+- (void)changeSlider:(UISlider *)slider
+{
+    
+}
+
+- (void)clickbtn
+{
+    
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

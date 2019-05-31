@@ -1,0 +1,145 @@
+//
+//  LWSetNewPWViewController.swift
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2019/1/17.
+//  Copyright © 2019年 LWQ. All rights reserved.
+//
+
+import UIKit
+
+class LWSetNewPWViewController: LWBaseViewController {
+        
+        var pwTF:LWDefaultTextField?
+        var confimPwTF:LWDefaultTextField?
+        
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            self.title = "重新设置密码"
+            confiUI()
+            
+        }
+        
+        //    提交信息
+        @objc func submitInfor() {
+            if confimPwTF?.textField?.text == "" {
+                LWAlertView.show(text: "新密码不能为空")
+                return
+            }
+            if pwTF?.textField?.text == "" {
+                LWAlertView.show(text: "确认密码不能为空")
+                return
+            }
+            if pwTF?.textField?.text != confimPwTF?.textField?.text{
+                LWAlertView.show(text: "2次数输入的密码不一致")
+                return
+            }
+            
+            //            网络请求
+            self.navigationController?.popToRootViewController(animated: true)
+        }
+    
+    
+        // 配置界面
+        func confiUI() {
+            let headerImageView = UIImageView.init()
+            view.addSubview(headerImageView)
+            headerImageView.backgroundColor = .red
+            
+            let pwView = confiPwView()
+            view.addSubview(pwView)
+            let confirmPwView = confirmPWView()
+            view.addSubview(confirmPwView)
+            
+            let submitinforBtn = LWDefaultButton.defaultButton(title: "确定", textfont: LWSytem_Regular(15), textColor: .black, target: self, sel: #selector(submitInfor))
+            view.addSubview(submitinforBtn)
+            submitinforBtn.backgroundColor = .red
+            submitinforBtn.setBoundCorners(radius: ADJUSET(myfloat: 20), boundWidth: 0)
+            
+            headerImageView.snp.makeConstraints { (make) in
+                make.left.equalTo(view).offset(ADJUSET(myfloat: 20))
+                make.right.equalTo(view).offset(-ADJUSET(myfloat: 20))
+                make.top.equalTo(view.snp.top).offset(ADJUSET(myfloat: 30))
+                make.height.equalTo(ADJUSET(myfloat: 200))
+            }
+            pwView.snp.makeConstraints { (make) in
+                make.left.equalTo(view).offset(ADJUSET(myfloat: 30))
+                make.right.equalTo(view).offset(-ADJUSET(myfloat: 30))
+                make.top.equalTo(headerImageView.snp.bottom).offset(ADJUSET(myfloat: 30))
+            }
+            confirmPwView.snp.makeConstraints { (make) in
+                make.left.right.equalTo(pwView)
+                make.top.equalTo(pwView.snp.bottom).offset(ADJUSET(myfloat: 20))
+            }
+            submitinforBtn.snp.makeConstraints { (make) in
+                make.left.right.equalTo(confirmPwView)
+                make.top.equalTo(confirmPwView.snp.bottom).offset(ADJUSET(myfloat: 30))
+                make.height.equalTo(ADJUSET(myfloat: 40))
+            }
+            let btnsView = addBtns()
+            view.addSubview(btnsView)
+            btnsView.snp.makeConstraints { (make) in
+                make.centerX.equalTo(self.view)
+                make.top.equalTo(submitinforBtn.snp.bottom).offset(ADJUSET(myfloat: 20))
+            }
+        }
+        
+        func addBtns() -> LWBaseView {
+            let btnsView = LWBaseView()
+           
+            
+            return btnsView
+        }
+        
+        //    密码
+        func confiPwView() -> LWBaseView{
+            let pwView = LWBaseView()
+            pwTF = LWDefaultTextField.defaultTextField(placeholder: "请输入新密码", textFont: LWSytem_Regular(15), textColor: .black)
+            pwTF?.maxLenght = 20
+//            pwTF?.textField?.isSecureTextEntry = true
+//            let openTextBtn = LWDefaultButton.defaultButtonImage(image: UIImage().createImageWithColor(color: .red, frame: CGRect.init(x: 0, y: 0, width: 30, height: 30))!, setImageType: .Default, target: self, sel: #selector(opentPWTF(openBtn:)))
+//            openTextBtn.frame.size = CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30))
+//            pwTF?.textField?.rightView = openTextBtn
+//            pwTF?.textField?.rightViewMode = .whileEditing
+            
+            let lefticon = UIImageView()
+            lefticon.backgroundColor = .red
+            pwView.addSubview(lefticon)
+            pwView.addSubview(pwTF!)
+            lefticon.snp.makeConstraints { (make) in
+                make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+                make.left.equalTo(pwView)
+                make.centerY.equalTo(pwView.snp.centerY)
+            }
+            pwTF?.snp.makeConstraints { (make) in
+                make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+                make.top.bottom.right.equalTo(pwView)
+                make.height.equalTo(ADJUSET(myfloat: 40))
+            }
+            pwView.addBottomLine()
+            return pwView
+        }
+        
+    
+        func confirmPWView() -> LWBaseView {
+            let confirmView = LWBaseView()
+            let lefticon = UIImageView()
+            lefticon.backgroundColor = .red
+            confimPwTF = LWDefaultTextField.defaultTextField(placeholder: "请输入确认密码", textFont: LWSytem_Regular(15), textColor: .black)
+            confimPwTF?.maxLenght = 20
+            confirmView.addSubview(lefticon)
+            confirmView.addSubview(confimPwTF!)
+            lefticon.snp.makeConstraints { (make) in
+                make.size.equalTo(CGSize.init(width: ADJUSET(myfloat: 30), height: ADJUSET(myfloat: 30)))
+                make.left.equalTo(confirmView)
+                make.centerY.equalTo(confirmView.snp.centerY)
+            }
+            confimPwTF?.snp.makeConstraints { (make) in
+                make.left.equalTo(lefticon.snp.right).offset(ADJUSET(myfloat: 5))
+                make.top.bottom.right.equalTo(confirmView)
+                make.height.equalTo(ADJUSET(myfloat: 40))
+            }
+            confirmView.addBottomLine()
+            return confirmView
+        }
+}

@@ -1,0 +1,165 @@
+//
+//  RemotePushService.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/11/5.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "LWRemotePushService.h"
+#import "HYMessageDeatilViewController.h"
+#import "HYBaseNavigationController.h"
+#import "HYBaseTabBarController.h"
+/**
+ *  是否是线上环境
+ */
+#ifdef DEBUG
+BOOL isProduction = NO;
+#else
+BOOL isProduction = YES;
+#endif
+
+@implementation LWRemotePushService
+
+/**
+ 初始化 APNs 代码 / 初始化 JPush 代码
+ */
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    /**
+     初始化 APNs 代码
+     */
+    JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
+    entity.types = JPAuthorizationOptionAlert | JPAuthorizationOptionBadge | JPAuthorizationOptionSound;
+    [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
+    
+    /**
+     初始化 JPush 代码
+     */
+    [JPUSHService setupWithOption:launchOptions
+                           appKey:STYTEM_THIRD_JUPSH_APPKEY
+                          channel:STYTEM_THIRD_JUPSH_CHANNEL
+                 apsForProduction:isProduction
+            advertisingIdentifier:nil];
+    [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
+        if (resCode==0) {
+            LWLog(@"*******jpush获取registrationID成功    %@", registrationID);
+        }else{
+            LWLog(@"*******jpush获取registrationID失败");
+        }
+    }];
+    
+    return YES;
+}
+
+
+//前台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    LWLog(@"*******************didReceiveRemoteNotification**\nuserInfo:%@***********",userInfo);
+    
+    // Required, For systems with less than or equal to iOS 6
+    [JPUSHService handleRemoteNotification:userInfo];
+    application.applicationIconBadgeNumber = 0;
+    
+    [EBBannerView bannerWithBlock:^(EBBannerViewMaker *make) {}];
+    
+//    NSString *s =[NSString stringWithFormat:@"didReceiveRemoteNotification:%@",userInfo];
+//    ALERT(s);
+    [self lw_handleRemoteNotificationWithInfo:userInfo];
+}
+
+//后台收到
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    LWLog(@"*******************didReceiveRemoteNotification_fetchCompletionHandler**\nuserInfo:%@***********",userInfo);
+    [JPUSHService resetBadge];
+    // Required, iOS 7 Support
+    [JPUSHService handleRemoteNotification:userInfo];
+    
+    [self lw_handleRemoteNotificationWithInfo:userInfo];
+    
+    completionHandler(UIBackgroundFetchResultNewData);
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    [application setApplicationIconBadgeNumber:0];
+}
+
+/**
+ Required - 注册 DeviceToken
+ */
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    [JPUSHService registerDeviceToken:deviceToken];
+}
+
+/**
+ Optional - 注册推送失败
+ */
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    LWLog(@"*******did Fail To Register For Remote Notifications With Error: %@", error);
+}
+
+#pragma mark- JPUSHRegisterDelegate
+
+// iOS 12 Support
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center openSettingsForNotification:(UNNotification *)notification{
+    if (notification && [notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        //从通知界面直接进入应用
+    }else{
+        //从通知设置界面进入应用
+    }
+    LWLog(@"**********************openSettingsForNotification_notification:%@",notification);
+    [JPUSHService resetBadge];
+//    NSString *s =[NSString stringWithFormat:@"openSettingsForNotification:%@",notification];
+//    ALERT(s);
+    
+}
+
+/**
+ 前台状态 接受消息
+ */
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(NSInteger))completionHandler {
+    // Required
+    NSDictionary * userInfo = notification.request.content.userInfo;
+    if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        [JPUSHService handleRemoteNotification:userInfo];
+        [JPUSHService resetBadge];
+    }
+    POST_NOTI(GETMESSAGEINFORKNOEISORNOTNOLOOKMESSAGE_FOR_PUSH, nil);
+    [EBBannerView bannerWithBlock:^(EBBannerViewMaker *make) {}];
+    completionHandler(UNNotificationPresentationOptionAlert); // 需要执行这个方法，选择是否提醒用户，有 Badge、Sound、Alert 三种类型可以选择设置
+}
+
+/**
+ 后台 点击消息进来的
+ */
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler {
+    // Required
+    NSDictionary * userInfo = response.notification.request.content.userInfo;
+    if([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        [JPUSHService handleRemoteNotification:userInfo];
+        [JPUSHService resetBadge];
+    }
+    [self lw_handleRemoteNotificationWithInfo:userInfo];
+//    NSString *s =[NSString stringWithFormat:@"didReceiveNotificationResponse:%@",userInfo];
+//    ALERT(s);
+    completionHandler();  // 系统要求执行这个方法
+}
+
+/**
+ 处理消息
+ */
+- (void)lw_handleRemoteNotificationWithInfo:(NSDictionary *)info
+{
+    HYMessageDeatilViewController *message = [HYMessageDeatilViewController creatMessageDeatilWithTitleStr:@"消息" msgType:1 extend:nil];
+    message.hidesBottomBarWhenPushed = YES;
+    HYBaseTabBarController * tabbarViewController = (HYBaseTabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+    HYBaseNavigationController *navi = (HYBaseNavigationController *)tabbarViewController.childViewControllers[tabbarViewController.selectedIndex];
+    [navi pushViewController:message animated:YES];
+}
+
+@end

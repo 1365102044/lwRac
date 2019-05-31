@@ -1,0 +1,55 @@
+
+//
+//  HYAddImageItemView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/4.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYAddImageItemView.h"
+
+@interface HYAddImageItemView()
+@property (nonatomic, strong) HYDefaultButton * deleBtn;
+
+@end
+@implementation HYAddImageItemView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI
+{
+    _itemImageView = [[HYBaseImageView alloc] init];
+    _itemImageView.backgroundColor = [UIColor redColor];
+    [self addSubview:_itemImageView];
+    [_itemImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.mas_equalTo(self).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.right.bottom.mas_equalTo(self).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+    }];
+    
+    _deleBtn = [HYDefaultButton buttonImageWithImageNamed:@"addphoto_n"
+                                                     type:(HYProjectButtonSetImageDefault)
+                                                   target:self
+                                                 selector:@selector(clickDele)];
+    [self addSubview:_deleBtn];
+    [_deleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_offset(CGSizeMake(ADJUST_PERCENT_FLOAT(15), ADJUST_PERCENT_FLOAT(15)));
+        make.right.mas_equalTo(_itemImageView.mas_right).mas_offset(ADJUST_PERCENT_FLOAT(5));
+        make.top.mas_equalTo(_itemImageView.mas_top).mas_offset(-ADJUST_PERCENT_FLOAT(5));
+    }];
+}
+
+- (void)clickDele
+{
+    POST_NOTI(@"clickDelebtn", self);
+}
+
+@end
+

@@ -1,0 +1,115 @@
+//
+//  HYLoginViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/21.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYLoginViewController.h"
+#import "HYLoginMainView.h"
+#import "HYRequstGlobalDataTool.h"
+@interface HYLoginViewController ()
+@property (nonatomic, strong) HYLoginMainView * loginMainView;
+
+@end
+
+@implementation HYLoginViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.赋值
+
+#pragma mark - Third.点击事件
+- (void)clickMainBtnFunc:(NSInteger )tag
+{
+    if(tag == 10){
+        POST_NOTI(CHANGETABBAR_INDEX_KEY, (@{@"tag":@"100",@"lastIndex":@(_sourceTabbarIndex)}));
+        [self.view endEditing:YES];
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }else if (tag == 11){
+        [self rquestCode];
+    }else if (tag == 12){
+        [self postLoginRequest];
+    }
+}
+#pragma mark - Fourth.网络请求
+/**
+ 请求验证码
+ */
+- (void)rquestCode {
+    _loginMainView.sendCodeBtn.userInteractionEnabled = NO;
+    PARA_CREART;
+    PARA_SET(self.loginMainView.accountTF.text, @"phone");
+    [[HYServiceManager share] postRequestAnWithurl:GETLOGINCODE_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n-----------\n\nrequestcode:%@",objc);
+                                          _loginMainView.sendCodeBtn.userInteractionEnabled = YES;
+                                          [self.loginMainView startTimer];
+                                      }failureBlock:^(id error, id requestInfo) {
+                                          _loginMainView.sendCodeBtn.userInteractionEnabled = YES;
+                                      }];
+}
+
+- (void)postLoginRequest {
+    PARA_CREART;
+    PARA_SET(self.loginMainView.accountTF.text, @"phone");
+    PARA_SET(self.loginMainView.pwTF.text, @"checkCode");
+    NSArray *collectArr = [[HYUserInfor_LocalData share] getCollectIDs];
+    PARA_SET(collectArr,@"collectRoomIds");
+    
+    [[HYServiceManager share] postRequestAnWithurl:LOGINWITHCODE_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"\n-----------\n\nlogin:%@",objc);
+                                          [self clickMainBtnFunc:10];
+                                          [[HYUserInfor_LocalData share] saveLoginInfor:objc[@"result"]];
+                                          [[HYRequstGlobalDataTool new] requestMessageInforCallBackBlock:nil failureBlock:nil];
+                                          if (_sourceTabbarIndex == 3) {
+                                              POST_NOTI(CHANGETABBAR_INDEX_KEY, @"3");
+                                          }
+                                      } failureBlock:^(id error, id requestInfo) {
+                                      }];
+}
+
+#pragma mark - Fifth.视图生命周期
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBar.hidden = YES;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self.view addSubview:self.loginMainView];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    [[HYTimerManager shareTimer] stopTimer];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+
+- (HYLoginMainView*)loginMainView
+{
+    if (!_loginMainView) {
+        _loginMainView = [[HYLoginMainView alloc] initWithFrame:self.view.bounds];
+        WEAKSELF(self);
+        _loginMainView.clickBtnBlock = ^(id sender) {
+            UIButton *btn = (UIButton *)sender;
+            [weakself clickMainBtnFunc:btn.tag];
+        };
+        [self.view addSubview:_loginMainView];
+    }
+    return _loginMainView;
+}
+
+#pragma mark - Eigth.Other
+
+
+@end

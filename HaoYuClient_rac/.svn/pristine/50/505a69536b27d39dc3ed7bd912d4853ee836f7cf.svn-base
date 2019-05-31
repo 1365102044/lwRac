@@ -1,0 +1,101 @@
+//
+//  HYMessageViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMessageViewController.h"
+#import "HYMessageMainListTableViewCell.h"
+#import "HYMessageDeatilViewController.h"
+
+#define  MESSAGEMAINLISTINDIFTER  @"MESSAGEMAINLISTINDIFTER"
+
+@interface HYMessageViewController ()
+@property (nonatomic, strong) UIViewController * sourceViewController;
+@property (nonatomic, strong) NSArray * dataArr;
+
+@end
+
+@implementation HYMessageViewController
+
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.赋值
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYMessageMainListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:MESSAGEMAINLISTINDIFTER];
+    if (!cell) {
+        cell = [[HYMessageMainListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:MESSAGEMAINLISTINDIFTER];
+        [cell setData:self.dataArr[indexPath.row]];
+    }
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataArr.count;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYMessageDeatilViewController *messageDeatil = [HYMessageDeatilViewController creatMessageDeatilWithTitleStr:self.dataArr[indexPath.row][@"title"] msgType:indexPath.row + 1 extend:nil];
+    [self.navigationController pushViewController:messageDeatil animated:YES];
+}
+
+#pragma mark - Fifth.视图生命周期
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    self.title = @"消息";
+    self.MainTableView.mj_header = nil;
+    self.dataArr = @[];
+    [self.view addSubview:self.MainTableView];
+    [self refreshData];
+}
+
+- (void)refreshData
+{
+    self.dataArr = @[@{@"title":@"合同消息",@"desc":@"推送更新通知，及时更新"},
+                     @{@"title":@"活动消息",@"desc":@"推送社区活动消息及公告"},
+                     @{@"title":@"账单消息",@"desc":@"推送账单信息，了解明细"},
+                     @{@"title":@"物业保修",@"desc":@"推送物业消息，公寓消息及时掌控"},
+                     @{@"title":@"通知公告",@"desc":@"掌握最新消息"},
+                     @{@"title":@"选配包",@"desc":@"推送最新的选配包相关消息"}
+                     ];
+    [self.MainTableView reloadData];
+}
+
+/**
+ 跳转消息列表
+ */
++ (instancetype)pushMessageViewControllerWithSourceVC:(UIViewController *)sourceViewController
+{
+    HYMessageViewController *messageVC = [[HYMessageViewController alloc] init];
+    messageVC.sourceViewController = sourceViewController;
+    [sourceViewController.navigationController pushViewController:messageVC animated:YES];
+    return messageVC;
+}
+
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+
+@end

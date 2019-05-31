@@ -1,0 +1,380 @@
+//
+//  HYActionSheet.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/25.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYActionSheet.h"
+#import "JXTAlertManagerHeader.h"
+
+@interface HYActionSheet ()
+
+@end
+
+@implementation HYActionSheet
+
+/**
+ 底部选择弹窗（规范-选择弹窗带标题）
+ 
+ @param controller          当前控制器
+ @param title               标题
+ @param callBack            回调（根据index来判断）
+ @param buttonTitle         选项
+ */
++ (void)showAlert:(UIViewController *)controller
+            title:(NSString *)title
+         callBack:(HYEventCallBackBlock)callBack
+      buttonTitle:(NSString *)buttonTitle, ... NS_REQUIRES_NIL_TERMINATION
+{
+    
+    NSMutableArray *tempArray = [NSMutableArray array];
+    
+    if (buttonTitle) {
+        
+        /**
+         *  添加第一个参数
+         */
+        [tempArray addObject:buttonTitle];
+        
+        /**
+         *  定义一个指向个数可变的参数列表指针；
+         */
+        va_list args;
+        
+        /**
+         *  用于存放取出的参数
+         */
+        NSString *arg;
+        
+        /**
+         *  初始化变量刚定义的va_list变量，这个宏的第二个参数是第一个可变参数的前一个参数，是一个固定的参数
+         */
+        va_start(args, buttonTitle);
+        
+        /**
+         *  遍历全部参数 va_arg返回可变的参数(a_arg的第二个参数是你要返回的参数的类型)
+         */
+        while ((arg = va_arg(args, NSString *))) {
+            [tempArray addObject:arg];
+        }
+        
+        /**
+         *  清空参数列表，并置参数指针args无效
+         */
+        va_end(args);
+    }
+    
+    [controller jxt_showActionSheetWithTitle:nil
+                                     message:nil
+                           appearanceProcess:^(JXTAlertController * _Nonnull alertMaker) {
+                               
+                               NSMutableAttributedString *alertControllerStr = [[NSMutableAttributedString alloc] initWithString:title];
+                               [alertControllerStr addAttribute:NSForegroundColorAttributeName
+                                                          value:HYCOLOR.color_c4
+                                                          range:NSMakeRange(0, title.length)];
+                               [alertControllerStr addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:ADJUST_PERCENT_FLOAT(12)] range:NSMakeRange(0, title.length)];
+                               [alertMaker setValue:alertControllerStr forKey:@"attributedTitle"];
+                               
+                               [tempArray enumerateObjectsUsingBlock:^(NSString *  _Nonnull obj,
+                                                                       NSUInteger idx,
+                                                                       BOOL * _Nonnull stop) {
+                                   alertMaker.
+                                   addActionDefaultTitle(obj);
+                               }];
+                               
+                               /**
+                                *  配置颜色
+                                */
+                               __weak JXTAlertController *weakAlertMaker = alertMaker;
+                               [alertMaker setAlertAddActionDone:^{
+                                   [weakAlertMaker.actions enumerateObjectsUsingBlock:^(UIAlertAction * _Nonnull obj,
+                                                                                        NSUInteger idx,
+                                                                                        BOOL * _Nonnull stop) {
+                                       [obj setValue:HYCOLOR.color_c4 forKey:@"titleTextColor"];
+                                   }];
+                               }];
+                               
+                           } actionsBlock:^(NSInteger buttonIndex, UIAlertAction * _Nonnull action, JXTAlertController * _Nonnull alertSelf) {
+                               callBack(@(buttonIndex));
+                           }];
+}
+
+/**
+ 底部选择弹窗（规范-底部取消）
+ 
+ @param controller          当前控制器
+ @param destructiveTitle    最上面警告作用按钮
+ @param callBack            回调（根据index来判断）
+ @param buttonTitle         选项
+ */
++ (void)showAlert:(UIViewController *)controller
+ destructiveTitle:(NSString *)destructiveTitle
+         callBack:(HYEventCallBackBlock)callBack
+      buttonTitle:(NSString *)buttonTitle, ... NS_REQUIRES_NIL_TERMINATION
+{
+    NSMutableArray *tempArray = [NSMutableArray array];
+    
+    if (buttonTitle) {
+        
+        /**
+         *  添加第一个参数
+         */
+        [tempArray addObject:buttonTitle];
+        
+        /**
+         *  定义一个指向个数可变的参数列表指针；
+         */
+        va_list args;
+        
+        /**
+         *  用于存放取出的参数
+         */
+        NSString *arg;
+        
+        /**
+         *  初始化变量刚定义的va_list变量，这个宏的第二个参数是第一个可变参数的前一个参数，是一个固定的参数
+         */
+        va_start(args, buttonTitle);
+        
+        /**
+         *  遍历全部参数 va_arg返回可变的参数(a_arg的第二个参数是你要返回的参数的类型)
+         */
+        while ((arg = va_arg(args, NSString *))) {
+            [tempArray addObject:arg];
+        }
+        
+        /**
+         *  清空参数列表，并置参数指针args无效
+         */
+        va_end(args);
+    }
+    
+    [controller jxt_showActionSheetWithTitle:nil
+                                     message:nil
+                           appearanceProcess:^(JXTAlertController * _Nonnull alertMaker) {
+                               
+                               alertMaker.
+                               addActionCancelTitle(@"取消").
+                               addActionDestructiveTitle(@"删除");
+                               
+                               [tempArray enumerateObjectsUsingBlock:^(NSString *  _Nonnull obj,
+                                                                       NSUInteger idx,
+                                                                       BOOL * _Nonnull stop) {
+                                   alertMaker.addActionDefaultTitle(obj);
+                               }];
+                               
+                               /**
+                                *  配置颜色
+                                */
+                               __weak JXTAlertController *weakAlertMaker = alertMaker;
+                               [alertMaker setAlertAddActionDone:^{
+                                   [weakAlertMaker.actions enumerateObjectsUsingBlock:^(UIAlertAction * _Nonnull obj,
+                                                                                        NSUInteger idx,
+                                                                                        BOOL * _Nonnull stop) {
+                                       if([obj.title isEqualToString:@"删除"]){
+                                           [obj setValue:HYCOLOR.color_c26 forKey:@"titleTextColor"];
+                                       }else{
+                                           [obj setValue:HYCOLOR.color_c4 forKey:@"titleTextColor"];
+                                       }
+                                   }];
+                               }];
+                               
+                           } actionsBlock:^(NSInteger buttonIndex, UIAlertAction * _Nonnull action, JXTAlertController * _Nonnull alertSelf) {
+                               
+                               callBack(@(buttonIndex));
+                               
+                           }];
+}
+
+/**
+ 底部选择弹窗（无规范-底部取消）
+ 
+ @param controller          当前控制器
+ @param callBack            回调（根据index来判断）
+ @param buttonTitle         选项
+ */
++ (void)showAlert:(UIViewController *)controller
+         callBack:(HYEventCallBackBlock)callBack
+      buttonTitle:(NSString *)buttonTitle, ... NS_REQUIRES_NIL_TERMINATION
+{
+    NSMutableArray *tempArray = [NSMutableArray array];
+    
+    if (buttonTitle) {
+        
+        /**
+         *  添加第一个参数
+         */
+        [tempArray addObject:buttonTitle];
+        
+        /**
+         *  定义一个指向个数可变的参数列表指针；
+         */
+        va_list args;
+        
+        /**
+         *  用于存放取出的参数
+         */
+        NSString *arg;
+        
+        /**
+         *  初始化变量刚定义的va_list变量，这个宏的第二个参数是第一个可变参数的前一个参数，是一个固定的参数
+         */
+        va_start(args, buttonTitle);
+        
+        /**
+         *  遍历全部参数 va_arg返回可变的参数(a_arg的第二个参数是你要返回的参数的类型)
+         */
+        while ((arg = va_arg(args, NSString *))) {
+            [tempArray addObject:arg];
+        }
+        
+        /**
+         *  清空参数列表，并置参数指针args无效
+         */
+        va_end(args);
+    }
+    
+    [controller jxt_showActionSheetWithTitle:nil
+                                     message:nil
+                           appearanceProcess:^(JXTAlertController * _Nonnull alertMaker) {
+                               
+                               alertMaker.
+                               addActionCancelTitle(@"取消");
+                               
+                               [tempArray enumerateObjectsUsingBlock:^(NSString *  _Nonnull obj,
+                                                                       NSUInteger idx,
+                                                                       BOOL * _Nonnull stop) {
+                                   alertMaker.addActionDefaultTitle(obj);
+                               }];
+                               
+                               /**
+                                *  配置颜色
+                                */
+                               __weak JXTAlertController *weakAlertMaker = alertMaker;
+                               [alertMaker setAlertAddActionDone:^{
+                                   [weakAlertMaker.actions enumerateObjectsUsingBlock:^(UIAlertAction * _Nonnull obj,
+                                                                                        NSUInteger idx,
+                                                                                        BOOL * _Nonnull stop) {
+                                       if([obj.title isEqualToString:@"取消"]){
+                                           [obj setValue:HYCOLOR.color_c26 forKey:@"titleTextColor"];
+                                       }else{
+                                           [obj setValue:HYCOLOR.color_c4 forKey:@"titleTextColor"];
+                                       }
+                                   }];
+                               }];
+                               
+                           } actionsBlock:^(NSInteger buttonIndex, UIAlertAction * _Nonnull action, JXTAlertController * _Nonnull alertSelf) {
+                               
+                               callBack(@(buttonIndex));
+                               
+                           }];
+}
+
+/**
+ 底部选择弹窗（无规范-底部取消）
+ 
+ @param controller          当前控制器
+ @param title               标题
+ @param callBack            回调（根据index来判断）
+ @param buttonArray         选项
+ */
++ (void)showBottomCancelAlert:(UIViewController *)controller
+                        title:(NSString *)title
+                     callBack:(HYEventCallBackBlock)callBack
+                  buttonArray:(NSArray *)buttonArray
+{
+    
+    [controller jxt_showActionSheetWithTitle:nil
+                                     message:nil
+                           appearanceProcess:^(JXTAlertController * _Nonnull alertMaker) {
+                               
+                               NSMutableAttributedString *alertControllerStr = [[NSMutableAttributedString alloc] initWithString:title];
+                               [alertControllerStr addAttribute:NSForegroundColorAttributeName
+                                                          value:HYCOLOR.color_c4
+                                                          range:NSMakeRange(0, title.length)];
+                               [alertControllerStr addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:ADJUST_PERCENT_FLOAT(12)] range:NSMakeRange(0, title.length)];
+                               [alertMaker setValue:alertControllerStr forKey:@"attributedTitle"];
+                               
+                               alertMaker.
+                               addActionCancelTitle(@"取消");
+                               
+                               [buttonArray enumerateObjectsUsingBlock:^(NSString *  _Nonnull obj,
+                                                                       NSUInteger idx,
+                                                                       BOOL * _Nonnull stop) {
+                                   alertMaker.addActionDefaultTitle(obj);
+                               }];
+                               
+                               /**
+                                *  配置颜色
+                                */
+                               __weak JXTAlertController *weakAlertMaker = alertMaker;
+                               [alertMaker setAlertAddActionDone:^{
+                                   [weakAlertMaker.actions enumerateObjectsUsingBlock:^(UIAlertAction * _Nonnull obj,
+                                                                                        NSUInteger idx,
+                                                                                        BOOL * _Nonnull stop) {
+                                       if([obj.title isEqualToString:@"取消"]){
+                                           [obj setValue:HYCOLOR.color_c26 forKey:@"titleTextColor"];
+                                       }else{
+                                           [obj setValue:HYCOLOR.color_c4 forKey:@"titleTextColor"];
+                                       }
+                                   }];
+                               }];
+                               
+                           } actionsBlock:^(NSInteger buttonIndex, UIAlertAction * _Nonnull action, JXTAlertController * _Nonnull alertSelf) {
+                               
+                               callBack(@(buttonIndex));
+                               
+                           }];
+}
+/**
+ 带标题，有取消-------------
+ */
++ (void)showAlert:(UIViewController *)controller
+            title:(NSString *)title
+        buttonArr:(NSArray *)buttonArr
+         callBack:(HYEventCallBackBlock)callBack
+{
+//    [HYActionSheet showAlert:controller title:title titleColor:HYCOLOR.color_c4 buttonTitleColor:HYCOLOR.color_c4 IsHaveCancleButton:YES cancleButtonTitleColor:HYCOLOR.color_c26 buttonTitleArr:buttonArr callBack:callBack];
+    
+}
+
+/**
+ 没有标题 有取消-------------
+ */
++ (void)showAlert:(UIViewController *)controller
+        buttonArr:(NSArray *)buttonArr
+         callBack:(HYEventCallBackBlock)callBack
+{
+//    [HYActionSheet showAlert:controller buttonTitleColor:HYCOLOR.color_c4 IsHaveCancleButton:YES cancleButtonTitleColor:HYCOLOR.color_c26 buttonTitleArr:buttonArr callBack:callBack];
+}
+
++ (void)showDefaultAlert:(UIViewController *)controller
+                    titleKey:(NSString *)titleKey
+             buttonArr:(NSArray *)buttonArr
+              callBack:(HYEventCallBackBlock)callBack
+{
+    UIAlertController *temp = [UIAlertController alertControllerWithTitle:@""
+                                                                  message:titleKey
+                                                           preferredStyle:(UIAlertControllerStyleActionSheet)];
+    for (NSString *str in buttonArr) {
+        UIAlertAction *sure = [UIAlertAction actionWithTitle:str style:(UIAlertActionStyleDefault) handler:^(UIAlertAction * _Nonnull action) {
+            if (callBack) {
+                callBack([NSString stringWithFormat:@"%lu",(unsigned long)[buttonArr indexOfObject:action.title]]);
+            }
+        }];
+        [temp addAction:sure];
+    }
+    UIAlertAction *sure0 = [UIAlertAction actionWithTitle:@"取消" style:(UIAlertActionStyleCancel) handler:^(UIAlertAction * _Nonnull action) {
+        if (callBack) {
+            callBack([NSString stringWithFormat:@"%lu",(unsigned long)[buttonArr indexOfObject:action.title]]);
+        }
+    }];
+    [temp addAction:sure0];
+    [controller presentViewController:temp animated:YES completion:nil];
+}
+
+
+@end
+

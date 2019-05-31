@@ -1,0 +1,81 @@
+//
+//  HYBaseWebViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBaseWebViewController.h"
+
+@interface HYBaseWebViewController ()<UIWebViewDelegate>
+@property (nonatomic, strong) UIWebView * webview;
+
+@end
+
+@implementation HYBaseWebViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+/**
+ 签约协议  1
+ 预订协议  2
+ */
+- (void)setWebUrlWithType:(NSInteger)type
+{
+    NSString *url ;
+    if (type == 1) {
+        url = @"http://px.hntpsjwy.com/wechatApps/weixin/homeCenter/agreement.html";
+    }else if (type == 2){
+        self.navigationItem.title = @"预订协议";
+        url = @"http://px.hntpsjwy.com/wechatApps/weixin/homeCenter/agreement.html";
+    }
+    
+    if (!url) {
+        return;
+    }
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:(NSURLRequestUseProtocolCachePolicy) timeoutInterval:10];
+    [self.webview loadRequest:request];
+    
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    //    [SVProgressHUD dismiss];
+}
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+{
+    //    [SVProgressHUD dismiss];
+}
+#pragma mark - Fifth.视图生命周期
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = HYCOLOR.color_c1;
+    self.webview = [[UIWebView alloc] init];
+    [self.view addSubview:self.webview];
+    self.webview.delegate = self;
+    
+    [self.webview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.view);
+    }];
+}
+#pragma mark - Sixth.界面配置
+
+#pragma mark - Seventh.懒加载
+- (UIWebView*)webview
+{
+    if (!_webview) {
+        _webview = [[UIWebView alloc] init];
+    }
+    return _webview;
+}
+#pragma mark - Eigth.Other
+
+
+@end

@@ -1,0 +1,68 @@
+//
+//  HYQianYueBillListTableViewCell.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/27.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYueBillListTableViewCell.h"
+
+@interface HYQianYueBillListTableViewCell ()
+@property (nonatomic, strong) HYDefaultLabel * title_L;
+@property (nonatomic, strong) HYDefaultLabel * free_L;
+@property (nonatomic, strong) HYDefaultLabel * time_L;
+@property (nonatomic, strong) HYDefaultLabel * dingJinDesc_L;
+
+@end
+
+@implementation HYQianYueBillListTableViewCell
+
+- (void)setBillModel:(HYQianYueBillModel *)billModel
+{
+    _billModel = billModel;
+    _title_L.text = billModel.titleDesc;
+    _free_L.text = [NSString stringWithFormat:@"费用：%@",billModel.money];
+    _time_L.text = [NSString stringWithFormat:@"周期：%@ ~ %@",billModel.beginTime,billModel.endTime];
+    if (billModel.dingJinDikouDesc) {
+        _dingJinDesc_L.text  = [NSString stringWithFormat:@"(%@)",billModel.dingJinDikouDesc];
+    }
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        CGFloat MARGIN = ADJUST_PERCENT_FLOAT(10);
+        
+        _title_L = [HYDefaultLabel labelWithFont:SYSTEM_BOLDFONT(16) text:@"" textColor:HYCOLOR.color_c4];
+        _free_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15) text:@"" textColor:HYCOLOR.color_c4];
+        _time_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15) text:@"" textColor:HYCOLOR.color_c4];
+        _dingJinDesc_L = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(13) text:@"" textColor:HYCOLOR.color_c2];
+        [self.contentView addSubview:_title_L];
+        [self.contentView addSubview:_free_L];
+        [self.contentView addSubview:_time_L];
+        [self.contentView addSubview:_dingJinDesc_L];
+        
+        [_title_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(self.contentView).mas_offset(MARGIN);
+            make.top.mas_equalTo(self.contentView).mas_offset(MARGIN*2);
+        }];
+        [_free_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_title_L.mas_left);
+            make.top.mas_equalTo(_title_L.mas_bottom).mas_offset(MARGIN);
+        }];
+        [_dingJinDesc_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_title_L.mas_left);
+            make.top.mas_equalTo(_free_L.mas_bottom).mas_offset(MARGIN/2);
+        }];
+        [_time_L mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_title_L.mas_left);
+            make.top.mas_equalTo(_dingJinDesc_L.mas_bottom).mas_offset(MARGIN);
+            make.bottom.mas_equalTo(self.contentView.mas_bottom).mas_offset(-MARGIN);
+        }];
+    }
+    return self;
+}
+
+@end

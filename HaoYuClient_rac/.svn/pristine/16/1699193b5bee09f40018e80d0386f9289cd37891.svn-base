@@ -1,0 +1,48 @@
+//
+//  HYIdCardItemView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/20.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYIdCardItemView.h"
+
+@implementation HYIdCardItemView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.descLabel = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(14)
+                                                  text:@""
+                                             textColor:HYCOLOR.color_c2];
+        [self addSubview:_descLabel];
+        _descLabel.backgroundColor = [UIColor clearColor];
+        [_descLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.mas_equalTo(self.mas_centerX);
+            make.centerY.mas_equalTo(self.mas_centerY);
+        }];
+        self.userInteractionEnabled = YES;
+        [self bk_whenTapped:^{
+            self.callBackBlock(self);
+        }];
+    }
+    return self;
+}
++ (instancetype)creatIdCardImageView:(NSString *)desc callBackBlock:(HYEventCallBackBlock)callBackBlock
+{
+    HYIdCardItemView *instance = [[HYIdCardItemView alloc] init];
+    instance.descLabel.text = desc;
+    instance.callBackBlock = callBackBlock;
+    return instance;
+}
+- (void)setPicImage:(UIImage *)image
+{
+    if (image == nil) {
+        return;
+    }
+    self.image = image;
+    _descLabel.text = @"";
+}
+@end

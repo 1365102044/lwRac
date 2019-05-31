@@ -1,0 +1,167 @@
+//
+//  HYMapNavigation.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/7/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMapNavigation.h"
+
+@interface HYMapNavigation ()
+@property (nonatomic, strong) NSArray * maps;
+@property (nonatomic, strong) UIViewController * VC;
+@property (nonatomic, assign) CLLocationCoordinate2D coor;
+@property (nonatomic, strong) NSString * addre;
+
+@end
+
+@implementation HYMapNavigation
+
+/**
+ 开始导航
+ */
+- (void)startNavigationWith:(CLLocationCoordinate2D)coor currentVC:(UIViewController *)VC
+{
+    _VC = VC;
+    _coor = coor;
+    [self getAddre];
+}
+
+- (void)getInstalledMapAppWithAddr:(NSString *)addrString withEndLocation:(CLLocationCoordinate2D)endLocation
+{
+    NSMutableArray *maps = [NSMutableArray array];
+    //苹果地图
+    NSMutableDictionary *iosMapDic = [NSMutableDictionary dictionary];
+    iosMapDic[@"title"] = @"苹果地图";
+    [maps addObject:iosMapDic];
+    NSString *appStr = NSLocalizedString(@"app_name", nil);
+    
+    //高德地图
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
+        NSMutableDictionary *gaodeMapDic = [NSMutableDictionary dictionary];
+        gaodeMapDic[@"title"] = @"高德地图";
+        
+        NSString *urlString = [[NSString stringWithFormat:@"iosamap://path?sourceApplication=%@&sid=BGVIS1&did=BGVIS2&dname=%@&dev=0&t=2",appStr ,addrString] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet  URLQueryAllowedCharacterSet]];
+        gaodeMapDic[@"url"] = urlString;
+        [maps addObject:gaodeMapDic];
+    }
+    
+    //百度地图
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
+        NSMutableDictionary *baiduMapDic = [NSMutableDictionary dictionary];
+        baiduMapDic[@"title"] = @"百度地图";
+        //        NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin=我的位置&destination=%@&mode=walking&src=%@",addrString ,appStr] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet  URLQueryAllowedCharacterSet]];
+        
+        NSString * urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name=目的地&mode=walking&coord_type=gcj02",endLocation.latitude,endLocation.longitude] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        baiduMapDic[@"url"] = urlString;
+        
+        [maps addObject:baiduMapDic];
+    }
+    
+    //腾讯地图
+    
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"qqmap://"]]) {
+        
+        NSMutableDictionary *qqMapDic = [NSMutableDictionary dictionary];
+        
+        qqMapDic[@"title"] = @"腾讯地图";
+        
+        NSString *urlString = [[NSString stringWithFormat:@"qqmap://map/routeplan?from=我的位置&type=walk&tocoord=%f,%f&to=%@&coord_type=1&policy=0",endLocation.latitude , endLocation.longitude ,addrString] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet  URLQueryAllowedCharacterSet]];
+        qqMapDic[@"url"] = urlString;
+        [maps addObject:qqMapDic];
+    }
+    
+    //谷歌地图
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"comgooglemaps://"]]) {
+        NSMutableDictionary *googleMapDic = [NSMutableDictionary dictionary];
+        googleMapDic[@"title"] = @"谷歌地图";
+        NSString *urlString = [[NSString stringWithFormat:@"comgooglemaps://?saddr=&daddr=%@&directionsmode=walking",addrString] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet  URLQueryAllowedCharacterSet]];
+        googleMapDic[@"url"] = urlString;
+        [maps addObject:googleMapDic];
+    }
+    self.maps = maps;
+    
+    [self alertAmaps:_coor];
+}
+
+/**
+ 第三方地图
+ */
+- (void)alertAmaps:(CLLocationCoordinate2D)gps
+{
+    if (self.maps.count == 0) {
+        return;
+    }
+    UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    for (int i = 0; i < self.maps.count; i++) {
+        if (i == 0) {
+            [alertVC addAction:[UIAlertAction actionWithTitle:self.maps[i][@"title"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [self navAppleMap:gps];
+            }]];
+        }else{
+            [alertVC addAction:[UIAlertAction actionWithTitle:self.maps[i][@"title"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [self otherMap:i];
+            }]];
+        }
+    }
+    [alertVC addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [self.VC presentViewController:alertVC animated:YES completion:nil];
+}
+
+// 苹果地图
+- (void)navAppleMap:(CLLocationCoordinate2D)gps
+{
+    MKMapItem *currentLoc = [MKMapItem mapItemForCurrentLocation];
+    MKMapItem *toLocation = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:gps addressDictionary:nil]];
+    toLocation.name = _addre;
+    NSArray *items = @[currentLoc,toLocation];
+    NSDictionary *dic = @{
+                          
+                          MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
+                          
+                          MKLaunchOptionsMapTypeKey: @(MKMapTypeStandard),
+                          
+                          MKLaunchOptionsShowsTrafficKey: @(YES)
+                          
+                          };
+    [MKMapItem openMapsWithItems:items launchOptions:dic];
+}
+
+///  第三方地图
+- (void)otherMap:(NSInteger)index
+{
+    NSDictionary *dic = self.maps[index];
+    NSString *urlString = dic[@"url"];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+}
+
+- (void)getAddre
+{
+    //反向地理编码
+    CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
+    CLLocation *cl = [[CLLocation alloc] initWithLatitude:_coor.latitude longitude:_coor.longitude];
+    [clGeoCoder reverseGeocodeLocation:cl completionHandler: ^(NSArray *placemarks,NSError *error) {
+        for (CLPlacemark *placeMark in placemarks) {
+            NSDictionary *addressDic = placeMark.addressDictionary;
+            NSString *state=[addressDic objectForKey:@"State"];
+            NSString *city=[addressDic objectForKey:@"City"];
+            NSString *subLocality=[addressDic objectForKey:@"SubLocality"];
+            NSString *street=[addressDic objectForKey:@"Street"];
+            NSLog(@"所在城市====%@ %@ %@ %@", state, city, subLocality, street);
+            _addre = [NSString stringWithFormat:@"%@%@%@",city, subLocality, street];
+            
+            [self getInstalledMapAppWithAddr:_addre withEndLocation:_coor];
+        }
+    }];
+}
+
+- (NSArray*)maps
+{
+    if (!_maps) {
+        _maps = [[NSArray alloc] init];
+    }
+    return _maps;
+}
+
+@end

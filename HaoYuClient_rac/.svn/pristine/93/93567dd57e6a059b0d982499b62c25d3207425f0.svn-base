@@ -1,0 +1,102 @@
+//
+//  HYMineCollectViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/24.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYMineCollectViewController.h"
+#import "HYCollectListTableViewCell.h"
+#import "HYCollectModel.h"
+#import "HYHuXingDeatilViewController.h"
+#define  COLLECTLISTCELLIDNTIFIER @"COLLECTLISTCELLIDNTIFIER"
+@interface HYMineCollectViewController ()
+
+@end
+
+@implementation HYMineCollectViewController
+
+
+#pragma mark - First.通知
+
+#pragma mark - Second.赋值
+- (void)requestListInfor
+{
+    [self.dataMutableArray removeAllObjects];
+    PARA_CREART;
+    PARA_SET([USERDEFAULTS_GET(USER_INFOR_PHONE) isNullToString], @"phone");
+    [[HYServiceManager share] postRequestAnWithurl:GET_COLLECTLIST_INFOR_URL
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          LWLog(@"======\n\n\n收藏列表：%@",objc);
+                                          NSArray *renterInfoArr = objc[@"result"][@"list"];
+                                          for (NSDictionary *dict in renterInfoArr) {
+                                              HYCollectModel *model = [HYCollectModel modelWithJSON:dict];
+                                              [self.dataMutableArray addObject:model];
+                                          }
+                                          if (renterInfoArr.count == 0) {
+                                              [self showTableViewPlaceholder: Empty_Holder];
+                                          }
+                                          [self.MainTableView reloadData];
+                                          [self.MainTableView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainTableView.mj_header endRefreshing];
+                                          [self showTableViewPlaceholder: RequestError_Holder];
+                                      }];
+}
+
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYCollectListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:COLLECTLISTCELLIDNTIFIER];
+    if(!cell){
+        cell = [[HYCollectListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:COLLECTLISTCELLIDNTIFIER];
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.indexPath = indexPath;
+    cell.dataModel = self.dataMutableArray[indexPath.row];
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataMutableArray.count;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    HYCollectModel *model = self.dataMutableArray[indexPath.row];
+    HYHuXingDeatilViewController *huxingDeati = [[HYHuXingDeatilViewController alloc] init];
+    huxingDeati.HuXingId = model.roomTypeId;
+    huxingDeati.itemStatus = model.hiItemStatus;
+    [self.navigationController pushViewController:huxingDeati animated:YES];
+}
+
+#pragma mark - Fifth.视图生命周期
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self requestListInfor];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"我的收藏";
+    [self setUI];
+//    [self requestListInfor];
+}
+#pragma mark - Sixth.界面配置
+- (void)setUI
+{
+    [self.view addSubview:self.MainTableView];
+    self.MainTableView.rowHeight = ADJUST_PERCENT_FLOAT(130);
+}
+
+#pragma mark - Seventh.懒加载
+
+#pragma mark - Eigth.Other
+
+
+@end

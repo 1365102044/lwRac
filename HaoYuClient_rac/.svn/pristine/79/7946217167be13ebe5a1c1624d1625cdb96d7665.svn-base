@@ -1,0 +1,35 @@
+//
+//  LWNetWorkMacro.h
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/18.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#ifndef LWNetWorkMacro_h
+#define LWNetWorkMacro_h
+//** =========================================================================================== */
+//** =========================================基础网络请求配置===================================== */
+//** =========================================================================================== */
+
+/**
+ * 网络请求基础URLString
+ */
+#ifdef DEBUG
+
+//#define BASE_URL                            @"http://px.hntpsjwy.com"
+#define BASE_URL                            @"http://px.hntpsjwy.com:81"
+//#define BASE_URL                            @"http://192.168.1.100:52001"
+
+#else
+
+#define BASE_URL                            @"http://px.hntpsjwy.com"
+
+#endif
+
+/**
+ 公司编码 gcid 
+ */
+#define  BASE_GCID                          @"0371070"
+
+#endif /* LWNetWorkMacro_h */

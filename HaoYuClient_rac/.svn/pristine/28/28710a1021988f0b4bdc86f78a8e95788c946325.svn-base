@@ -1,0 +1,93 @@
+//
+//  HYQianYue_IdCardView.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/6/19.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYQianYue_IdCardView.h"
+#import "HYIdCardItemView.h"
+#import "ImagePicker.h"
+@implementation HYQianYue_IdCardView
+- (void)clickImageView:(HYIdCardItemView *)sender type:(NSString *)type
+{
+    //设置主要参数
+    [[ImagePicker sharedManager] dwSetPresentDelegateVC:self.viewController SheetShowInView:self InfoDictionaryKeys:1 allowsEditing:NO];
+    //回调
+    [[ImagePicker sharedManager] dwGetpickerTypeStr:^(NSString *pickerTypeStr) {
+        
+    } pickerImagePic:^(UIImage *pickerImagePic) {
+        sender.image = pickerImagePic;
+        NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+        dict[type] = pickerImagePic;
+        [self.selectImageArrary addObject:dict];
+    }];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        HYDefaultLabel *title1 = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                          text:@"请上传身份证照片"
+                                                     textColor:HYCOLOR.color_c4];
+        HYIdCardItemView *zhengmian  = [HYIdCardItemView creatIdCardImageView:@"身份证正面照" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"zheng"];
+        }];
+        HYIdCardItemView *fanmian  = [HYIdCardItemView creatIdCardImageView:@"身份证反面照" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"fan"];
+        }];
+        
+        HYDefaultLabel *title2 = [HYDefaultLabel labelWithFont:SYSTEM_REGULARFONT(15)
+                                                          text:@"请上传其他证明照"
+                                                     textColor:HYCOLOR.color_c4];
+        HYIdCardItemView *shouchizhao  = [HYIdCardItemView creatIdCardImageView:@"手持身份证照" callBackBlock:^(id sender) {
+            [self clickImageView:sender type:@"shouchi"];
+        }];
+        
+        [self addSubview:title1];
+        [self addSubview:title2];
+        [self addSubview:zhengmian];
+        [self addSubview:fanmian];
+        [self addSubview:shouchizhao];
+        
+        CGFloat ITEM_W = (SCREEN_WIDTH - MARGIN*9)/2;
+        [title1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(self.mas_top).mas_offset(MARGIN*2);
+            make.left.mas_equalTo(self).mas_offset(MARGIN*2);
+        }];
+        [zhengmian mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.left.mas_equalTo(self.mas_left).mas_offset(MARGIN*3);
+            make.top.mas_equalTo(title1.mas_bottom).mas_offset(MARGIN*2);
+        }];
+        [fanmian mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.left.mas_equalTo(zhengmian.mas_right).mas_offset(MARGIN*3);
+            make.centerY.mas_equalTo(zhengmian.mas_centerY);
+        }];
+        [title2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(fanmian.mas_bottom).mas_offset(MARGIN*3);
+            make.left.mas_equalTo(self).mas_offset(MARGIN*2);
+        }];
+        [shouchizhao mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_offset(CGSizeMake(ITEM_W, ITEM_W));
+            make.left.mas_equalTo(zhengmian);
+            make.top.mas_equalTo(title2.mas_bottom).mas_offset(MARGIN*2);
+        }];
+        [zhengmian setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+        [fanmian setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+        [shouchizhao setBoundWidth:0.5 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+    }
+    return self;
+}
+
+- (NSMutableArray*)selectImageArrary
+{
+    if (!_selectImageArrary) {
+        _selectImageArrary = [[NSMutableArray alloc] init];
+    }
+    return _selectImageArrary;
+}
+@end

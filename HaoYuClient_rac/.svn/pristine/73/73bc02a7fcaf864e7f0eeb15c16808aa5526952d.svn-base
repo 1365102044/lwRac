@@ -1,0 +1,120 @@
+//
+//  HYWaterElectricSurfaceDeatilViewController.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/31.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYWaterElectricSurfaceDeatilViewController.h"
+#import "HYSurfaceDeatilView.h"
+#import "HYShuiDianBiaoModel.h"
+#import "HYPaymentViewController.h"
+#import "HYWaterElectricSurfacePayRecordListViewController.h"
+
+@interface HYWaterElectricSurfaceDeatilViewController ()
+@property (nonatomic, strong) HYSurfaceDeatilView * MainView;
+/**
+ 跳转水电表
+ titleStr  水表、电表
+ */
+@property (nonatomic, strong) NSString * titleStr;
+@property (nonatomic, strong) HYShuiDianBiaoModel * DataModel;
+@property (nonatomic, strong) HYContractModel *heTongModel;
+@end
+
+@implementation HYWaterElectricSurfaceDeatilViewController
+
+#pragma mark - First.通知
+
+#pragma mark - Second.网络请求
+- (void)requestInfor
+{
+    PARA_CREART;
+    PARA_SET([_heTongModel.houseId isNullToString], @"houseId");
+    NSString *URLSTR = GET_MINEDIANBAO_INFOR_URL;
+    if ([_titleStr isEqualToString:@"水表"]) {
+        URLSTR = GET_MINESHUIBAO_INFOR_URL;
+    }
+    [[HYServiceManager share] postRequestAnWithurl:URLSTR
+                                         paramters:para
+                                      successBlock:^(id objc, id requestInfo) {
+                                          if ([_titleStr isEqualToString:@"水表"]) {
+                                              NSArray *list = objc[@"result"][@"list"];
+                                              if ([list isKindOfClass:[NSArray class]]) {
+                                                  _DataModel = [HYShuiDianBiaoModel modelWithJSON:list.firstObject];
+                                              }
+                                          }else if ([_titleStr isEqualToString:@"电表"]){
+                                              _DataModel = [HYShuiDianBiaoModel modelWithJSON:objc[@"result"]];
+                                          }
+                                          _MainView.dataModel = _DataModel;
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      } failureBlock:^(id error, id requestInfo) {
+                                          [self.MainScrollView.mj_header endRefreshing];
+                                      }];
+}
+#pragma mark - Third.点击事件
+
+#pragma mark - Fourth.代理方法
+
+#pragma mark - Fifth.视图生命周期
++ (instancetype)creatSurfaceDeatilViewController:(NSString *)titleStr heTongModel:(HYContractModel *)heTongModel
+{
+    HYWaterElectricSurfaceDeatilViewController *instance = [[HYWaterElectricSurfaceDeatilViewController alloc] init];
+    instance.titleStr = titleStr;
+    instance.heTongModel = heTongModel;
+    return instance;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setConfiUI];
+    [self requestInfor];
+    self.MainView.clickHistoryLBlock = ^(id sender) {
+        HYWaterElectricSurfacePayRecordListViewController *temp =  [HYWaterElectricSurfacePayRecordListViewController creatRechargePayRecordListViewControllerWithTitleStr:_titleStr extend: ([_titleStr isEqualToString:@"电表"]) ? _heTongModel.electricityId : _heTongModel.waterId];
+        [self.navigationController pushViewController:temp animated:YES];
+    };
+}
+#pragma mark - Sixth.界面配置
+- (void)setConfiUI{
+    
+    self.title                       = _titleStr;
+    self.view.backgroundColor        = HYCOLOR.color_c1;
+    [self.view addSubview:self.MainScrollView];
+    [self.MainScrollView addSubview:self.MainView];
+    [self.MainScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.view.mas_top).mas_offset(NAVIGATOR_HEIGHT);
+        make.left.right.bottom.mas_equalTo(self.view);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self.MainScrollView);
+        make.width.mas_offset(SCREEN_WIDTH);
+    }];
+    [self.MainView.payLable bk_whenTapped:^{
+        PARA_CREART;
+        PARA_SET(([_titleStr isEqualToString:@"水表"] ? @"2" : @"1"), @"num");
+        PARA_SET([HYStringTool checkString:_heTongModel.houseId], @"houseId");
+        PARA_SET([HYStringTool checkString:_DataModel.customId], @"meterId");
+        [HYPaymentViewController pushPayViewController:self PayMentType:rechargePayMentType extend:para];
+    }];
+
+    self.MainScrollView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self refreshingAction:@selector(requestInfor)];
+}
+#pragma mark - Seventh.懒加载
+
+- (HYSurfaceDeatilView*)MainView
+{
+    if (!_MainView) {
+        _MainView                    = [[HYSurfaceDeatilView alloc] init];
+        _MainView.backgroundColor    = HYCOLOR.color_c1;
+        _MainView.typeStr            = _titleStr;
+    }
+    return _MainView;
+}
+
+#pragma mark - Eigth.Other
+
+
+@end

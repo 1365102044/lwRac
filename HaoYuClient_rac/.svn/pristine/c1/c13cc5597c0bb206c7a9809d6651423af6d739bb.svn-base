@@ -1,0 +1,45 @@
+//
+//  HYBorderLongButton.m
+//  HaoYuClient
+//
+//  Created by 刘文强 on 2018/5/22.
+//  Copyright © 2018年 LWQ. All rights reserved.
+//
+
+#import "HYBorderLongButton.h"
+
+@implementation HYBorderLongButton
+/**
+ 初始化按钮3（规范）- 边框按钮
+ 
+ @param titleStringKey                      titleStringKey
+ @param target                              target
+ @param selector                            selector
+ @return                                    按钮3（规范）- 边框按钮
+ */
++ (instancetype)buttonWithTitleStringKey:(NSString *)titleStringKey
+                                  target:(id)target
+                                selector:(SEL)selector
+{
+    HYBorderLongButton *button = [self buttonWithTitleStringKey:titleStringKey
+                                                     titleColor:HYCOLOR.color_c26
+                                                      titleFont:SYSTEM_MEDIUMFONT(14.f)
+                                             backgroundImageNor:[UIImage imageNamed:@"public_next_btn_border_s"]
+                                             backgroundImageDis:[UIImage imageNamed:@"public_next_btn_border_s"]
+                                             backgroundImageHig:[UIImage imageNamed:@"public_next_btn_border_s"]
+                                                         target:target
+                                                       selector:selector];
+//    [button setTitleColor:HYCOLOR.color_c26
+//                 forState:UIControlStateNormal];
+//    [button setTitleColor:HYCOLOR.color_c31
+//                 forState:UIControlStateHighlighted];
+//    [button setTitleColor:HYCOLOR.color_c28
+//                 forState:UIControlStateDisabled];
+    button.layer.cornerRadius = ADJUST_PERCENT_FLOAT(4.f);
+    button.layer.masksToBounds = YES;
+    button.layer.borderColor = HYCOLOR.color_c26.CGColor;
+    button.layer.borderWidth = 1;
+    return button;
+}
+
+@end
