@@ -25,8 +25,6 @@
 /** 1.注册 2 忘记密码 3.登录*/
 @property (nonatomic, assign) NSInteger viewType;
 
-@property (nonatomic, copy) HYEventCallBackBlock submitBlock;
-
 + (instancetype)loginMainView;
 + (instancetype)registerMainView:(NSInteger)registerOrForgetpwType;
 

@@ -15,163 +15,26 @@
 #import "HYQuYuModel.h"
 #import "HYHomePageModel.h"
 #import <malloc/malloc.h>
+#import "LWHouseListViewModel.h"
+
 #define  HOUSERESCOURCESLISTCELLIDNTIFIER @"HOUSERESCOURCESLISTCELLIDNTIFIER"
 @interface HYHouseRescourcesViewController ()<UIScrollViewDelegate>
 @property (nonatomic, strong) HYHouseTopView * topView;
-@property (nonatomic, strong) NSArray * quyuDatas;
-
-//升序or降序  默认 desc  /asc
-@property (nonatomic, strong) NSString * sortType;
-//区域ID
-@property (nonatomic, strong) NSString * quyuId;
-//预入住时间
-@property (nonatomic, strong) NSString * preStayTime;
-/**
- 首页过来的数据
- */
+/** 首页过来的数据 */
 @property (nonatomic, strong) NSArray * dataModel;
+
+@property (nonatomic, strong) LWHouseListViewModel * houseViewModel;
 
 @end
 
 @implementation HYHouseRescourcesViewController
 
 #pragma mark - First.通知
-/**
- 修改城市列表后，修改筛选条件
- */
-- (void)changeCityNoti:(NSNotification *)noti
-{
-    [_topView.regionbtn setTitle:@"选择区域" forState:UIControlStateNormal];
-    //清空筛选条件
-    _quyuId = nil;
-    [self requestListInfor];
-}
+
 
 #pragma mark - Second.网络请求
 
-/**
- 根据城市ID 获取区域列表
- */
-- (void)requestQuYuInforByCityId
-{
-    NSArray *quyu_loca_Arr =  [HYPublic_LocalData share].QuYu_ByCityId_Arr_M;
-    _quyuDatas =  quyu_loca_Arr;
-    if (quyu_loca_Arr && quyu_loca_Arr.count > 0) {
-        NSMutableArray *items_Ar = [[NSMutableArray alloc] init];
-        for (HYQuYuModel *model in quyu_loca_Arr) {
-            [items_Ar addObject:model.townName];
-        }
-        [items_Ar insertObject:@"全部区域" atIndex:0];
-        [self showPopViewWithDataArray:items_Ar];
-        return;
-    }
-    PARA_CREART;
-    PARA_SET([HYStringTool checkString:[HYPublic_LocalData share].location_City_Id], @"cityId");
-    [[HYServiceManager share] postRequestWithurl:GET_QUYU_LIST_BY_CITY_INFOR_URL
-                                       paramters:para
-                                    successBlock:^(id objc, id requestInfo) {
-                                        LWLog(@"-------\nquyu:%@",objc);
-                                        _quyuDatas = [NSArray new];
-                                        NSMutableArray *tem_Ar = [[NSMutableArray alloc] init];
-                                        NSMutableArray *items_Ar = [[NSMutableArray alloc] init];
-                                        for (NSDictionary *dic in objc[@"result"][@"list"]) {
-                                            HYQuYuModel *model = [HYQuYuModel modelWithJSON:dic];
-                                            [items_Ar addObject:model.townName];
-                                            [tem_Ar addObject:model];
-                                        }
-                                        _quyuDatas = tem_Ar;
-                                        [HYPublic_LocalData share].QuYu_ByCityId_Arr_M = _quyuDatas;
-                                        [items_Ar insertObject:@"全部区域" atIndex:0];
-                                        [self showPopViewWithDataArray:items_Ar];
-                                    } failureBlock:^(id error, id requestInfo) {
-                                        
-                                    }];
-}
-
-/**
- 获取列表数据
- */
-- (void)requestListInfor
-{
-    PARA_CREART;
-    PARA_SET([HYStringTool checkString:_preStayTime], @"preStayTime");
-    PARA_SET(@"zujin_", @"sortFields");
-    PARA_SET(_sortType, @"sortType");//asc
-    PARA_SET([HYStringTool checkString:_quyuId], @"quyuId");
-    PARA_SET([HYStringTool checkString:[HYPublic_LocalData share].location_City_Id], @"cityId");//@"d94bba14-dec1-11e5-bcc3-00163e1c066c"
-    [[HYServiceManager share] postRequestAnWithurl:HOUSE_LIST_INFOR_URL
-                                         paramters:para
-                                      successBlock:^(id objc, id requestInfo) {
-                                          NSArray *datas = objc[@"result"][@"list"];
-                                          [self handleListDatas:datas];
-                                          [self.MainTableView.mj_header  endRefreshing];
-                                          if (datas.count == 0) {
-                                              [self showTableViewPlaceholder:Empty_Holder];
-                                          }
-                                      } failureBlock:^(id error, id requestInfo) {
-                                          [self.MainTableView.mj_header  endRefreshing];
-                                          [self showTableViewPlaceholder:RequestError_Holder];
-                                      }];
-}
-
-- (void)handleListDatas:(NSArray *)datas
-{
-    if (!datas) {
-        return;
-    }
-    NSMutableArray *temp_data = [[NSMutableArray alloc] init];
-    for (NSDictionary *dict in datas) {
-        HYHouseRescourcesModel *houseRescourcesModel = [HYHouseRescourcesModel modelWithJSON:dict];
-        [temp_data addObject:houseRescourcesModel];
-    }
-    self.dataMutableArray = temp_data;
-    [self.MainTableView reloadData];
-}
-
 #pragma mark - Third.点击事件
-
-/**
- 弹框
- */
-- (void)showPopViewWithDataArray:(NSArray *)DataArray
-{
-    HYHourseChooseListView *listview = [HYHourseChooseListView showChooseListView:DataArray
-                                                                    referenceView:_topView.regionbtn
-                                                                    callBackBlock:^(id sender) {
-                                                                        if([sender integerValue] == 0){
-                                                                            _quyuId = nil;
-                                                                            [_topView.regionbtn setTitle:@"全部区域" forState:UIControlStateNormal];
-                                                                            _topView.regionbtn.selected = NO;
-                                                                        }else{
-                                                                            HYQuYuModel *quyumodel =         _quyuDatas[[sender integerValue]-1];
-                                                                            [_topView.regionbtn setTitle:quyumodel.townName forState:UIControlStateNormal];
-                                                                            _topView.regionbtn.selected = NO;
-                                                                            _quyuId = quyumodel.customId;
-                                                                        }
-                                                                        [self requestListInfor];
-                                                                    }];
-    listview.clickDismissBlock = ^(id sender) {
-        _topView.regionbtn.selected = NO;
-    };
-    _topView.regionbtn.selected = YES;
-}
-
-/**
- 点击筛选条件
- */
-- (void)chooseList:(NSInteger)tag
-{
-    if (tag == 10) {
-        [self requestQuYuInforByCityId];
-    }else if (tag == 11){
-        if ([_sortType isEqualToString:@"desc"]) {
-            _sortType = @"asc";
-        }else{
-            _sortType = @"desc";
-        }
-        [self requestListInfor];
-    }
-}
 
 #pragma mark - Fourth.代理方法
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -182,63 +45,19 @@
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.indexPath = indexPath;
-    HYHouseRescourcesModel *dataModel = self.dataMutableArray[indexPath.row];
+    HYHouseRescourcesModel *dataModel = self.houseViewModel.dataMutableArray[indexPath.row];
     cell.houseRescourcesModel = dataModel;
-    
-//    if (dataModel.houseImg_test) {
-//        cell.cellView.houseImage.image = dataModel.houseImg_test;
-//    }else{
-//        cell.cellView.houseImage.image = IMAGENAME(@"占位图-750_300");
-//        if(!tableView.decelerating && !tableView.dragging){
-//            [cell.cellView.houseImage sd_setImageWithURL:[NSURL URLWithString:dataModel.picObjcModel.big] placeholderImage:nil completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
-//                dataModel.houseImg_test = image;
-//            }];
-//        }
-//    }
     return cell;
 }
 
-//- (void)loadCellImage
-//{
-//    NSArray *visibleRows =  self.MainTableView.indexPathsForVisibleRows;
-//    for (NSIndexPath *indexpath in visibleRows) {
-//        HYHouseRescourcesListTableViewCell *cell = [self.MainTableView cellForRowAtIndexPath:indexpath];
-//        HYHouseRescourcesModel *mode = self.dataMutableArray[indexpath.row];
-//        [cell.cellView.houseImage sd_setImageWithURL:[NSURL URLWithString:mode.picObjcModel.big] placeholderImage:IMAGENAME(@"占位图-750_300") completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
-//            mode.houseImg_test = image;
-//        }];
-//        NSLog(@"********************%@***********%@",indexpath,visibleRows);
-//    }
-//    
-//    NSLog(@"Size of %@: %zd", NSStringFromClass([self.dataMutableArray class]), malloc_size((__bridge const void *) self.dataMutableArray));
-//}
-///** 停止 滚动动画 */
-//- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-//{
-//    [self loadCellImage];
-//}
-//
-//- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-//{
-//    if (!decelerate) {
-//        [self loadCellImage];
-//    }else{
-//        // 有停止动画，最后会调用
-//    }
-//}
-//
-//-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
-//{
-//    NSLog(@"+++++++++cell_height:%f",cell.height);
-//}
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.dataMutableArray.count;
+    return self.houseViewModel.dataMutableArray.count;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    id model = self.dataMutableArray[indexPath.row];
+    id model = self.houseViewModel.dataMutableArray[indexPath.row];
     NSString * customId ;
     if ([model isKindOfClass:[HYHouseRescourcesModel class]]) {
         HYHouseRescourcesModel *tem_M = model;
@@ -271,22 +90,20 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    //默认
-    _sortType = @"desc";
-    
     [self setUI];
-    if (!self.dataModel) {
-        [self requestListInfor];
-    }else{
+    
+    self.houseViewModel = [LWHouseListViewModel createHouseViewModelBind:self.topView];
+    self.houseViewModel.mainTableView = self.MainTableView;
+    self.houseViewModel.dataModel = self.dataModel;
+    [self.houseViewModel.delegateSubject subscribeNext:^(id  _Nullable x) {
         self.MainTableView.mj_header = nil;
-        [self.dataMutableArray addObjectsFromArray:self.dataModel];
+        [self.houseViewModel.dataMutableArray addObjectsFromArray:self.dataModel];
         self.topView.hidden = YES;
         [self.MainTableView  mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.edges.mas_equalTo(self.view);
         }];
         [self.MainTableView reloadData];
-    }
-    ADD_NOTI(changeCityNoti:, HOUSERESOURCE_CITYID_FORCHANGECITY_INHOUMEPAGE_NOTI);
+    }];
 }
 
 #pragma mark - Sixth.界面配置
@@ -310,21 +127,6 @@
 {
     if (!_topView) {
         _topView = [[HYHouseTopView alloc] init];
-        WEAKSELF(self);
-        _topView.clickBtnBlock = ^(id sender) {
-            if (!sender) {
-                _preStayTime = _topView.yuJIruzhuTimeTextField.textFiled.text;
-                [weakself requestListInfor];
-                return ;
-            }
-            UIButton *btn = sender;
-            if (btn.tag == 15){
-                _preStayTime = @"";
-                [weakself requestListInfor];
-            }else{
-                [weakself chooseList:btn.tag];
-            }
-        };
     }
     return _topView;
 }

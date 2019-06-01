@@ -20,7 +20,6 @@
 
 @implementation LWLoginViewController
 
-
 #pragma mark - First.通知
 - (void)clickMainBtnFunc
 {
@@ -38,7 +37,6 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    
     [[HYTimerManager shareTimer] stopTimer];
 }
 -(void)viewWillAppear:(BOOL)animated
@@ -64,8 +62,8 @@
     
     self.loginViewModel = [LWLoginViewModel createLoginViewModelWithMainView:self.mainView];
     [self.loginViewModel.delegateSubject subscribeNext:^(id  _Nullable x) {
-        [weakself clickMainBtnFunc];
-        if (weakself.sourceTabbarIndex == 3) {
+        [self clickMainBtnFunc];
+        if (self.sourceTabbarIndex == 3) {
             POST_NOTI(CHANGETABBAR_INDEX_KEY, @"3");
         }
     }];

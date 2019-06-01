@@ -21,7 +21,7 @@
     
 #ifdef DEBUG
     //    设置连接的服务器 默认是测试服务器(0:测试，1:培训 2:正式 3:薛云 4:新安，5:开发)
-    USERDEFAULTS_SET(@(0), SAVE_CURRENT_SERVICETYPE_KEY);
+    USERDEFAULTS_SET(@(2), SAVE_CURRENT_SERVICETYPE_KEY);
     [SYSTEM_USERDEFAULTS synchronize];
     
 //    [[FLEXManager sharedManager] showExplorer];

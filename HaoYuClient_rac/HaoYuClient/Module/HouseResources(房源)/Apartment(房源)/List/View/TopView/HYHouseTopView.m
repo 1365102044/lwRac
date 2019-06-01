@@ -33,7 +33,7 @@
                                                                                  titleFont:SYSTEM_REGULARFONT(15)
                                                                                 imageNamed:@"shopping_point_n"
                                                                                     target:self
-                                                                                  selector:@selector(clickBtn:)];
+                                                                                  selector:nil];
     [_regionbtn setImage:IMAGENAME(@"shopping_point_s") forState:UIControlStateSelected];
     _regionbtn.tag = 10;
     _pricebtn = [HYRightImageButton buttonImageAndTitleWithTitleStringKey:@"价格排序"
@@ -43,7 +43,7 @@
                                                                                  titleFont:SYSTEM_REGULARFONT(15)
                                                                                 imageNamed:@"shopping_point_n"
                                                                                     target:self
-                                                                                  selector:@selector(clickBtn:)];
+                                                                                  selector:nil];
     [_pricebtn setImage:IMAGENAME(@"shopping_point_s") forState:UIControlStateSelected];
     _pricebtn.tag = 11;
     _yuJIruzhuTimeTextField = [HYDefaultTextField creatDefaultTextField:@"请输入入住时间"
@@ -52,7 +52,7 @@
     _yuJIruzhuTimeTextField.textFiled.enabled = NO;
     _yuJIruzhuTimeTextField.textFiled.textAlignment = NSTextAlignmentCenter;
     
-    HYDefaultButton *clearBtn = [HYDefaultButton buttonWithTitleStringKey:@"清空" titleColor:HYCOLOR.color_c4 titleFont:SYSTEM_REGULARFONT(13) target:self selector:@selector(clickClearBtn:)];
+    HYDefaultButton *clearBtn = [HYDefaultButton buttonWithTitleStringKey:@"清空" titleColor:HYCOLOR.color_c4 titleFont:SYSTEM_REGULARFONT(13) target:self selector:nil];
     _clearBtn = clearBtn;
     clearBtn.tag = 15;
     [_clearBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c2];
@@ -71,42 +71,7 @@
         make.left.mas_equalTo(_regionbtn.mas_right);
     }];
     [self updateClearBtnContransWithisShow:NO];
-    [_yuJIruzhuTimeTextField bk_whenTapped:^{
-        [self chooseDate];
-    }];
 }
-
-
-- (void)clickClearBtn:(UIButton *)sender
-{
-    [self updateClearBtnContransWithisShow:NO];
-    _yuJIruzhuTimeTextField.textFiled.text = nil;
-    [self clickBtn:sender];
-}
-
-- (void)chooseDate
-{
-    [self endEditing:YES];
-    [HYDatePickerManager showDatePicker:^(id sender) {
-        NSArray *firstArr = [sender componentsSeparatedByString:@" "];
-        self.yuJIruzhuTimeTextField.textFiled.text = firstArr.firstObject;
-        if (self.clickBtnBlock) {
-            self.clickBtnBlock(nil);
-        }
-        [self updateClearBtnContransWithisShow:YES];
-    } DateStyle:DateStyleShowYearMonthDay];
-}
-
-- (void)clickBtn:(UIButton *)sender
-{
-    if (self.clickBtnBlock) {
-        self.clickBtnBlock(sender);
-    }
-    if (sender.tag == 11) {
-        sender.selected = !sender.selected;
-    }
-}
-
 - (void)updateClearBtnContransWithisShow:(BOOL)isShow
 {
     [_clearBtn mas_remakeConstraints:^(MASConstraintMaker *make) {

@@ -13,7 +13,6 @@
 @property (nonatomic, strong) HYDefaultTextField * yuJIruzhuTimeTextField;
 @property (nonatomic, strong) HYRightImageButton *regionbtn;
 @property (nonatomic, strong) HYRightImageButton *pricebtn;
-@property (nonatomic, copy) HYEventCallBackBlock clickBtnBlock;
 @property (nonatomic, strong) HYDefaultButton * clearBtn;
-
+- (void)updateClearBtnContransWithisShow:(BOOL)isShow;
 @end

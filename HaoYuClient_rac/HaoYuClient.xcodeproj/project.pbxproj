@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		BD50BD6545ECBC009B58F1AD /* libPods-HaoYuClient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ACA020768A1981CB803A86AB /* libPods-HaoYuClient.a */; };
+		F602568422A21FBB00FF7749 /* LWHouseListViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = F602568322A21FBB00FF7749 /* LWHouseListViewModel.m */; };
+		F602568822A2267400FF7749 /* LWBaseViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = F602568722A2267400FF7749 /* LWBaseViewModel.m */; };
 		F603106E20C8E308001E165D /* HYContractPDFViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F603106D20C8E308001E165D /* HYContractPDFViewController.m */; };
 		F603107120C8FFC2001E165D /* HYMineModel.m in Sources */ = {isa = PBXBuildFile; fileRef = F603107020C8FFC2001E165D /* HYMineModel.m */; };
 		F603107520C900FA001E165D /* HYBaoXiuModel.m in Sources */ = {isa = PBXBuildFile; fileRef = F603107420C900FA001E165D /* HYBaoXiuModel.m */; };
@@ -511,6 +513,10 @@
 		476458A582E57001283A1D75 /* Pods-HaoYuClient.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HaoYuClient.debug.xcconfig"; path = "Pods/Target Support Files/Pods-HaoYuClient/Pods-HaoYuClient.debug.xcconfig"; sourceTree = "<group>"; };
 		57D40A22ABC1E683669A5E5C /* libPods-HaoYuClientTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HaoYuClientTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACA020768A1981CB803A86AB /* libPods-HaoYuClient.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HaoYuClient.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F602568222A21FBB00FF7749 /* LWHouseListViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LWHouseListViewModel.h; sourceTree = "<group>"; };
+		F602568322A21FBB00FF7749 /* LWHouseListViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LWHouseListViewModel.m; sourceTree = "<group>"; };
+		F602568622A2267400FF7749 /* LWBaseViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LWBaseViewModel.h; sourceTree = "<group>"; };
+		F602568722A2267400FF7749 /* LWBaseViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LWBaseViewModel.m; sourceTree = "<group>"; };
 		F603106C20C8E308001E165D /* HYContractPDFViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYContractPDFViewController.h; sourceTree = "<group>"; };
 		F603106D20C8E308001E165D /* HYContractPDFViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYContractPDFViewController.m; sourceTree = "<group>"; };
 		F603106F20C8FFC2001E165D /* HYMineModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYMineModel.h; sourceTree = "<group>"; };
@@ -1468,6 +1474,25 @@
 				57D40A22ABC1E683669A5E5C /* libPods-HaoYuClientTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F602568122A21F8400FF7749 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				F602568222A21FBB00FF7749 /* LWHouseListViewModel.h */,
+				F602568322A21FBB00FF7749 /* LWHouseListViewModel.m */,
+			);
+			name = Model;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
+		F602568522A2266300FF7749 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				F602568622A2267400FF7749 /* LWBaseViewModel.h */,
+				F602568722A2267400FF7749 /* LWBaseViewModel.m */,
+			);
+			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		F603106B20C8E2CC001E165D /* ContractPDF */ = {
@@ -2804,6 +2829,7 @@
 		F66BEC3F20AEC62300CA3307 /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				F602568522A2266300FF7749 /* ViewModel */,
 				F66BEC4020AEC62300CA3307 /* Other */,
 				F66BEC4120AEC62300CA3307 /* Controller */,
 				F66BEC4220AEC62300CA3307 /* Model */,
@@ -4155,6 +4181,7 @@
 		F6B1B9CC20CD177F00655D6E /* List */ = {
 			isa = PBXGroup;
 			children = (
+				F602568122A21F8400FF7749 /* Model */,
 				F6B1B9CE20CD17AE00655D6E /* View */,
 				F648DADD20B2A1180069655D /* HYHouseRescourcesViewController.h */,
 				F648DADE20B2A1180069655D /* HYHouseRescourcesViewController.m */,
@@ -5255,6 +5282,7 @@
 				F619F15720B415A500E12414 /* PBBlurImageView.m in Sources */,
 				F619F17620B415A500E12414 /* NSObject+Extend.m in Sources */,
 				F6C227502100651100E2AB77 /* BMKClusterManager.m in Sources */,
+				F602568422A21FBB00FF7749 /* LWHouseListViewModel.m in Sources */,
 				F6EF11E820CA113A00A850A3 /* UIView+Extension.m in Sources */,
 				F6AD2F212153743E00574311 /* HYDiscountModel.m in Sources */,
 				F6849EC6223F9D5A0072CAF6 /* LWUpdatePassWordViewController.m in Sources */,
@@ -5290,6 +5318,7 @@
 				F6F941C52288FB80002C2783 /* LWHomeHotInforListTableViewCell.m in Sources */,
 				F647190A2238EC2D00D7E6EF /* LWLoginMainView.m in Sources */,
 				F619F03920B3F33500E12414 /* HYServiceManager.m in Sources */,
+				F602568822A2267400FF7749 /* LWBaseViewModel.m in Sources */,
 				F6722E3120C51AE800FB6E2B /* HYAddImageItemView.m in Sources */,
 				F6A3439C20F74DA400E4D1E3 /* HYCityModel.m in Sources */,
 				F619F15820B415A500E12414 /* PBPGView.m in Sources */,
