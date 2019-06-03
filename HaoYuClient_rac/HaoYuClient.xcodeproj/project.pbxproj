@@ -88,6 +88,7 @@
 		F61D6031210B23E80089DC6B /* HYDiscoverSecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F61D6030210B23E80089DC6B /* HYDiscoverSecondViewController.m */; };
 		F61EAB25216DCA6C002F06FE /* HYSegmentView.m in Sources */ = {isa = PBXBuildFile; fileRef = F61EAB24216DCA6C002F06FE /* HYSegmentView.m */; };
 		F620B44521746CE8003BF653 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F620B44421746CE8003BF653 /* JavaScriptCore.framework */; };
+		F623CFF522A4F9D6000FF1CB /* LWHouseListTableViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F623CFF422A4F9D5000FF1CB /* LWHouseListTableViewManager.m */; };
 		F626409521BF4A1100192949 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F626409421BF4A1100192949 /* UserNotifications.framework */; };
 		F628374120C0D4080027AB2A /* HYSurfaceDeatilView.m in Sources */ = {isa = PBXBuildFile; fileRef = F628374020C0D4080027AB2A /* HYSurfaceDeatilView.m */; };
 		F628374520C0D7620027AB2A /* HYVerticalLable.m in Sources */ = {isa = PBXBuildFile; fileRef = F628374420C0D7620027AB2A /* HYVerticalLable.m */; };
@@ -669,6 +670,8 @@
 		F61EAB23216DCA6C002F06FE /* HYSegmentView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYSegmentView.h; sourceTree = "<group>"; };
 		F61EAB24216DCA6C002F06FE /* HYSegmentView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYSegmentView.m; sourceTree = "<group>"; };
 		F620B44421746CE8003BF653 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F623CFF322A4F9D5000FF1CB /* LWHouseListTableViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LWHouseListTableViewManager.h; sourceTree = "<group>"; };
+		F623CFF422A4F9D5000FF1CB /* LWHouseListTableViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LWHouseListTableViewManager.m; sourceTree = "<group>"; };
 		F626409421BF4A1100192949 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		F628373F20C0D4080027AB2A /* HYSurfaceDeatilView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYSurfaceDeatilView.h; sourceTree = "<group>"; };
 		F628374020C0D4080027AB2A /* HYSurfaceDeatilView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYSurfaceDeatilView.m; sourceTree = "<group>"; };
@@ -1481,6 +1484,8 @@
 			children = (
 				F602568222A21FBB00FF7749 /* LWHouseListViewModel.h */,
 				F602568322A21FBB00FF7749 /* LWHouseListViewModel.m */,
+				F623CFF322A4F9D5000FF1CB /* LWHouseListTableViewManager.h */,
+				F623CFF422A4F9D5000FF1CB /* LWHouseListTableViewManager.m */,
 			);
 			name = Model;
 			path = "New Group";
@@ -5205,6 +5210,7 @@
 				F6B3A55421F95640003C24E4 /* HYCircleView.m in Sources */,
 				F619F17420B415A500E12414 /* CALayer+Transition.m in Sources */,
 				F64C404820BF832900C47230 /* HYContractDeatilMainView.m in Sources */,
+				F623CFF522A4F9D6000FF1CB /* LWHouseListTableViewManager.m in Sources */,
 				F67EA05620B6C02B00C5CB9E /* HYFuWuPingJiaViewController.m in Sources */,
 				F69BBCCE20D24DB90090851C /* HYYuDingSureCommitInforView.m in Sources */,
 				F66BEC6320AEC62300CA3307 /* UITextView+Placeholder.m in Sources */,

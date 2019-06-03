@@ -7,23 +7,16 @@
 //
 
 #import "HYHouseRescourcesViewController.h"
-#import "HYHouseRescourcesListTableViewCell.h"
 #import "HYHouseRescourceDeatilViewController.h"
 #import "HYHouseTopView.h"
-#import "HYHourseChooseListView.h"
-#import "HYHouseRescourcesModel.h"
-#import "HYQuYuModel.h"
-#import "HYHomePageModel.h"
-#import <malloc/malloc.h>
-#import "LWHouseListViewModel.h"
+#import "LWHouseListTableViewManager.h"
 
-#define  HOUSERESCOURCESLISTCELLIDNTIFIER @"HOUSERESCOURCESLISTCELLIDNTIFIER"
 @interface HYHouseRescourcesViewController ()<UIScrollViewDelegate>
 @property (nonatomic, strong) HYHouseTopView * topView;
 /** 首页过来的数据 */
 @property (nonatomic, strong) NSArray * dataModel;
-
 @property (nonatomic, strong) LWHouseListViewModel * houseViewModel;
+@property (nonatomic, strong) LWHouseListTableViewManager * tableViewDelegateManager;
 
 @end
 
@@ -31,46 +24,11 @@
 
 #pragma mark - First.通知
 
-
 #pragma mark - Second.网络请求
 
 #pragma mark - Third.点击事件
 
 #pragma mark - Fourth.代理方法
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    HYHouseRescourcesListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:HOUSERESCOURCESLISTCELLIDNTIFIER];
-    if(!cell){
-        cell = [[HYHouseRescourcesListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:HOUSERESCOURCESLISTCELLIDNTIFIER];
-    }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.indexPath = indexPath;
-    HYHouseRescourcesModel *dataModel = self.houseViewModel.dataMutableArray[indexPath.row];
-    cell.houseRescourcesModel = dataModel;
-    return cell;
-}
-
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return self.houseViewModel.dataMutableArray.count;
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    id model = self.houseViewModel.dataMutableArray[indexPath.row];
-    NSString * customId ;
-    if ([model isKindOfClass:[HYHouseRescourcesModel class]]) {
-        HYHouseRescourcesModel *tem_M = model;
-        customId = tem_M.customId;
-    }else if ([model isKindOfClass:[HYHomePageModel class]]){
-        HYHomePageModel *tem_M = model;
-        customId = tem_M.itemId;
-    }
-    HYHouseRescourceDeatilViewController *deatilVC = [[HYHouseRescourceDeatilViewController alloc] init];
-    deatilVC.hidesBottomBarWhenPushed = YES;
-    deatilVC.houseItemId = customId;
-    [self.navigationController pushViewController:deatilVC animated:YES];
-}
 
 #pragma mark - Fifth.视图生命周期
 + (instancetype)houseRescourcesViewControllerWithDataModel:(NSArray *)dataModel
@@ -81,6 +39,7 @@
     instance.title = extend[@"title"] ?:@"房源";
     return instance;
 }
+
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
@@ -91,17 +50,20 @@
     [super viewDidLoad];
     
     [self setUI];
-    
-    self.houseViewModel = [LWHouseListViewModel createHouseViewModelBind:self.topView];
-    self.houseViewModel.mainTableView = self.MainTableView;
+    self.MainTableView.dataSource = self.tableViewDelegateManager;
+    self.MainTableView.delegate = self.tableViewDelegateManager;
     self.houseViewModel.dataModel = self.dataModel;
-    [self.houseViewModel.delegateSubject subscribeNext:^(id  _Nullable x) {
+    self.MainTableView.mj_header = [MJRefreshGifHeader headerWithRefreshingTarget:self.houseViewModel refreshingAction:@selector(requestListInfor)];
+    if (self.houseViewModel.dataModel) {
         self.MainTableView.mj_header = nil;
-        [self.houseViewModel.dataMutableArray addObjectsFromArray:self.dataModel];
         self.topView.hidden = YES;
         [self.MainTableView  mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.edges.mas_equalTo(self.view);
         }];
+    }
+    @weakify(self);
+    [RACObserve(self.houseViewModel, dataMutableArray) subscribeNext:^(id  _Nullable x) {
+        @strongify(self);
         [self.MainTableView reloadData];
     }];
 }
@@ -126,8 +88,38 @@
 - (HYHouseTopView*)topView
 {
     if (!_topView) {
-        _topView = [[HYHouseTopView alloc] init];
+        _topView = [HYHouseTopView createTopViewBindViewModel:self.houseViewModel];
     }
     return _topView;
+}
+- (LWHouseListViewModel *)houseViewModel
+{
+    if (!_houseViewModel) {
+        _houseViewModel = [[LWHouseListViewModel alloc] init];
+        @weakify(self);
+        [_houseViewModel.endRefreshSubject subscribeNext:^(id  _Nullable x) {
+            @strongify(self);
+            [self.MainTableView.mj_header endRefreshing];
+        }];
+        [_houseViewModel.noDataSubject subscribeNext:^(id  _Nullable x) {
+            [self showTableViewPlaceholder:[x integerValue]];
+        }];
+    }
+    return _houseViewModel;
+}
+- (LWHouseListTableViewManager*)tableViewDelegateManager
+{
+    if (!_tableViewDelegateManager) {
+        _tableViewDelegateManager = [LWHouseListTableViewManager createListTableViewManagerBindViewModel:self.houseViewModel];
+        @weakify(self);
+        [_tableViewDelegateManager.pushVcSubject subscribeNext:^(id  _Nullable x) {
+            @strongify(self);
+            HYHouseRescourceDeatilViewController *deatilVC = [[HYHouseRescourceDeatilViewController alloc] init];
+            deatilVC.hidesBottomBarWhenPushed = YES;
+            deatilVC.houseItemId = x;
+            [self.navigationController pushViewController:deatilVC animated:YES];
+        }];
+    }
+    return _tableViewDelegateManager;
 }
 @end

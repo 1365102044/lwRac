@@ -12,16 +12,97 @@
 #import "HYChooseListView.h"
 
 @interface HYHouseTopView ()
+@property (nonatomic, strong) LWHouseListViewModel * houseViewModel;
+@property (nonatomic, strong) HYDefaultTextField * yuJIruzhuTimeTextField;
+@property (nonatomic, strong) HYRightImageButton *regionbtn;
+@property (nonatomic, strong) HYRightImageButton *pricebtn;
+@property (nonatomic, strong) HYDefaultButton * clearBtn;
 @end
 @implementation HYHouseTopView
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)init
 {
-    self = [super initWithFrame:frame];
+    self = [super init];
     if (self) {
         [self setUI];
     }
     return self;
+}
+
++ (instancetype)createTopViewBindViewModel:(LWHouseListViewModel *)viewModel
+{
+    HYHouseTopView *topView = [[HYHouseTopView alloc] init];
+    topView.houseViewModel = viewModel;
+    [topView confir];
+    return topView;
+}
+
+- (void)confir
+{
+    @weakify(self);
+    [RACObserve(self.houseViewModel,quyuNameDatas) subscribeNext:^(id  _Nullable x) {
+        @strongify(self);
+        [self showPopViewWithDataArray:x];
+    }];
+    [RACObserve(self.houseViewModel, regionTitle) subscribeNext:^(id  _Nullable x) {
+        @strongify(self);
+        x = x ? x : @"全部区域";
+        [self.regionbtn setTitle:x forState:UIControlStateNormal];
+    }];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithActionBlock:^(id  _Nonnull sender) {
+        [self endEditing:YES];
+        [HYDatePickerManager showDatePicker:^(id sender) {
+            NSArray *firstArr = [sender componentsSeparatedByString:@" "];
+            self.houseViewModel.preStayTime = self.yuJIruzhuTimeTextField.textFiled.text = firstArr.firstObject;
+            [self.houseViewModel requestListInfor];
+            [self updateClearBtnContransWithisShow:YES];
+        } DateStyle:DateStyleShowYearMonthDay];
+    }];
+    [self.yuJIruzhuTimeTextField addGestureRecognizer:tap];
+}
+
+- (void)clickRegion
+{
+    [self.houseViewModel requestQuYuInforByCityId];
+    _regionbtn.selected = YES;
+}
+- (void)clickSortPrice
+{
+    self.pricebtn.selected = !self.pricebtn.selected;
+    [self.houseViewModel updateSortPrice:self.pricebtn.selected];
+}
+- (void)clickClearBtn
+{
+    [self updateClearBtnContransWithisShow:NO];
+    self.yuJIruzhuTimeTextField.textFiled.text = nil;
+    [self.houseViewModel requestListInfor];
+}
+
+/**
+ 弹框
+ */
+- (void)showPopViewWithDataArray:(NSArray *)DataArray
+{
+    if (!DataArray || ![DataArray isKindOfClass:[NSArray class]]) return;
+    HYHourseChooseListView *listview = [HYHourseChooseListView showChooseListView:DataArray
+                                                                    referenceView:self.regionbtn
+                                                                    callBackBlock:^(id sender) {
+                                                                        if([sender integerValue] == 0){
+                                                                            self.houseViewModel.quyuId = @"";
+                                                                            [self.regionbtn setTitle:@"全部区域" forState:UIControlStateNormal];
+                                                                            self.regionbtn.selected = NO;
+                                                                        }else{
+                                                                            HYQuYuModel *quyumodel =         self.houseViewModel.quyuModelArray[[sender integerValue]-1];
+                                                                            self.houseViewModel.quyuId = quyumodel.customId;
+                                                                            [self.regionbtn setTitle:quyumodel.townName forState:UIControlStateNormal];
+                                                                        }
+                                                                        [self.houseViewModel requestListInfor];
+                                                                        self.regionbtn.selected = NO;
+                                                                    }];
+    listview.clickDismissBlock = ^(id sender) {
+        self.regionbtn.selected = NO;
+    };
 }
 
 - (void)setUI
@@ -33,9 +114,8 @@
                                                                                  titleFont:SYSTEM_REGULARFONT(15)
                                                                                 imageNamed:@"shopping_point_n"
                                                                                     target:self
-                                                                                  selector:nil];
+                                                                                  selector:@selector(clickRegion)];
     [_regionbtn setImage:IMAGENAME(@"shopping_point_s") forState:UIControlStateSelected];
-    _regionbtn.tag = 10;
     _pricebtn = [HYRightImageButton buttonImageAndTitleWithTitleStringKey:@"价格排序"
                                                                              titleColorNor:HYCOLOR.color_c4
                                                                              titleColorSel:HYCOLOR.color_c4
@@ -43,19 +123,17 @@
                                                                                  titleFont:SYSTEM_REGULARFONT(15)
                                                                                 imageNamed:@"shopping_point_n"
                                                                                     target:self
-                                                                                  selector:nil];
+                                                                                  selector:@selector(clickSortPrice)];
     [_pricebtn setImage:IMAGENAME(@"shopping_point_s") forState:UIControlStateSelected];
-    _pricebtn.tag = 11;
     _yuJIruzhuTimeTextField = [HYDefaultTextField creatDefaultTextField:@"请输入入住时间"
                                                                    font:SYSTEM_REGULARFONT(15)
                                                               textColor:HYCOLOR.color_c4];
     _yuJIruzhuTimeTextField.textFiled.enabled = NO;
     _yuJIruzhuTimeTextField.textFiled.textAlignment = NSTextAlignmentCenter;
     
-    HYDefaultButton *clearBtn = [HYDefaultButton buttonWithTitleStringKey:@"清空" titleColor:HYCOLOR.color_c4 titleFont:SYSTEM_REGULARFONT(13) target:self selector:nil];
+    HYDefaultButton *clearBtn = [HYDefaultButton buttonWithTitleStringKey:@"清空" titleColor:HYCOLOR.color_c4 titleFont:SYSTEM_REGULARFONT(13) target:self selector:@selector(clickClearBtn)];
     _clearBtn = clearBtn;
-    clearBtn.tag = 15;
-    [_clearBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c2];
+    [clearBtn setBoundWidth:1 cornerRadius:4 boardColor:HYCOLOR.color_c2];
     [self addSubview:clearBtn];
     [self addSubview:_regionbtn];
     [self addSubview:_pricebtn];

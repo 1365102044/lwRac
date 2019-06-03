@@ -22,17 +22,22 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString * preStayTime;
 //升序or降序  默认 desc  /asc
 @property (nonatomic, strong) NSString * sortType;
-/**
- 首页过来的数据
- */
+// 首页过来的数据
 @property (nonatomic, strong) NSArray * dataModel;
 
-@property (nonatomic, strong) UITableView * mainTableView;
+// 结束下拉刷新
+@property (nonatomic, strong) RACSubject * endRefreshSubject;
+// 无数据
+@property (nonatomic, strong) RACSubject * noDataSubject;
 
-@property (nonatomic, strong) RACSubject * delegateSubject;
+// 区域名字
+@property (nonatomic, strong) NSString * townName;
+@property (nonatomic, strong) NSArray * quyuModelArray;
 
+// 区域名字数据
+@property (nonatomic, strong) NSArray * quyuNameDatas;
 
-+ (instancetype)createHouseViewModelBind:(UIView *)topView;
+@property (nonatomic, strong) NSString * regionTitle;
 
 /**
  获取列表数据
@@ -43,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
  根据城市ID 获取区域列表
  */
 - (void)requestQuYuInforByCityId;
+/**
+ 更新价格排序
+ */
+- (void)updateSortPrice:(BOOL)isAsc;
 
 @end
 

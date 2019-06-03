@@ -10,7 +10,7 @@
 #import "HYBaseViewController.h"
 
 typedef NS_ENUM(NSInteger, EmptyDataPage){
-    Empty_Holder,        //无数据
+    Empty_Holder = 0,        //无数据
     NoNetwork_Holder,    //无网络
     RequestError_Holder,        //请求错误
     FillData_holder      //有数据

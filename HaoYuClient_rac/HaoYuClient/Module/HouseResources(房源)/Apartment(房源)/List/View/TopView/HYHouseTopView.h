@@ -9,10 +9,13 @@
 #import "HYBaseView.h"
 #import "HYRightImageButton.h"
 #import "HYDefaultTextField.h"
+#import "LWHouseListViewModel.h"
+#import "HYHourseChooseListView.h"
+
+#import <ReactiveObjC.h>
 @interface HYHouseTopView : HYBaseView
-@property (nonatomic, strong) HYDefaultTextField * yuJIruzhuTimeTextField;
-@property (nonatomic, strong) HYRightImageButton *regionbtn;
-@property (nonatomic, strong) HYRightImageButton *pricebtn;
-@property (nonatomic, strong) HYDefaultButton * clearBtn;
-- (void)updateClearBtnContransWithisShow:(BOOL)isShow;
+
+//- (void)updateClearBtnContransWithisShow:(BOOL)isShow;
+
++ (instancetype)createTopViewBindViewModel:(LWHouseListViewModel *)viewModel;
 @end

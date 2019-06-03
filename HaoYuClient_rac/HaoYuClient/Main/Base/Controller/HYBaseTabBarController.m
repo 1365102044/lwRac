@@ -34,7 +34,7 @@
     self.tabBar.backgroundColor = [UIColor whiteColor];
     
     [self addSubControllerWithTitleKey:@"首页" imageNamed:@"home_home" viewController:[[HYHomeViewController alloc] init]];
-    [self addSubControllerWithTitleKey:@"房源" imageNamed:@"home_idle" viewController:[[HYHouseRescourcesViewController alloc] init]];
+    [self addSubControllerWithTitleKey:@"房源" imageNamed:@"home_idle" viewController:[HYHouseRescourcesViewController houseRescourcesViewControllerWithDataModel:nil extend:nil]];
     [self addSubControllerWithTitleKey:@"发现" imageNamed:@"home_finder" viewController:[[HYDiscoverViewController alloc] init]];
     [self addSubControllerWithTitleKey:@"我的" imageNamed:@"home_mine" viewController:[[HYMineViewController alloc] init]];
     
