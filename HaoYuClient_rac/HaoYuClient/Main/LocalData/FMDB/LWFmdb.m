@@ -223,6 +223,20 @@
     return res;
 }
 
+#pragma mark ---修改
+
+/**
+ 批量修改数据
+ 
+ @param keys 修改条件（主键）
+ @param values 数据
+ @param tableType 表类型
+ */
+- (void)updateTableWithKeys:(NSArray *)keys Values:(NSArray *)values TableType:(LWBDTableType)tableType;
+{
+    
+}
+
 #pragma mark ---查询
 
 /**

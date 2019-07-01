@@ -27,7 +27,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSString *url =  @"http://pms.hntpsjwy.com/wechatApps/weixin/homeCenter/privacy.html";
+    NSString *url =  @"";
     
     UIWebView *webview = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT-NAVIGATOR_HEIGHT)];
     [self.view addSubview:webview];

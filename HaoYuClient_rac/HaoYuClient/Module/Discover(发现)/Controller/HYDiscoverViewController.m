@@ -14,7 +14,7 @@
 #import "HYMoneyTextFiled.h"
 #import "UIControl+LWdelay.h"
 
-#define DISCOVER_MAIN_URLS  @"pms.hntpsjwy.com/wechatApps/weixin/homeCenter/find.html"
+#define DISCOVER_MAIN_URLS  @"192.168.1.222/wechatApps/weixin/homeCenter/find.html"
 
 //#define DISCOVER_MAIN_URLS  @"mp.weixin.qq.com/mp/homepage?__biz=MzU1NjU4NjgyOA==&hid=1&sn=1946efb80af26d6e8d8c2f0fea9b7987&scene=18#wechat_redirect"
 @interface HYDiscoverViewController ()<WKUIDelegate,WKNavigationDelegate>

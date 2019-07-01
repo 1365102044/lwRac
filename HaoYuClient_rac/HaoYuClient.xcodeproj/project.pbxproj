@@ -83,7 +83,7 @@
 		F619F17920B415A500E12414 /* NSString+File.m in Sources */ = {isa = PBXBuildFile; fileRef = F619F14F20B415A500E12414 /* NSString+File.m */; };
 		F619F17D20B4181100E12414 /* HYBaseLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F619F17C20B4181100E12414 /* HYBaseLabel.m */; };
 		F619F18A20B41AAC00E12414 /* HYBaseLabelAttributeStringModel.m in Sources */ = {isa = PBXBuildFile; fileRef = F619F18920B41AAC00E12414 /* HYBaseLabelAttributeStringModel.m */; };
-		F61D3FEA21A80153000E97E1 /* pms.hntpsjwy.com.der in Resources */ = {isa = PBXBuildFile; fileRef = F61D3FE921A80153000E97E1 /* pms.hntpsjwy.com.der */; };
+		F61D3FEA21A80153000E97E1 /* pms.product.com.der in Resources */ = {isa = PBXBuildFile; fileRef = F61D3FE921A80153000E97E1 /* pms.product.com.der */; };
 		F61D602E210B04150089DC6B /* HYQianYueBillListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F61D602D210B04150089DC6B /* HYQianYueBillListTableViewCell.m */; };
 		F61D6031210B23E80089DC6B /* HYDiscoverSecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F61D6030210B23E80089DC6B /* HYDiscoverSecondViewController.m */; };
 		F61EAB25216DCA6C002F06FE /* HYSegmentView.m in Sources */ = {isa = PBXBuildFile; fileRef = F61EAB24216DCA6C002F06FE /* HYSegmentView.m */; };
@@ -662,7 +662,7 @@
 		F619F17C20B4181100E12414 /* HYBaseLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYBaseLabel.m; sourceTree = "<group>"; };
 		F619F18820B41AAC00E12414 /* HYBaseLabelAttributeStringModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYBaseLabelAttributeStringModel.h; sourceTree = "<group>"; };
 		F619F18920B41AAC00E12414 /* HYBaseLabelAttributeStringModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYBaseLabelAttributeStringModel.m; sourceTree = "<group>"; };
-		F61D3FE921A80153000E97E1 /* pms.hntpsjwy.com.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = pms.hntpsjwy.com.der; sourceTree = "<group>"; };
+		F61D3FE921A80153000E97E1 /* pms.product.com.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = pms.product.com.der; sourceTree = "<group>"; };
 		F61D602C210B04150089DC6B /* HYQianYueBillListTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYQianYueBillListTableViewCell.h; sourceTree = "<group>"; };
 		F61D602D210B04150089DC6B /* HYQianYueBillListTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HYQianYueBillListTableViewCell.m; sourceTree = "<group>"; };
 		F61D602F210B23E80089DC6B /* HYDiscoverSecondViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HYDiscoverSecondViewController.h; sourceTree = "<group>"; };
@@ -2785,7 +2785,7 @@
 		F66BEC3A20AEC62300CA3307 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F61D3FE921A80153000E97E1 /* pms.hntpsjwy.com.der */,
+				F61D3FE921A80153000E97E1 /* pms.product.com.der */,
 				F64B270320B29818000A9390 /* Color.bundle */,
 			);
 			path = Resources;
@@ -2887,7 +2887,6 @@
 		F66BEC4320AEC62300CA3307 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				F6E3C1DF2293A26D00147C40 /* BasePopView */,
 				F6EF11EA20CA2D0A00A850A3 /* BaseTextFiled */,
 				F6722E2B20C5193100FB6E2B /* BaseImageView */,
 				F69FF83F20B5169D004EF98A /* BaseCollectionView */,
@@ -4681,13 +4680,6 @@
 			path = TopBar;
 			sourceTree = "<group>";
 		};
-		F6E3C1DF2293A26D00147C40 /* BasePopView */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = BasePopView;
-			sourceTree = "<group>";
-		};
 		F6E5BCD921C0DE9E0060C327 /* FMDB */ = {
 			isa = PBXGroup;
 			children = (
@@ -4963,7 +4955,7 @@
 				F619F16220B415A500E12414 /* CoreSDWebImage.bundle in Resources */,
 				F6A1C44F20BE893F00A285BE /* HYContractListTableViewCell.xib in Resources */,
 				F619F15D20B415A500E12414 /* PhotoItemView.xib in Resources */,
-				F61D3FEA21A80153000E97E1 /* pms.hntpsjwy.com.der in Resources */,
+				F61D3FEA21A80153000E97E1 /* pms.product.com.der in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -19,16 +19,16 @@
 
 
 //协议地址
-#define BASE_XIYI_URL                          @"http://pms.hntpsjwy.com"
+#define BASE_XIYI_URL                          @"http:"
 //阿里云地址
-#define BASE_ALIYUNPIC_URL                     @"http://pms.hntpsjwy.com"
+#define BASE_ALIYUNPIC_URL                     @"http:"
 
 #else
 
-//正式接口
-#define BASE_URL                               @"https://pms.hntpsjwy.com"
-#define BASE_XIYI_URL                          @"http://pms.hntpsjwy.com"
-#define BASE_ALIYUNPIC_URL                     @"http://pms.hntpsjwy.com"
+////正式接口
+#define BASE_URL                               @"https:"
+#define BASE_XIYI_URL                          @"http:"
+#define BASE_ALIYUNPIC_URL                     @"http:"
 
 #endif
 

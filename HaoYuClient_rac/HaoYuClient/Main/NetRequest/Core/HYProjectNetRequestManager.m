@@ -907,7 +907,7 @@
         sessionManager.responseSerializer                           = serializer;
         if ([baseUrl containsString:@"https"]) {
             //防止被抓包
-            NSString *cerPath = @"pms.hntpsjwy.com";
+            NSString *cerPath = @"pms.product.com";
             NSString *certFilePath = [[NSBundle mainBundle] pathForResource:cerPath ofType:@"der"];
             NSData *certData = [NSData dataWithContentsOfFile:certFilePath];
             NSSet *certSet = [NSSet setWithObject:certData];
